@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CRS-PDVS — Getting ready for your pension verification. A step-by-step guided walkthrough.">
+  <meta name="theme-color" content="#1e2275">
+  <title>CRS-PDVS — Getting Ready</title>
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+
+  <style>
+    /* =====================================================
+       ONBOARD — Guided pre-verification flow
+       ===================================================== */
+    body {
+      background: var(--neutral-50);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .onboard-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-10) var(--space-6) var(--space-16);
+    }
+
+    /* ========== Progress Stepper ========== */
+    .ob-stepper {
+      width: 100%;
+      max-width: 640px;
+      margin-bottom: var(--space-8);
+    }
+
+    .ob-stepper__row {
+      display: flex;
+      align-items: center;
+    }
+
+    .ob-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      flex: 1;
+      position: relative;
+    }
+
+    .ob-step__dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid var(--crs-blue-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-muted);
+      transition: all 0.35s ease;
+    }
+
+    .ob-step--done .ob-step__dot {
+      background: var(--green-500);
+      border-color: var(--green-500);
+      color: white;
+    }
+
+    .ob-step--active .ob-step__dot {
+      background: var(--crs-blue-600);
+      border-color: var(--crs-blue-600);
+      color: white;
+      box-shadow: 0 0 0 4px var(--crs-blue-100);
+    }
+
+    .ob-step__label {
+      font-size: 10px;
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-muted);
+      text-align: center;
+      white-space: nowrap;
+      letter-spacing: 0.01em;
+    }
+
+    .ob-step--active .ob-step__label { color: var(--crs-blue-600); font-weight: var(--font-weight-semi); }
+    .ob-step--done .ob-step__label  { color: var(--green-600); }
+
+    .ob-connector {
+      flex: 1;
+      height: 2px;
+      background: var(--crs-blue-100);
+      margin-bottom: 20px;
+      transition: background 0.35s ease;
+    }
+    .ob-connector--done { background: var(--green-300); }
+
+
+    /* ========== Screen card ========== */
+    .ob-card {
+      width: 100%;
+      max-width: 640px;
+      background: white;
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      animation: obFadeIn 0.45s ease both;
+    }
+
+    @keyframes obFadeIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .ob-card__header {
+      padding: var(--space-8) var(--space-8) var(--space-6);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .ob-screen-label {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semi);
+      color: var(--crs-blue-500);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--space-4);
+    }
+
+    .ob-screen-label-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--crs-blue-400);
+    }
+
+    .ob-card__title {
+      font-size: clamp(var(--font-size-xl), 3vw, var(--font-size-2xl));
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-3);
+    }
+
+    .ob-card__intro {
+      font-size: var(--font-size-base);
+      color: var(--color-text-muted);
+      line-height: var(--line-height-relaxed);
+      margin: 0;
+    }
+
+    .ob-card__body {
+      padding: var(--space-8);
+    }
+
+    .ob-card__footer {
+      padding: var(--space-4) var(--space-8) var(--space-8);
+      display: flex;
+      gap: var(--space-3);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .ob-card__footer .btn-primary {
+      background: var(--crs-blue-500);
+      border-color: var(--crs-blue-500);
+      padding: var(--space-3) var(--space-8);
+      font-size: var(--font-size-base);
+    }
+
+    .ob-card__footer .btn-primary:hover {
+      background: var(--crs-blue-600);
+      border-color: var(--crs-blue-600);
+    }
+
+    .ob-footer-help {
+      margin-left: auto;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+    .ob-footer-help:hover { color: var(--crs-blue-500); }
+
+
+    /* ========== Screen 1 — Identity Confirmed ========== */
+    .confirmed-card {
+      background: var(--crs-blue-900);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8) var(--space-8);
+      color: white;
+      margin-bottom: var(--space-6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .confirmed-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.025);
+      pointer-events: none;
+    }
+
+    .confirmed-card::after {
+      content: '';
+      position: absolute;
+      bottom: -30px; left: 30px;
+      width: 260px; height: 100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.015);
+      pointer-events: none;
+    }
+
+    .confirmed-card__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 5px 14px;
+      background: rgba(74,222,128,0.12);
+      border: 1px solid rgba(74,222,128,0.2);
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      color: #4ade80;
+      font-weight: var(--font-weight-semi);
+      margin-bottom: var(--space-5);
+      letter-spacing: 0.03em;
+    }
+
+    .confirmed-card__badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: badgePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badgePulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    .confirmed-card__name {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-extra);
+      color: white;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-1);
+      line-height: 1.2;
+    }
+
+    .confirmed-card__id {
+      font-size: var(--font-size-sm);
+      color: rgba(255,255,255,0.45);
+      font-family: monospace;
+      letter-spacing: 0.04em;
+      margin-bottom: var(--space-6);
+    }
+
+    .confirmed-card__divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin-bottom: var(--space-6);
+    }
+
+    .confirmed-card__row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-5);
+    }
+
+    @media (max-width: 480px) {
+      .confirmed-card__row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .confirmed-card__field-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.38);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--space-2);
+    }
+
+    .confirmed-card__field-value {
+      font-size: var(--font-size-base);
+      color: rgba(255,255,255,0.88);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.3;
+    }
+
+    .ob-next-step-note {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: var(--crs-blue-50);
+      border: 1px solid var(--crs-blue-100);
+      border-radius: var(--radius-md);
+    }
+
+    .ob-next-step-note__text {
+      font-size: var(--font-size-sm);
+      color: var(--crs-blue-700);
+      line-height: var(--line-height-relaxed);
+      margin: 0;
+    }
+
+
+    /* ========== Screen 2 — How It Works ========== */
+    .how-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .how-item {
+      display: flex;
+      gap: var(--space-5);
+      padding-bottom: var(--space-7);
+      position: relative;
+    }
+
+    .how-item:last-child { padding-bottom: 0; }
+
+    /* Vertical connector */
+    .how-item::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 44px;
+      bottom: 0;
+      width: 2px;
+      background: var(--crs-blue-100);
+    }
+    .how-item:last-child::before { display: none; }
+
+    .how-item__number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--crs-blue-600);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-bold);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px var(--crs-blue-200);
+    }
+
+    .how-item__content { flex: 1; padding-top: var(--space-2); }
+
+    .how-item__title {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semi);
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .how-item__desc {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      line-height: var(--line-height-relaxed);
+      margin: 0;
+    }
+
+    .reassurance-note {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: var(--green-50);
+      border: 1px solid var(--green-100);
+      border-radius: var(--radius-md);
+      margin-top: var(--space-6);
+    }
+
+    .reassurance-note__text {
+      font-size: var(--font-size-sm);
+      color: var(--green-700);
+      line-height: var(--line-height-relaxed);
+      margin: 0;
+    }
+
+
+    /* ========== Screen 3 — What You'll Do ========== */
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+
+    .action-tile {
+      background: var(--neutral-50);
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6) var(--space-5);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .action-tile:hover {
+      border-color: var(--crs-blue-200);
+      box-shadow: var(--shadow-xs);
+    }
+
+    .action-tile__icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-4);
+      font-size: 22px;
+    }
+
+    .action-tile__icon--blue  { background: var(--crs-blue-50);  }
+    .action-tile__icon--green { background: var(--green-50);  }
+    .action-tile__icon--amber { background: var(--amber-50); }
+    .action-tile__icon--teal  { background: var(--teal-50); }
+
+    .action-tile__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semi);
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .action-tile__desc {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      line-height: var(--line-height-relaxed);
+      margin: 0;
+    }
+
+    /* "If it doesn't work" section */
+    .fallback-panel {
+      background: var(--amber-50);
+      border: 1px solid var(--amber-100);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+    }
+
+    .fallback-panel__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semi);
+      color: var(--amber-700);
+      margin-bottom: var(--space-2);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .fallback-panel__text {
+      font-size: var(--font-size-sm);
+      color: var(--amber-600);
+      line-height: var(--line-height-relaxed);
+      margin: 0;
+    }
+
+
+    /* ========== Screen 4 — Prototype Consent ========== */
+    .proto-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      background: var(--amber-50);
+      border: 1px solid var(--amber-200);
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semi);
+      color: var(--amber-700);
+      margin-bottom: var(--space-6);
+    }
+
+    .consent-points {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+
+    .consent-point {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-4);
+    }
+
+    .consent-point__icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: var(--crs-blue-50);
+      color: var(--crs-blue-500);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .consent-point__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semi);
+      color: var(--color-text-primary);
+      margin-bottom: 3px;
+    }
+
+    .consent-point__text {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      line-height: var(--line-height-relaxed);
+      margin: 0;
+    }
+
+    .consent-checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: var(--crs-blue-50);
+      border: 1px solid var(--crs-blue-100);
+      border-radius: var(--radius-md);
+    }
+
+    .consent-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 2px solid var(--crs-blue-400);
+      accent-color: var(--crs-blue-600);
+      flex-shrink: 0;
+      margin-top: 1px;
+      cursor: pointer;
+    }
+
+    .consent-checkbox-label {
+      font-size: var(--font-size-sm);
+      color: var(--crs-blue-800);
+      line-height: var(--line-height-relaxed);
+      cursor: pointer;
+    }
+
+
+    /* ========== Screen 5 — Camera Permission ========== */
+    .camera-illustration {
+      background: linear-gradient(150deg, var(--crs-blue-900), var(--crs-blue-700));
+      border-radius: var(--radius-xl);
+      padding: var(--space-10) var(--space-8);
+      text-align: center;
+      margin-bottom: var(--space-6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .camera-illustration::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center top, rgba(255,255,255,0.05) 0%, transparent 65%);
+    }
+
+    /* Face oval placeholder */
+    .camera-face-oval {
+      width: 120px;
+      height: 140px;
+      border: 3px solid rgba(255,255,255,0.35);
+      border-radius: 50%;
+      margin: 0 auto var(--space-5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      animation: ovalPulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes ovalPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.12); }
+      50%       { box-shadow: 0 0 0 14px rgba(255,255,255,0); }
+    }
+
+    /* Corner guides */
+    .camera-face-oval::before,
+    .camera-face-oval::after {
+      content: '';
+      position: absolute;
+      width: 24px; height: 24px;
+      border-color: white;
+      border-style: solid;
+      opacity: 0.6;
+    }
+    .camera-face-oval::before {
+      top: -3px; left: -3px;
+      border-width: 3px 0 0 3px;
+      border-radius: 4px 0 0 0;
+    }
+    .camera-face-oval::after {
+      bottom: -3px; right: -3px;
+      border-width: 0 3px 3px 0;
+      border-radius: 0 0 4px 0;
+    }
+
+    .camera-icon-inner {
+      font-size: 40px;
+      opacity: 0.7;
+    }
+
+    .camera-illustration__title {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semi);
+      color: rgba(255,255,255,0.9);
+      margin-bottom: var(--space-2);
+    }
+
+    .camera-illustration__sub {
+      font-size: var(--font-size-sm);
+      color: rgba(255,255,255,0.55);
+      margin: 0;
+    }
+
+    .camera-tips {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      margin-bottom: var(--space-6);
+    }
+
+    .camera-tip {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+    }
+
+    .camera-tip__icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md);
+      background: var(--crs-blue-50);
+      color: var(--crs-blue-500);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 14px;
+    }
+
+    .camera-tip__text {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-normal);
+      padding-top: var(--space-1);
+    }
+
+    .camera-tip__text strong {
+      color: var(--color-text-primary);
+      font-weight: var(--font-weight-semi);
+      display: block;
+    }
+
+    .camera-permission-note {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: var(--neutral-50);
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-md);
+    }
+
+    .camera-permission-note__text {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      line-height: var(--line-height-relaxed);
+      margin: 0;
+    }
+
+
+    /* ========== Help strip below card ========== */
+    .ob-help-strip {
+      width: 100%;
+      max-width: 640px;
+      margin-top: var(--space-5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+    .ob-help-strip a {
+      color: var(--crs-blue-500);
+      text-decoration: none;
+      font-weight: var(--font-weight-medium);
+    }
+    .ob-help-strip a:hover { text-decoration: underline; }
+
+    /* Screen show/hide */
+    .ob-screen { display: none; }
+    .ob-screen.active { display: block; }
+
+    @media (max-width: 640px) {
+      .ob-card__header,
+      .ob-card__body { padding: var(--space-6); }
+      .ob-card__footer { padding: var(--space-4) var(--space-6) var(--space-6); }
+      .action-grid { grid-template-columns: 1fr; }
+      .camera-illustration { padding: var(--space-8) var(--space-5); }
+      .ob-footer-help { margin-left: 0; width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================
+       SITE HEADER
+       ========================================================= -->
+  <header class="site-header" id="site-header">
+    <div class="site-header__inner">
+      <a href="index.html" class="site-header__brand" aria-label="Return to CRS-PDVS Home">
+        <div class="site-header__logo">
+          <img src="assets/images/crs_emblem.png" alt="Cross River State Logo" width="44" height="44" style="object-fit: contain;">
+        </div>
+        <div>
+          <div class="site-header__title">CRS-PDVS</div>
+          <div class="site-header__subtitle">Pension Verification</div>
+        </div>
+      </a>
+      <nav class="site-header__nav" aria-label="Navigation">
+        <a href="index.html" class="site-header__link">Home</a>
+        <a href="index.html#support" class="site-header__link">Support</a>
+      </nav>
+    </div>
+  </header>
+
+
+  <!-- =========================================================
+       MAIN
+       ========================================================= -->
+  <main class="onboard-page">
+
+    <!-- ===== Stepper ===== -->
+    <div class="ob-stepper" id="ob-stepper" aria-label="Onboarding progress">
+      <div class="ob-stepper__row">
+        <div class="ob-step ob-step--done" id="ob-step-lookup">
+          <div class="ob-step__dot">✓</div>
+          <span class="ob-step__label">Account Found</span>
+        </div>
+        <div class="ob-connector ob-connector--done" id="ob-conn-1"></div>
+        <div class="ob-step ob-step--active" id="ob-step-confirm">
+          <div class="ob-step__dot" id="ob-dot-confirm">2</div>
+          <span class="ob-step__label">Identity</span>
+        </div>
+        <div class="ob-connector" id="ob-conn-2"></div>
+        <div class="ob-step" id="ob-step-explain">
+          <div class="ob-step__dot" id="ob-dot-explain">3</div>
+          <span class="ob-step__label">How It Works</span>
+        </div>
+        <div class="ob-connector" id="ob-conn-3"></div>
+        <div class="ob-step" id="ob-step-prepare">
+          <div class="ob-step__dot" id="ob-dot-prepare">4</div>
+          <span class="ob-step__label">Prepare</span>
+        </div>
+        <div class="ob-connector" id="ob-conn-4"></div>
+        <div class="ob-step" id="ob-step-consent">
+          <div class="ob-step__dot" id="ob-dot-consent">5</div>
+          <span class="ob-step__label">Consent</span>
+        </div>
+        <div class="ob-connector" id="ob-conn-5"></div>
+        <div class="ob-step" id="ob-step-camera">
+          <div class="ob-step__dot" id="ob-dot-camera">6</div>
+          <span class="ob-step__label">Camera</span>
+        </div>
+      </div>
+    </div><!-- /stepper -->
+
+
+    <!-- =====================================================
+         SCREEN A — Identity Confirmed
+         ===================================================== -->
+    <div class="ob-card ob-screen active" id="screen-a">
+      <div class="ob-card__header">
+        <div class="ob-screen-label">
+          <span class="ob-screen-label-dot"></span>
+          Step 2 of 6 — Identity Confirmed
+        </div>
+        <h1 class="ob-card__title">Welcome, <span id="ob-pensioner-name">Margaret Effiom</span>.</h1>
+        <p class="ob-card__intro">We found your account. Before we begin, please confirm these details are correct.</p>
+      </div>
+
+      <div class="ob-card__body">
+        <!-- Mini identity card -->
+        <div class="confirmed-card">
+          <div class="confirmed-card__badge">
+            <div class="confirmed-card__badge-dot"></div>
+            Account Confirmed
+          </div>
+          <div class="confirmed-card__name" id="ob-card-name">Margaret N. Effiom</div>
+          <div class="confirmed-card__id" id="ob-card-id">CRS-PEN-2024-0001</div>
+          <div class="confirmed-card__divider"></div>
+          <div class="confirmed-card__row">
+            <div>
+              <div class="confirmed-card__field-label">Local Government</div>
+              <div class="confirmed-card__field-value" id="ob-card-lga">Calabar Municipality</div>
+            </div>
+            <div>
+              <div class="confirmed-card__field-label">Pension Category</div>
+              <div class="confirmed-card__field-value" id="ob-card-category">Civil Service Retiree</div>
+            </div>
+            <div>
+              <div class="confirmed-card__field-label">Phone</div>
+              <div class="confirmed-card__field-value" id="ob-card-phone">0803****721</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- What comes next -->
+        <div class="ob-next-step-note">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--crs-blue-400)" stroke-width="2" style="flex-shrink:0;margin-top:2px;" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <p class="ob-next-step-note__text">
+            We will guide you through three short steps. The whole process takes less than five minutes. If you are not sure at any point, there is always a help option at the bottom of the screen.
+          </p>
+        </div>
+      </div>
+
+      <div class="ob-card__footer">
+        <a href="verify.html" class="btn btn-secondary btn-sm">← Back</a>
+        <button class="btn btn-primary" id="btn-a-continue">
+          This Is Me — Continue
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:4px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <a href="index.html#support" class="ob-footer-help">Need help?</a>
+      </div>
+    </div>
+
+
+    <!-- =====================================================
+         SCREEN B — How Digital Verification Works
+         ===================================================== -->
+    <div class="ob-card ob-screen" id="screen-b">
+      <div class="ob-card__header">
+        <div class="ob-screen-label">
+          <span class="ob-screen-label-dot"></span>
+          Step 3 of 6 — How It Works
+        </div>
+        <h2 class="ob-card__title">Verification is simple and secure.</h2>
+        <p class="ob-card__intro">Here is exactly what the system does — nothing more, nothing less.</p>
+      </div>
+
+      <div class="ob-card__body">
+        <div class="how-list">
+          <div class="how-item">
+            <div class="how-item__number">1</div>
+            <div class="how-item__content">
+              <div class="how-item__title">Your identity has already been confirmed</div>
+              <p class="how-item__desc">You entered your Pension ID and phone number, and we matched them to your pension record. This step is complete.</p>
+            </div>
+          </div>
+          <div class="how-item">
+            <div class="how-item__number">2</div>
+            <div class="how-item__content">
+              <div class="how-item__title">We check you are present using your camera</div>
+              <p class="how-item__desc">The system uses your phone or computer camera to confirm you are a real, living person — not a photograph or recording. You will be asked to look at the screen, blink, or gently move your head.</p>
+            </div>
+          </div>
+          <div class="how-item">
+            <div class="how-item__number">3</div>
+            <div class="how-item__content">
+              <div class="how-item__title">A verification result is recorded</div>
+              <p class="how-item__desc">The outcome is sent directly to the Cross River State Pension Board. You will receive a reference number to keep for your records.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="reassurance-note">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green-500)" stroke-width="2" style="flex-shrink:0;margin-top:2px;" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <p class="reassurance-note__text">
+            No photographs or recordings are stored. The verification check only confirms your presence and does not identify you beyond what you have already provided.
+          </p>
+        </div>
+      </div>
+
+      <div class="ob-card__footer">
+        <button class="btn btn-secondary btn-sm" id="btn-b-back">← Back</button>
+        <button class="btn btn-primary" id="btn-b-continue">
+          I Understand — Continue
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:4px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <a href="index.html#support" class="ob-footer-help">Need help?</a>
+      </div>
+    </div>
+
+
+    <!-- =====================================================
+         SCREEN C — What You Will Do + If It Fails
+         ===================================================== -->
+    <div class="ob-card ob-screen" id="screen-c">
+      <div class="ob-card__header">
+        <div class="ob-screen-label">
+          <span class="ob-screen-label-dot"></span>
+          Step 4 of 6 — Preparing You
+        </div>
+        <h2 class="ob-card__title">What you will do next.</h2>
+        <p class="ob-card__intro">There are just two actions. Both are brief.</p>
+      </div>
+
+      <div class="ob-card__body">
+        <div class="action-grid">
+          <div class="action-tile">
+            <div class="action-tile__icon action-tile__icon--blue">📷</div>
+            <div class="action-tile__title">Allow camera access</div>
+            <p class="action-tile__desc">When your browser or phone asks permission to use the camera, tap "Allow". This is the only time you are asked.</p>
+          </div>
+          <div class="action-tile">
+            <div class="action-tile__icon action-tile__icon--green">👁️</div>
+            <div class="action-tile__title">Look at the screen</div>
+            <p class="action-tile__desc">A face guide will appear. Look directly at the screen and follow the simple on-screen prompts — blink or gently turn your head.</p>
+          </div>
+          <div class="action-tile">
+            <div class="action-tile__icon action-tile__icon--teal">💡</div>
+            <div class="action-tile__title">Sit in good light</div>
+            <p class="action-tile__desc">Face a window or a well-lit room. Avoid having a bright light behind you. Remove glasses only if you usually do not wear them.</p>
+          </div>
+          <div class="action-tile">
+            <div class="action-tile__icon action-tile__icon--amber">⏱️</div>
+            <div class="action-tile__title">It takes under a minute</div>
+            <p class="action-tile__desc">Once the camera is ready, the verification check itself takes less than 60 seconds to complete.</p>
+          </div>
+        </div>
+
+        <div class="fallback-panel">
+          <div class="fallback-panel__title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            If verification cannot be completed
+          </div>
+          <p class="fallback-panel__text">
+            If the camera check does not work — for any reason — you will not lose your progress. Simply visit any approved support center, where a trained agent can complete the verification for you in person without a camera.
+          </p>
+        </div>
+      </div>
+
+      <div class="ob-card__footer">
+        <button class="btn btn-secondary btn-sm" id="btn-c-back">← Back</button>
+        <button class="btn btn-primary" id="btn-c-continue">
+          I'm Ready — Continue
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:4px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <a href="index.html#support" class="ob-footer-help">I need to go to a center instead</a>
+      </div>
+    </div>
+
+
+    <!-- =====================================================
+         SCREEN D — Prototype Consent
+         ===================================================== -->
+    <div class="ob-card ob-screen" id="screen-d">
+      <div class="ob-card__header">
+        <div class="ob-screen-label">
+          <span class="ob-screen-label-dot"></span>
+          Step 5 of 6 — Before You Continue
+        </div>
+        <h2 class="ob-card__title">A note about this prototype.</h2>
+        <p class="ob-card__intro">This system is currently in testing. Please read the following before proceeding.</p>
+      </div>
+
+      <div class="ob-card__body">
+        <div class="proto-badge">
+          🧪 Prototype — Testing Phase
+        </div>
+
+        <div class="consent-points">
+          <div class="consent-point">
+            <div class="consent-point__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+              <div class="consent-point__title">No real data is recorded</div>
+              <p class="consent-point__text">All verification sessions in this prototype are simulated. Your pension status is not affected. No information is submitted to the Pension Board during this test.</p>
+            </div>
+          </div>
+
+          <div class="consent-point">
+            <div class="consent-point__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div>
+              <div class="consent-point__title">Camera access is for demonstration only</div>
+              <p class="consent-point__text">If you allow camera access, the feed is not recorded, transmitted, or stored. It is used only to demonstrate how the live verification interface will look and behave.</p>
+            </div>
+          </div>
+
+          <div class="consent-point">
+            <div class="consent-point__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <div class="consent-point__title">Participant feedback is welcome</div>
+              <p class="consent-point__text">If you are testing this prototype as a stakeholder or participant, please share your experience with the development team so we can improve the system before full launch.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="consent-checkbox-row">
+          <input type="checkbox" class="consent-checkbox" id="consent-check" aria-required="true">
+          <label class="consent-checkbox-label" for="consent-check">
+            I understand that this is a prototype and that no real pension verification is taking place. I am willing to continue for testing purposes.
+          </label>
+        </div>
+
+        <div id="consent-error" style="display:none; margin-top:var(--space-3);">
+          <div class="field-error" role="alert">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Please tick the box above to continue.
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-card__footer">
+        <button class="btn btn-secondary btn-sm" id="btn-d-back">← Back</button>
+        <button class="btn btn-primary" id="btn-d-continue">
+          Agree &amp; Continue
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:4px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <a href="index.html#support" class="ob-footer-help">Need help?</a>
+      </div>
+    </div>
+
+
+    <!-- =====================================================
+         SCREEN E — Camera Permission
+         ===================================================== -->
+    <div class="ob-card ob-screen" id="screen-e">
+      <div class="ob-card__header">
+        <div class="ob-screen-label">
+          <span class="ob-screen-label-dot"></span>
+          Step 6 of 6 — Camera Access
+        </div>
+        <h2 class="ob-card__title">Your camera is needed for face guidance.</h2>
+        <p class="ob-card__intro">We use your camera only to display a live view so you can position your face correctly. No recording is made.</p>
+      </div>
+
+      <div class="ob-card__body">
+        <!-- Camera illustration -->
+        <div class="camera-illustration">
+          <div class="camera-face-oval" aria-label="Face position guide" role="img">
+            <div class="camera-icon-inner" aria-hidden="true">🙂</div>
+          </div>
+          <div class="camera-illustration__title">Position your face inside the oval</div>
+          <p class="camera-illustration__sub">Look directly at the screen and stay still</p>
+        </div>
+
+        <!-- Tips -->
+        <div class="camera-tips">
+          <div class="camera-tip">
+            <div class="camera-tip__icon">💡</div>
+            <div class="camera-tip__text">
+              <strong>Choose good lighting</strong>
+              Sit facing a window or bright light. Avoid sitting with a window or lamp behind you.
+            </div>
+          </div>
+          <div class="camera-tip">
+            <div class="camera-tip__icon">📐</div>
+            <div class="camera-tip__text">
+              <strong>Hold your device steady</strong>
+              Hold your phone at arm's length or prop it upright. Keep your face centred in the oval guide.
+            </div>
+          </div>
+          <div class="camera-tip">
+            <div class="camera-tip__icon">😐</div>
+            <div class="camera-tip__text">
+              <strong>Look natural</strong>
+              Keep a neutral expression. Remove sunglasses. It is fine to wear prescription glasses or a headscarf.
+            </div>
+          </div>
+        </div>
+
+        <!-- Browser permission note -->
+        <div class="camera-permission-note">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--crs-blue-400)" stroke-width="2" style="flex-shrink:0;margin-top:2px;" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <p class="camera-permission-note__text">
+            Your browser will ask for permission to use the camera. Tap <strong>"Allow"</strong> when prompted. You can revoke access at any time from your browser settings. Declining permission will not affect your pension status.
+          </p>
+        </div>
+      </div>
+
+      <div class="ob-card__footer">
+        <button class="btn btn-secondary btn-sm" id="btn-e-back">← Back</button>
+        <button class="btn btn-primary" id="btn-e-begin">
+          Allow Camera &amp; Begin
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:4px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <a href="index.html#support" class="ob-footer-help">I cannot use a camera</a>
+      </div>
+    </div>
+
+
+    <!-- Help strip -->
+    <div class="ob-help-strip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Stuck? <a href="index.html#support">Visit a support center near you</a> — no camera or internet needed.
+    </div>
+
+  </main>
+
+
+  <!-- =========================================================
+       SCRIPTS
+       ========================================================= -->
+  <script src="js/mock-data.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    /* ============================================================
+       Phase 04 Onboarding Flow — CRS-PDVS
+       Inherits matched pensioner from sessionStorage (if available)
+       Falls back to first pensioner in mock data for demo
+       ============================================================ */
+    (function () {
+
+      // ---- Load pensioner context from session or use demo data ----
+      let pensioner = null;
+      try {
+        const stored = sessionStorage.getItem('crs_matched_pensioner');
+        if (stored) pensioner = JSON.parse(stored);
+      } catch (e) {}
+
+      if (!pensioner && window.CRS_PDVS_DATA) {
+        pensioner = CRS_PDVS_DATA.pensioners[0];
+      }
+
+      // ---- Populate identity card ----
+      function maskPhone(p) {
+        if (!p || p.length < 7) return '—';
+        return p.slice(0, 4) + '****' + p.slice(-3);
+      }
+
+      if (pensioner) {
+        const fullName = `${pensioner.firstName} ${pensioner.lastName}`;
+        document.getElementById('ob-pensioner-name').textContent = pensioner.firstName;
+        document.getElementById('ob-card-name').textContent = fullName;
+        document.getElementById('ob-card-id').textContent   = pensioner.id;
+        document.getElementById('ob-card-lga').textContent  = pensioner.lga;
+        document.getElementById('ob-card-category').textContent = pensioner.category;
+        document.getElementById('ob-card-phone').textContent = maskPhone(pensioner.phoneRaw);
+      }
+
+
+      // ---- Screen management ----
+      const SCREENS = ['screen-a', 'screen-b', 'screen-c', 'screen-d', 'screen-e'];
+      let currentIdx = 0;
+
+      function showScreen(idx, direction) {
+        if (idx < 0 || idx >= SCREENS.length) return;
+
+        SCREENS.forEach((id, i) => {
+          const el = document.getElementById(id);
+          if (el) el.classList.toggle('active', i === idx);
+        });
+
+        currentIdx = idx;
+        updateStepper(idx);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // ---- Stepper sync ----
+      // Stepper steps correspond to:
+      // 0=lookup(done), 1=confirm, 2=explain, 3=prepare, 4=consent, 5=camera
+      const stepIds = ['ob-step-lookup','ob-step-confirm','ob-step-explain','ob-step-prepare','ob-step-consent','ob-step-camera'];
+      const dotIds  = ['','ob-dot-confirm','ob-dot-explain','ob-dot-prepare','ob-dot-consent','ob-dot-camera'];
+      const connIds = ['ob-conn-1','ob-conn-2','ob-conn-3','ob-conn-4','ob-conn-5'];
+
+      function updateStepper(screenIdx) {
+        const activeStepIdx = screenIdx + 1; // screen 0 → step 1 (confirm)
+
+        stepIds.forEach((id, i) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.classList.remove('ob-step--active', 'ob-step--done');
+          if (i < activeStepIdx) el.classList.add('ob-step--done');
+          else if (i === activeStepIdx) el.classList.add('ob-step--active');
+          // Update dot text/check
+          const dot = dotIds[i] ? document.getElementById(dotIds[i]) : null;
+          if (dot) {
+            dot.textContent = i < activeStepIdx ? '✓' : String(i + 1);
+          }
+        });
+
+        connIds.forEach((id, i) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.classList.toggle('ob-connector--done', i < activeStepIdx);
+        });
+      }
+
+      // ---- Wire navigation ----
+      // Screen A
+      document.getElementById('btn-a-continue').addEventListener('click', () => showScreen(1));
+
+      // Screen B
+      document.getElementById('btn-b-back').addEventListener('click', () => showScreen(0));
+      document.getElementById('btn-b-continue').addEventListener('click', () => showScreen(2));
+
+      // Screen C
+      document.getElementById('btn-c-back').addEventListener('click', () => showScreen(1));
+      document.getElementById('btn-c-continue').addEventListener('click', () => showScreen(3));
+
+      // Screen D — requires consent checkbox
+      document.getElementById('btn-d-back').addEventListener('click', () => showScreen(2));
+      document.getElementById('btn-d-continue').addEventListener('click', () => {
+        const checked = document.getElementById('consent-check').checked;
+        document.getElementById('consent-error').style.display = checked ? 'none' : 'block';
+        if (checked) showScreen(4);
+      });
+
+      // Screen E
+      document.getElementById('btn-e-back').addEventListener('click', () => showScreen(3));
+      document.getElementById('btn-e-begin').addEventListener('click', () => {
+        const btn = document.getElementById('btn-e-begin');
+        btn.disabled = true;
+        btn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;animation:spin 1s linear infinite;" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/></svg>
+          Starting Camera…
+        `;
+
+        setTimeout(() => {
+          window.location.href = 'face.html';
+        }, 600);
+      });
+
+      // ---- Init ----
+      showScreen(0);
+
+    })();
+
+    // Spin animation for button loader
+    const style = document.createElement('style');
+    style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+    document.head.appendChild(style);
+  </script>
+
+</body>
+</html>

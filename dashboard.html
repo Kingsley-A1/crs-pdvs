@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CRS-PDVS — Pensioner Dashboard and Verification Outcome">
+  <meta name="theme-color" content="#1e2275">
+  <title>CRS-PDVS — My Dashboard</title>
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+
+  <style>
+    body {
+      background: var(--neutral-50);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =====================================================
+       OUTCOME SCREENS (Rendered conditionally)
+       ===================================================== */
+    .outcome-view {
+      display: none;
+      flex: 1;
+      padding: var(--space-10) var(--space-6);
+      background: white;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      animation: fadeSlideUp 0.4s ease;
+    }
+    .outcome-view.active { display: flex; }
+
+    .outcome-card {
+      max-width: 540px;
+      width: 100%;
+    }
+
+    .outcome-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--space-6);
+      font-size: 32px;
+    }
+    .outcome-icon--success { background: #f0fdf4; color: #16a34a; box-shadow: 0 0 0 8px rgba(74, 222, 128, 0.1); }
+    .outcome-icon--pending { background: var(--amber-50); color: var(--amber-600); box-shadow: 0 0 0 8px rgba(251, 191, 36, 0.1); }
+    .outcome-icon--failed  { background: #fff1f2; color: #dc2626; box-shadow: 0 0 0 8px rgba(248, 113, 113, 0.1); }
+    .outcome-icon--referred{ background: var(--neutral-100); color: var(--neutral-600); box-shadow: 0 0 0 8px rgba(156, 163, 175, 0.1); }
+
+    .outcome-title {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-3);
+      letter-spacing: -0.02em;
+    }
+
+    .outcome-desc {
+      font-size: var(--font-size-base);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-relaxed);
+      margin-bottom: var(--space-8);
+    }
+
+    .outcome-ref {
+      display: inline-block;
+      background: var(--neutral-50);
+      border: 1px dashed var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-6);
+      margin-bottom: var(--space-8);
+      font-family: monospace;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+    .outcome-ref strong { color: var(--color-text-primary); }
+
+    .outcome-actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      align-items: center;
+    }
+    @media (min-width: 480px) {
+      .outcome-actions { flex-direction: row; justify-content: center; }
+    }
+
+
+    /* =====================================================
+       MAIN DASHBOARD
+       ===================================================== */
+    .dashboard-view {
+      display: none;
+      flex: 1;
+      padding: var(--space-8) var(--space-6) var(--space-16);
+      max-width: 1000px;
+      margin: 0 auto;
+      width: 100%;
+      animation: fadeSlideUp 0.4s ease;
+    }
+    .dashboard-view.active { display: block; }
+
+    .dash-header {
+      margin-bottom: var(--space-8);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+    }
+    .dash-header__greeting {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-1);
+      letter-spacing: -0.02em;
+    }
+    .dash-header__sub {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+    @media (min-width: 800px) {
+      .dash-grid { grid-template-columns: 320px 1fr; align-items: start; }
+    }
+
+    /* Cards */
+    .dash-card {
+      background: white;
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .dash-card__header {
+      padding: var(--space-5) var(--space-6);
+      border-bottom: 1px solid var(--color-border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--neutral-50);
+    }
+    .dash-card__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .dash-card__body { padding: var(--space-6); }
+
+    /* Profile Card specifics */
+    .profile-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--crs-blue-100);
+      color: var(--crs-blue-600);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-bold);
+      margin-bottom: var(--space-4);
+    }
+
+    .profile-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semi);
+      margin-bottom: var(--space-6);
+    }
+    .profile-status--active   { background: #f0fdf4; color: #15803d; }
+    .profile-status--pending  { background: var(--amber-50); color: var(--amber-700); }
+    .profile-status--alert    { background: #fff1f2; color: #b91c1c; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    .kv-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+    .kv-item__label {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+    .kv-item__value {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      font-weight: var(--font-weight-medium);
+    }
+
+    /* Next Cycle Callout */
+    .next-cycle-note {
+      margin-top: var(--space-6);
+      padding: var(--space-4);
+      background: var(--crs-blue-50);
+      border: 1px solid var(--crs-blue-100);
+      border-radius: var(--radius-md);
+    }
+    .next-cycle-note__label {
+      font-size: var(--font-size-xs);
+      color: var(--crs-blue-500);
+      font-weight: var(--font-weight-semi);
+      margin-bottom: 4px;
+    }
+    .next-cycle-note__date {
+      font-size: var(--font-size-base);
+      color: var(--crs-blue-800);
+      font-weight: var(--font-weight-bold);
+    }
+
+    /* History List */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-4) 0;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .history-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .history-item:first-child { padding-top: 0; }
+    
+    .history-info__date {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semi);
+      color: var(--color-text-primary);
+      margin-bottom: 2px;
+    }
+    .history-info__type {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+    .history-badge {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      font-weight: var(--font-weight-medium);
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================
+       SITE HEADER
+       ========================================================= -->
+  <header class="site-header" id="site-header">
+    <div class="site-header__inner" style="max-width: 1000px;">
+      <a href="index.html" class="site-header__brand" aria-label="Return to CRS-PDVS Home">
+        <div class="site-header__logo">
+          <img src="assets/images/crs_emblem.png" alt="Cross River State Logo" width="44" height="44" style="object-fit: contain;">
+        </div>
+        <div>
+          <div class="site-header__title">CRS-PDVS</div>
+          <div class="site-header__subtitle">Verification Portal</div>
+        </div>
+      </a>
+      <nav class="site-header__nav" aria-label="Navigation" id="header-nav"></nav>
+    </div>
+  </header>
+
+
+  <!-- =========================================================
+       VIEW: OUTCOME SCREENS
+       ========================================================= -->
+  <main class="outcome-view" id="view-outcome">
+    <div class="outcome-card" id="outcome-content">
+      <!-- Injected via JS based on URL parameters -->
+    </div>
+  </main>
+
+
+  <!-- =========================================================
+       VIEW: DASHBOARD
+       ========================================================= -->
+  <main class="dashboard-view" id="view-dashboard">
+    <div class="dash-header">
+      <div>
+        <h1 class="dash-header__greeting">Hello, <span id="dash-first-name">Margaret</span>.</h1>
+        <p class="dash-header__sub">Your digital verification summary and history.</p>
+      </div>
+      <div>
+        <!-- Optional top-right action -->
+        <a href="index.html#support" class="btn btn-secondary btn-sm">Get Support</a>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <!-- Left Column: Profile Statement -->
+      <div class="left-col">
+        <div class="dash-card">
+          <div class="dash-card__body">
+            <div class="profile-avatar" id="dash-initials">ME</div>
+            <div class="profile-status profile-status--active" id="dash-status-badge">
+              <span class="status-dot"></span> <span id="dash-status-text">Active Selection</span>
+            </div>
+
+            <div class="kv-list">
+              <div class="kv-item">
+                <div class="kv-item__label">Pension ID</div>
+                <div class="kv-item__value" id="dash-pen-id">CRS-PEN-2024-0000</div>
+              </div>
+              <div class="kv-item">
+                <div class="kv-item__label">Full Name</div>
+                <div class="kv-item__value" id="dash-full-name">Margaret N. Effiom</div>
+              </div>
+              <div class="kv-item">
+                <div class="kv-item__label">Local Government</div>
+                <div class="kv-item__value" id="dash-lga">Calabar Municipality</div>
+              </div>
+            </div>
+
+            <div class="next-cycle-note">
+              <div class="next-cycle-note__label">Next Verification Due</div>
+              <div class="next-cycle-note__date" id="dash-next-due">15 June 2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: History & Information -->
+      <div class="right-col" style="display: flex; flex-direction: column; gap: var(--space-6);">
+        
+        <!-- Verification History -->
+        <div class="dash-card">
+          <div class="dash-card__header">
+            <div class="dash-card__title">Verification History</div>
+          </div>
+          <div class="dash-card__body">
+            <div class="history-list" id="history-list-container">
+              <!-- JS maps history here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Support Box -->
+        <div class="dash-card">
+          <div class="dash-card__body" style="display: flex; gap: var(--space-4); align-items:flex-start;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--neutral-100); display: flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </div>
+            <div>
+              <h3 style="font-size: var(--font-size-base); font-weight:var(--font-weight-semi); margin-bottom: 4px;">Need assistance?</h3>
+              <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.5; margin-bottom: var(--space-3);">
+                If you have questions about your verification outcome or need to visit a center, our support team is available Monday–Friday.
+              </p>
+              <a href="index.html#support" class="btn btn-secondary btn-sm">Find a Support Center</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+
+  <!-- =========================================================
+       SCRIPTS
+       ========================================================= -->
+  <script src="js/mock-data.js"></script>
+  <script src="js/pensioner-auth.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    /* ============================================================
+       Phase 06 Dashboard & Post-Verification Outcomes
+       ============================================================ */
+    (function () {
+
+      // ---- 1. Auth guard — must be logged in ----
+      const authSession = PensionerAuth.guard();
+      if (!authSession) return; // guard() will redirect — stop execution
+
+      // ---- 2. Inject logged-in header nav ----
+      PensionerAuth.updateHeader({ activePage: 'dashboard' });
+
+      // ---- 3. Load pensioner from auth session first, then fallback ----
+      let pensioner = null;
+      try {
+        // Try legacy session key first (set by verify/face flow)
+        const stored = sessionStorage.getItem('crs_matched_pensioner');
+        if (stored) pensioner = JSON.parse(stored);
+      } catch (e) {}
+
+      // Use the auth session if available (registered user)
+      if (authSession && authSession.pensionId) {
+        // Merge auth session into pensioner shape
+        pensioner = {
+          id:        authSession.pensionId,
+          firstName: authSession.firstName,
+          lastName:  authSession.lastName,
+          phone:     authSession.phone,
+          lga:       authSession.lga,
+          category:  authSession.category,
+          status:    authSession.status || 'Active',
+          lastVerified:        authSession.lastVerified,
+          nextVerificationDue: authSession.nextVerificationDue,
+          bankName:    authSession.bankName,
+          accountLast4: authSession.accountLast4,
+          photoUrl:    authSession.photoUrl || null,
+        };
+      }
+
+      if (!pensioner && window.CRS_PDVS_DATA) {
+        pensioner = window.CRS_PDVS_DATA.pensioners[0];
+      }
+
+      if (!pensioner) {
+        // Nothing we can do — show plain message
+        document.body.innerHTML += '<p style="padding:40px;color:#555">Session expired. <a href="verify.html">Start again</a></p>';
+        return;
+      }
+
+      // ---- Utilities ----
+      const formatDate = (s) => {
+        if (!s) return '—';
+        return new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      };
+
+      const generateRef = () => {
+        const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let r = 'CRS-VRF-';
+        for (let i = 0; i < 4; i++) r += c[Math.floor(Math.random() * c.length)];
+        return r + '-' + Math.floor(100 + Math.random() * 900);
+      };
+
+      // ---- 2. Read URL state ----
+      const urlParams    = new URLSearchParams(window.location.search);
+      const outcomeState = urlParams.get('outcome');  // null = direct dashboard visit
+
+      const viewOutcome = document.getElementById('view-outcome');
+      const viewDash    = document.getElementById('view-dashboard');
+
+      // ---- 3. Show correct view ----
+      if (outcomeState) {
+        // Show outcome screen FIRST; user clicks through to dashboard
+        renderOutcome(outcomeState);
+        viewOutcome.classList.add('active');
+      } else {
+        // Direct visit — straight to dashboard
+        renderDashboard();
+        viewDash.classList.add('active');
+      }
+
+      // ---- Global functions called by buttons ----
+      window.continueToDashboard = function () {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        viewOutcome.classList.remove('active');
+        renderDashboard();
+        viewDash.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      window.endSession = function () {
+        PensionerAuth.signOut();
+      };
+
+
+      /* =======================================================
+         RENDER OUTCOME STATE
+         ======================================================= */
+      function renderOutcome(state) {
+        const container = document.getElementById('outcome-content');
+        const ref = generateRef();
+        const name = pensioner.firstName;
+
+        const configs = {
+          success: {
+            iconClass: 'outcome-icon--success',
+            svg: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+            title: 'Verification Successful',
+            desc: `Thank you, ${name}. Your liveness and identity checks have passed. Your pension record is active and up to date.`,
+            refBlock: `<div class="outcome-ref">Reference: <strong>${ref}</strong></div>`,
+            actions: `<button class="btn btn-primary btn-lg" onclick="continueToDashboard()">Continue to Dashboard</button>`,
+          },
+          pending: {
+            iconClass: 'outcome-icon--pending',
+            svg: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+            title: 'Verification Submitted — Under Review',
+            desc: `Your session was recorded and is under manual review by a pension officer. No action is required from you. You will be contacted if anything is needed.`,
+            refBlock: `<div class="outcome-ref">Reference: <strong>${ref}</strong></div>`,
+            actions: `<button class="btn btn-primary btn-lg" onclick="continueToDashboard()">Continue to Dashboard</button>`,
+          },
+          fail: {
+            iconClass: 'outcome-icon--failed',
+            svg: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+            title: 'Verification Could Not Be Completed',
+            desc: `We were unable to confirm your liveness this time. Please ensure you are in a well-lit area and your face is clearly visible. You may try again now.`,
+            refBlock: '',
+            actions: `
+              <a href="face.html" class="btn btn-primary btn-lg">Try Again</a>
+              <button class="btn btn-secondary" onclick="continueToDashboard()">Skip to Dashboard</button>
+            `,
+          },
+          referred: {
+            iconClass: 'outcome-icon--referred',
+            svg: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+            title: 'In-Person Verification Required',
+            desc: `We were unable to complete digital verification. You must visit an approved support center with a valid ID to complete your verification in person. Your pension is not affected yet.`,
+            refBlock: '',
+            actions: `
+              <a href="index.html#support" class="btn btn-primary btn-lg">Find a Support Center</a>
+              <button class="btn btn-ghost" style="color:var(--crs-blue-500);" onclick="continueToDashboard()">View My Dashboard</button>
+            `,
+          },
+        };
+
+        const cfg = configs[state];
+        if (!cfg) { window.continueToDashboard(); return; }
+
+        container.innerHTML = `
+          <div class="outcome-icon ${cfg.iconClass}">${cfg.svg}</div>
+          <h1 class="outcome-title">${cfg.title}</h1>
+          <p class="outcome-desc">${cfg.desc}</p>
+          ${cfg.refBlock}
+          <div class="outcome-actions">${cfg.actions}</div>
+        `;
+      }
+
+
+      /* =======================================================
+         RENDER DASHBOARD
+         ======================================================= */
+      function renderDashboard() {
+        // Name and avatar
+        document.getElementById('dash-first-name').textContent = pensioner.firstName;
+        document.getElementById('dash-initials').textContent =
+          (pensioner.firstName[0] + pensioner.lastName[0]).toUpperCase();
+
+        // Status badge — derive from outcome or pensioner record
+        const statusBadge = document.getElementById('dash-status-badge');
+        const statusText  = document.getElementById('dash-status-text');
+
+        let currentStatus = pensioner.status || 'Active';
+        if (outcomeState === 'success')  currentStatus = 'Active';
+        if (outcomeState === 'pending')  currentStatus = 'Pending Review';
+        if (outcomeState === 'fail' || outcomeState === 'referred') currentStatus = 'Verification Needed';
+
+        statusText.textContent = currentStatus;
+        if (currentStatus === 'Active') {
+          statusBadge.className = 'profile-status profile-status--active';
+        } else if (currentStatus === 'Pending Review') {
+          statusBadge.className = 'profile-status profile-status--pending';
+        } else {
+          statusBadge.className = 'profile-status profile-status--alert';
+        }
+
+        // Key-value fields
+        document.getElementById('dash-pen-id').textContent    = pensioner.id;
+        document.getElementById('dash-full-name').textContent = pensioner.firstName + ' ' + pensioner.lastName;
+        document.getElementById('dash-lga').textContent       = pensioner.lga;
+        document.getElementById('dash-next-due').textContent  = formatDate(pensioner.nextVerificationDue);
+
+        // Verification history
+        const listEl = document.getElementById('history-list-container');
+        const allSessions = (window.CRS_PDVS_DATA && window.CRS_PDVS_DATA.verificationSessions) || [];
+
+        let sessions = allSessions
+          .filter(s => s.pensionerId === pensioner.id)
+          .sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt));
+
+        // Inject a live session at the top if they just completed one
+        if (outcomeState === 'success' || outcomeState === 'pending') {
+          sessions = [{
+            startedAt: new Date().toISOString(),
+            type: 'Self-Service Digital',
+            status: outcomeState === 'success' ? 'Verified' : 'Pending Review'
+          }, ...sessions];
+        }
+
+        if (sessions.length === 0) {
+          listEl.innerHTML = `<p style="padding:16px 0;color:var(--color-text-muted);font-size:var(--font-size-sm);text-align:center;">No verification history yet.</p>`;
+          return;
+        }
+
+        const statusStyles = {
+          'Verified':      'background:#f0fdf4; color:#15803d;',
+          'Pending Review':'background:#fffbeb; color:#b45309;',
+          'Failed':        'background:#fff1f2; color:#b91c1c;',
+        };
+
+        listEl.innerHTML = sessions.map(s => {
+          const style = statusStyles[s.status] || 'background:#f3f4f6; color:#374151;';
+          return `
+            <div class="history-item">
+              <div class="history-info">
+                <div class="history-info__date">${formatDate(s.startedAt)}</div>
+                <div class="history-info__type">${s.type} Session</div>
+              </div>
+              <div class="history-badge" style="${style}">${s.status}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+    })();
+  </script>
+
+</body>
+</html>

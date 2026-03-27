@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CRS-PDVS — Live verification check.">
+  <meta name="theme-color" content="#0a1728">
+  <title>CRS-PDVS — Verification</title>
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+  <script src="js/pensioner-auth.js"></script>
+
+  <style>
+    /* =====================================================
+       FACE VERIFICATION — Immersive Full-Screen Layout
+       ===================================================== */
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background: #0a1728;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+    }
+
+    /* ---- Header ---- */
+    .vr-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      position: relative;
+      z-index: 50;
+      flex-shrink: 0;
+    }
+
+    .vr-header__brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vr-header__logo {
+      width: 28px; height: 28px;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+      opacity: 0.85;
+    }
+
+    .vr-header__title {
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .vr-header__status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .vr-status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #38bdf8;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .vr-cancel-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.75);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+    .vr-cancel-btn:hover { background: rgba(255,255,255,0.14); }
+
+    /* ---- QA Panel ---- */
+    .qa-panel {
+      position: fixed;
+      top: 52px;
+      right: 16px;
+      background: rgba(0,0,0,0.7);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px dashed rgba(255,255,255,0.25);
+      z-index: 200;
+      font-size: 11px;
+      backdrop-filter: blur(6px);
+      color: rgba(255,255,255,0.8);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .qa-panel select {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    /* ---- Main area: fills remaining space ---- */
+    .vr-main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 16px 24px;
+      gap: 0;
+      position: relative;
+    }
+
+    /* ---- Camera Scene Container ---- */
+    .vr-scene {
+      position: relative;
+      /* Responsive: on mobile take full width, on desktop constrain to portrait ratio */
+      width: min(100%, 340px);
+      /* Height = 4:3 portrait feel — but capped so instructions still fit */
+      aspect-ratio: 3 / 4;
+      max-height: calc(100vh - 200px);
+      border-radius: 24px;
+      overflow: hidden;
+      background: #000;
+      flex-shrink: 0;
+    }
+
+    /* The actual video: fills the scene perfectly */
+    .vr-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);  /* Mirror selfie */
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .vr-video.live { opacity: 1; }
+
+    /* Dark vignette overlay — darkens corners, keeps center bright */
+    .vr-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 70% at 50% 50%,
+        transparent 50%,
+        rgba(10, 23, 40, 0.7) 100%
+      );
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* ---- Face Oval --- */
+    /* Rendered with SVG for pixel-perfect masking */
+    .vr-oval-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    /* The oval stroke ring — animated via JS class swaps */
+    .oval-ring {
+      fill: none;
+      stroke: rgba(255,255,255,0.3);
+      stroke-width: 2.5;
+      transition: stroke 0.4s ease, filter 0.4s ease;
+    }
+    .oval-ring--scanning {
+      stroke: #38bdf8;
+      filter: drop-shadow(0 0 6px rgba(56,189,248,0.6));
+      animation: ovalPulse 1.8s ease-in-out infinite;
+    }
+    .oval-ring--step-done {
+      stroke: #4ade80;
+      filter: drop-shadow(0 0 8px rgba(74,222,128,0.7));
+    }
+    .oval-ring--success {
+      stroke: #4ade80;
+      filter: drop-shadow(0 0 14px rgba(74,222,128,0.9));
+    }
+    .oval-ring--error {
+      stroke: #f87171;
+      filter: drop-shadow(0 0 10px rgba(248,113,113,0.8));
+      animation: ovalShake 0.4s ease-in-out;
+    }
+
+    @keyframes ovalPulse {
+      0%, 100% { stroke-opacity: 1; }
+      50% { stroke-opacity: 0.5; }
+    }
+    @keyframes ovalShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-5px); }
+      40% { transform: translateX(5px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(3px); }
+    }
+
+    /* Corner bracket accents */
+    .oval-corner {
+      fill: none;
+      stroke-width: 3;
+      stroke-linecap: round;
+      transition: stroke 0.4s ease;
+    }
+    .oval-corner--tl { stroke: rgba(255,255,255,0.5); }
+    .oval-corner--br { stroke: rgba(255,255,255,0.5); }
+
+    /* ---- Instruction bar ---- */
+    .vr-instructions {
+      margin-top: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .vr-inst-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 4px;
+      transition: opacity 0.15s ease, color 0.3s ease;
+    }
+    .vr-inst-sub {
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      transition: opacity 0.15s ease;
+    }
+
+    /* ---- Step dots ---- */
+    .vr-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .dot.dot--active {
+      background: #38bdf8;
+      transform: scale(1.25);
+      box-shadow: 0 0 8px rgba(56,189,248,0.6);
+    }
+    .dot.dot--done {
+      background: #4ade80;
+      box-shadow: 0 0 6px rgba(74,222,128,0.5);
+    }
+
+    /* ---- Camera Denied overlay ---- */
+    .vr-denied-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0a1728;
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 32px 24px;
+    }
+    .vr-denied-overlay.active { display: flex; }
+
+    .denied-icon {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(248,113,113,0.1);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 24px;
+      border: 1px solid rgba(248,113,113,0.25);
+    }
+
+    .denied-title {
+      font-size: 20px; font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .denied-desc {
+      font-size: 14px; color: rgba(255,255,255,0.6);
+      max-width: 320px; line-height: 1.6;
+      margin-bottom: 28px;
+    }
+    .btn-retry {
+      padding: 12px 28px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .btn-retry:hover { background: rgba(255,255,255,0.18); }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="vr-header">
+    <div class="vr-header__brand">
+      <img src="assets/images/crs_emblem.png" alt="CRS Logo" class="vr-header__logo">
+      <span class="vr-header__title">CRS-PDVS</span>
+    </div>
+    <div class="vr-header__status">
+      <div class="vr-status-dot" id="status-dot"></div>
+      <span id="status-label">Initialising&hellip;</span>
+    </div>
+    <a href="onboard.html" class="vr-cancel-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Cancel
+    </a>
+  </header>
+
+  <!-- QA Dev toggle (prototype only) -->
+  <div class="qa-panel">
+    <span>🧪</span>
+    <select id="qa-outcome">
+      <option value="success">Pass</option>
+      <option value="pending">Pending Review</option>
+      <option value="fail">Fail</option>
+      <option value="referred">Referred</option>
+    </select>
+  </div>
+
+  <!-- Main verification scene -->
+  <main class="vr-main">
+    <div class="vr-scene" id="vr-scene">
+      <!-- Live video feed -->
+      <video id="camera-video" class="vr-video" autoplay playsinline muted></video>
+
+      <!-- Radial vignette -->
+      <div class="vr-vignette"></div>
+
+      <!-- SVG Face Oval (positioned over video) -->
+      <svg class="vr-oval-svg" id="oval-svg" viewBox="0 0 340 450" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <!-- Clip everything outside the oval to darken the scene edges -->
+          <mask id="face-mask">
+            <rect width="340" height="450" fill="rgba(0,0,0,0.75)"/>
+            <ellipse cx="170" cy="210" rx="105" ry="140" fill="white"/>
+          </mask>
+        </defs>
+
+        <!-- Dark background with oval cut-out -->
+        <rect width="340" height="450" fill="rgba(5,15,30,0.78)" mask="url(#face-mask)"/>
+
+        <!-- The oval ring (state changes via JS class) -->
+        <ellipse id="oval-ring" class="oval-ring" cx="170" cy="210" rx="105" ry="140"/>
+
+        <!-- Top-left corner bracket -->
+        <path class="oval-corner oval-corner--tl"
+              d="M 90,115 L 75,115 L 75,130"
+              stroke="rgba(255,255,255,0.55)" id="corner-tl"/>
+
+        <!-- Bottom-right corner bracket -->
+        <path class="oval-corner oval-corner--br"
+              d="M 250,305 L 265,305 L 265,290"
+              stroke="rgba(255,255,255,0.55)" id="corner-br"/>
+      </svg>
+    </div>
+
+    <!-- Instructions -->
+    <div class="vr-instructions">
+      <div class="vr-inst-title" id="inst-title">Requesting camera&hellip;</div>
+      <div class="vr-inst-sub" id="inst-sub">Please wait</div>
+
+      <!-- Step dots -->
+      <div class="vr-dots">
+        <div class="dot" id="dot-0"></div>
+        <div class="dot" id="dot-1"></div>
+        <div class="dot" id="dot-2"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Camera Denied Overlay -->
+  <div class="vr-denied-overlay" id="denied-overlay">
+    <div class="denied-icon">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    </div>
+    <div class="denied-title">Camera Access Denied</div>
+    <p class="denied-desc">
+      This verification requires your camera. Please allow camera access in your browser settings and try again. Your pension status is not affected by declining.
+    </p>
+    <button class="btn-retry" onclick="window.location.reload()">Retry</button>
+    <a href="index.html#support" style="display:block;margin-top:16px;font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;">Visit a support center instead</a>
+  </div>
+
+
+  <script>
+    (function () {
+      // ---- Auth guard — biometric verification requires a signed-in session ----
+      const authSession = PensionerAuth.guard();
+      if (!authSession) return; // redirects to pensioner-login.html?return=face.html
+
+      const video     = document.getElementById('camera-video');
+      const ovalRing  = document.getElementById('oval-ring');
+      const cornerTL  = document.getElementById('corner-tl');
+      const cornerBR  = document.getElementById('corner-br');
+      const instTitle = document.getElementById('inst-title');
+      const instSub   = document.getElementById('inst-sub');
+      const statusDot = document.getElementById('status-dot');
+      const statusLbl = document.getElementById('status-label');
+      const qaOutcome = document.getElementById('qa-outcome');
+      const dots      = [0,1,2].map(i => document.getElementById('dot-' + i));
+
+      /* =============================================
+         Colour state helpers
+         ============================================= */
+      const OVAL_STATES = {
+        idle:     { cls: '',                    corners: 'rgba(255,255,255,0.35)', headerDot: '#38bdf8' },
+        scanning: { cls: 'oval-ring--scanning', corners: '#38bdf8',               headerDot: '#38bdf8' },
+        stepDone: { cls: 'oval-ring--step-done',corners: '#4ade80',               headerDot: '#4ade80' },
+        success:  { cls: 'oval-ring--success',  corners: '#4ade80',               headerDot: '#4ade80' },
+        error:    { cls: 'oval-ring--error',    corners: '#f87171',               headerDot: '#f87171' },
+      };
+
+      function setOvalState(state) {
+        const s = OVAL_STATES[state] || OVAL_STATES.idle;
+        ovalRing.className = 'oval-ring ' + s.cls;
+        cornerTL.setAttribute('stroke', s.corners);
+        cornerBR.setAttribute('stroke', s.corners);
+        statusDot.style.background = s.headerDot;
+        statusDot.style.animation = (state === 'error') ? 'none' : '';
+      }
+
+      /* =============================================
+         Text fade helper
+         ============================================= */
+      function setText(title, sub, color) {
+        instTitle.style.opacity = 0;
+        instSub.style.opacity   = 0;
+        setTimeout(() => {
+          instTitle.textContent  = title;
+          instSub.textContent    = sub;
+          instTitle.style.color  = color || 'white';
+          instTitle.style.opacity = 1;
+          instSub.style.opacity   = 1;
+        }, 160);
+      }
+
+      /* =============================================
+         Dot helpers
+         ============================================= */
+      function activateDot(idx) {
+        dots.forEach((d, i) => {
+          d.className = 'dot' + (i < idx ? ' dot--done' : i === idx ? ' dot--active' : '');
+        });
+      }
+      function allDotsDone() {
+        dots.forEach(d => d.className = 'dot dot--done');
+      }
+
+      /* =============================================
+         Camera init
+         ============================================= */
+      async function startCamera() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 960 } },
+            audio: false
+          });
+          video.srcObject = stream;
+          video.onloadedmetadata = () => {
+            video.classList.add('live');
+            statusLbl.textContent = 'Camera active';
+            setTimeout(runSimulation, 800);
+          };
+        } catch (err) {
+          console.warn('Camera error:', err);
+          document.getElementById('denied-overlay').classList.add('active');
+        }
+      }
+
+      /* =============================================
+         Simulation sequence
+         ============================================= */
+      function runSimulation() {
+        const outcome = qaOutcome.value;
+        const willFail = (outcome === 'fail' || outcome === 'referred');
+
+        // Step 0 — Position face
+        activateDot(0);
+        setOvalState('scanning');
+        setText('Center your face', 'Fill the oval with your face and keep still');
+        statusLbl.textContent = 'Detecting face…';
+
+        // Step 1 — Blink (at 3.5s)
+        setTimeout(() => {
+          activateDot(1);
+          setOvalState('stepDone');       // green flash (step 0 done)
+          setText('✓ Face detected', 'Good. Now blink slowly once.', '#4ade80');
+          statusLbl.textContent = 'Liveness check 1/2';
+
+          // brief green → back to scanning colour for next step
+          setTimeout(() => setOvalState('scanning'), 900);
+        }, 3500);
+
+        // Step 2 — Turn head or fail branch (at 7.5s)
+        setTimeout(() => {
+          if (willFail) {
+            activateDot(-1); // none active
+            setOvalState('error');
+            setText('Motion unclear', 'We could not detect a clear blink.', '#f87171');
+            statusLbl.textContent = 'Check failed';
+            setTimeout(() => navigateOut(outcome), 2000);
+            return;
+          }
+
+          activateDot(2);
+          setOvalState('stepDone');
+          setText('✓ Blink confirmed', 'Now turn your head slightly to the right.', '#4ade80');
+          statusLbl.textContent = 'Liveness check 2/2';
+
+          setTimeout(() => setOvalState('scanning'), 900);
+        }, 7500);
+
+        // Processing (at 11.5s)
+        if (!willFail) {
+          setTimeout(() => {
+            allDotsDone();
+            setOvalState('stepDone');
+            setText('✓ Checks complete', 'Processing securely, please wait…');
+            statusLbl.textContent = 'Analysing…';
+          }, 11500);
+
+          // Navigate out (at 14.5s)
+          setTimeout(() => {
+            setOvalState('success');
+            setText('Verification complete!', 'Uploading to Pension Board…');
+            statusLbl.textContent = 'Done';
+            setTimeout(() => navigateOut(outcome), 1200);
+          }, 14500);
+        }
+      }
+
+      /* =============================================
+         Stop camera & redirect
+         ============================================= */
+      function navigateOut(outcome) {
+        const stream = video.srcObject;
+        if (stream) stream.getTracks().forEach(t => t.stop());
+        window.location.href = 'dashboard.html?outcome=' + outcome;
+      }
+
+      startCamera();
+
+    })();
+  </script>
+</body>
+</html>

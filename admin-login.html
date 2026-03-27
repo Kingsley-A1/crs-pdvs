@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CRS-PDVS Administration Portal — Secure login.">
+  <meta name="theme-color" content="#0a1728">
+  <title>CRS-PDVS — Admin Login</title>
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      font-family: var(--font-family, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+      background: #0d0f4a;
+      color: white;
+    }
+
+    /* ---- Left panel — branding ---- */
+    .login-left {
+      display: none;
+      width: 440px;
+      flex-shrink: 0;
+      background: linear-gradient(160deg, #141762 0%, #1a1f7a 50%, #1e2275 100%);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px 48px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @media (min-width: 900px) { .login-left { display: flex; } }
+
+    /* Background geometric accent */
+    .login-left::before {
+      content: '';
+      position: absolute;
+      bottom: -80px; right: -80px;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74,92,200,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .login-left__logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .login-left__emblem {
+      width: 44px; height: 44px;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+      opacity: 0.9;
+    }
+    .login-left__name {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: white;
+    }
+    .login-left__sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .login-left__headline {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: rgba(255,255,255,0.92);
+      letter-spacing: -0.01em;
+    }
+    .login-left__headline span { color: #38bdf8; }
+
+    .login-left__details {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.7;
+    }
+
+    /* Trust dots */
+    .trust-dots {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .trust-dot {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+    }
+    .trust-dot__icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ---- Right panel — login form ---- */
+    .login-right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      background: #0c1a2e;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .login-box__header {
+      margin-bottom: 36px;
+    }
+    .login-box__title {
+      font-size: 22px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+    .login-box__sub {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+    }
+
+    /* Role selector */
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .role-card {
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.04);
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .role-card input[type="radio"] {
+      position: absolute; opacity: 0; pointer-events: none;
+    }
+    .role-card:hover {
+      border-color: rgba(74,92,200,0.45);
+      background: rgba(43,53,181,0.06);
+    }
+    .role-card.selected {
+      border-color: #4a5cc8;
+      background: rgba(43,53,181,0.12);
+    }
+    .role-card__title {
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 2px;
+    }
+    .role-card__desc {
+      font-size: 10px;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.4;
+    }
+    .role-card__check {
+      position: absolute;
+      top: 8px; right: 8px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .role-card.selected .role-card__check {
+      background: #4a5cc8;
+      border-color: #7585db;
+    }
+
+    /* Form fields */
+    .login-field {
+      margin-bottom: 18px;
+    }
+    .login-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .login-input {
+      width: 100%;
+      padding: 11px 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .login-input::placeholder { color: rgba(255,255,255,0.25); }
+    .login-input:focus {
+      border-color: #4a5cc8;
+      background: rgba(43,53,181,0.08);
+    }
+
+    .login-submit {
+      width: 100%;
+      padding: 13px;
+      border-radius: 8px;
+      background: #2b35b5;
+      border: none;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .login-submit:hover { background: #1a1f7a; }
+    .login-submit:active { transform: scale(0.99); }
+    .login-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Error message */
+    .login-error {
+      display: none;
+      margin-bottom: 16px;
+      padding: 10px 14px;
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.25);
+      border-radius: 8px;
+      font-size: 13px;
+      color: #fca5a5;
+    }
+    .login-error.visible { display: block; }
+
+    /* Loading spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .login-submit.loading .spinner { display: block; }
+    .login-submit.loading .btn-text { opacity: 0.5; }
+
+    /* Footer note */
+    .login-footer {
+      margin-top: 28px;
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      line-height: 1.6;
+    }
+    .login-footer a { color: #adb8ec; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Branding column -->
+  <div class="login-left">
+    <div class="login-left__logo">
+      <img src="assets/images/crs_emblem.png" alt="Cross River State" class="login-left__emblem">
+      <div>
+        <div class="login-left__name">CRS-PDVS</div>
+        <div class="login-left__sub">Pension Verification System</div>
+      </div>
+    </div>
+
+    <div>
+      <h1 class="login-left__headline">
+        Secure administration for Cross River State <span>pension verification.</span>
+      </h1>
+      <p class="login-left__details">
+        Restricted to authorised Pension Board staff only.<br>
+        All actions are logged and audited.
+      </p>
+    </div>
+
+    <div class="trust-dots">
+      <div class="trust-dot">
+        <div class="trust-dot__icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(56,189,248,0.7)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        Role-based access control
+      </div>
+      <div class="trust-dot">
+        <div class="trust-dot__icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(56,189,248,0.7)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+        </div>
+        Full audit trail on every action
+      </div>
+      <div class="trust-dot">
+        <div class="trust-dot__icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(56,189,248,0.7)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        Real-time verification monitoring
+      </div>
+    </div>
+  </div>
+
+  <!-- Login form -->
+  <div class="login-right" style="background: #0d0f4a;">
+    <div class="login-box">
+      <div class="login-box__header">
+        <div class="login-box__title">Admin Sign In</div>
+        <div class="login-box__sub">Select your role and enter your credentials to continue.</div>
+      </div>
+
+      <!-- Role selector -->
+      <div class="role-selector" id="role-selector" role="radiogroup" aria-label="Select your role">
+        <label class="role-card selected" id="role-admin">
+          <input type="radio" name="admin-role" value="Pension Board Administrator" checked>
+          <div class="role-card__check"></div>
+          <div class="role-card__title">Board Administrator</div>
+          <div class="role-card__desc">Full system access</div>
+        </label>
+        <label class="role-card" id="role-officer">
+          <input type="radio" name="admin-role" value="Verification Officer">
+          <div class="role-card__check"></div>
+          <div class="role-card__title">Verification Officer</div>
+          <div class="role-card__desc">Reviews &amp; approvals</div>
+        </label>
+        <label class="role-card" id="role-supervisor">
+          <input type="radio" name="admin-role" value="Supervisor">
+          <div class="role-card__check"></div>
+          <div class="role-card__title">Supervisor</div>
+          <div class="role-card__desc">Escalations &amp; oversight</div>
+        </label>
+        <label class="role-card" id="role-auditor">
+          <input type="radio" name="admin-role" value="Auditor">
+          <div class="role-card__check"></div>
+          <div class="role-card__title">Auditor</div>
+          <div class="role-card__desc">Read-only audit access</div>
+        </label>
+        <label class="role-card" id="role-agent" style="grid-column: span 2;">
+          <input type="radio" name="admin-role" value="Assisted Verification Agent">
+          <div class="role-card__check"></div>
+          <div class="role-card__title">Assisted Verification Agent</div>
+          <div class="role-card__desc">Field &amp; center operations</div>
+        </label>
+      </div>
+
+      <!-- Error -->
+      <div class="login-error" id="login-error" role="alert">
+        Invalid credentials. Please check your email and password.
+      </div>
+
+      <!-- Fields -->
+      <div class="login-field">
+        <label class="login-label" for="admin-email">Staff Email Address</label>
+        <input type="email" id="admin-email" class="login-input"
+               placeholder="name@crspb.gov.ng" autocomplete="username">
+      </div>
+      <div class="login-field">
+        <label class="login-label" for="admin-password">Password</label>
+        <input type="password" id="admin-password" class="login-input"
+               placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <button class="login-submit" id="login-btn" type="button">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="btn-text">Sign In to Admin Portal</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-text"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+
+      <div class="login-footer">
+        This portal is restricted to authorised CRS Pension Board staff.<br>
+        Unauthorised access is a criminal offence. <a href="index.html">Return to public site</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/mock-data.js"></script>
+  <script>
+    (function () {
+      // ---- Mock credential map (role → user) ----
+      const CREDENTIALS = {
+        'Pension Board Administrator':    { email: 'm.essien@crspb.gov.ng',   userId: 'ADM-002' },
+        'Verification Officer':           { email: 'b.nku@crspb.gov.ng',      userId: 'ADM-001' },
+        'Supervisor':                     { email: 'e.ita@crspb.gov.ng',      userId: 'ADM-003' },
+        'Auditor':                        { email: 'c.obasi@crspb.gov.ng',    userId: 'ADM-004' },
+        'Assisted Verification Agent':    { email: 'm.ogar@crspb.gov.ng',     userId: 'ADM-005' },
+      };
+
+      // ---- Role selection ----
+      const cards = document.querySelectorAll('.role-card');
+      let selectedRole = 'Pension Board Administrator';
+
+      // Pre-fill email for default role
+      const emailInput = document.getElementById('admin-email');
+      emailInput.value = CREDENTIALS[selectedRole].email;
+
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          cards.forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          const radio = card.querySelector('input[type="radio"]');
+          radio.checked = true;
+          selectedRole = radio.value;
+          emailInput.value = CREDENTIALS[selectedRole].email;
+          document.getElementById('login-error').classList.remove('visible');
+        });
+      });
+
+      // ---- Login ----
+      const btn      = document.getElementById('login-btn');
+      const errorBox = document.getElementById('login-error');
+      const passInput = document.getElementById('admin-password');
+
+      btn.addEventListener('click', () => {
+        const email = emailInput.value.trim();
+        const pass  = passInput.value;
+        const expected = CREDENTIALS[selectedRole];
+
+        errorBox.classList.remove('visible');
+
+        // Validate email matches role
+        if (!email || email.toLowerCase() !== expected.email.toLowerCase()) {
+          errorBox.textContent = `That email does not match the selected role. Expected: ${expected.email}`;
+          errorBox.classList.add('visible');
+          return;
+        }
+
+        // Require any password (prototype)
+        if (!pass || pass.length < 4) {
+          errorBox.textContent = 'Please enter your password to continue.';
+          errorBox.classList.add('visible');
+          return;
+        }
+
+        // Loading state
+        btn.classList.add('loading');
+        btn.disabled = true;
+
+        // Find user from mock data
+        const user = window.CRS_PDVS_DATA
+          ? window.CRS_PDVS_DATA.adminUsers.find(u => u.userId === expected.userId)
+          : null;
+
+        // Store session
+        try {
+          sessionStorage.setItem('crs_admin_user', JSON.stringify({
+            userId:    expected.userId,
+            firstName: user ? user.firstName : 'Admin',
+            lastName:  user ? user.lastName  : '',
+            role:      selectedRole,
+            email:     email,
+            lga:       user ? user.lga : null,
+            loginTime: new Date().toISOString(),
+          }));
+        } catch (e) {}
+
+        // Simulated auth delay
+        setTimeout(() => {
+          window.location.href = 'admin.html';
+        }, 900);
+      });
+
+      // Enter key on password
+      passInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') btn.click();
+      });
+    })();
+  </script>
+
+</body>
+</html>

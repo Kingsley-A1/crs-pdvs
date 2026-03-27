@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRS-PDVS — You're Offline</title>
+  <meta name="theme-color" content="#1e2275">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: 'Inter', -apple-system, sans-serif;
+      background: linear-gradient(160deg, #0d0f4a 0%, #1e2275 60%, #2b35b5 100%);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      color: white; padding: 24px;
+    }
+    .card {
+      max-width: 420px; width: 100%; text-align: center;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px; padding: 48px 36px;
+      backdrop-filter: blur(12px);
+    }
+    .emblem {
+      width: 64px; height: 64px; margin: 0 auto 24px;
+      filter: brightness(0) invert(1); opacity: 0.85;
+    }
+    .icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px; font-size: 32px;
+    }
+    h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
+    p  { font-size: 15px; color: rgba(255,255,255,0.65); line-height: 1.7; margin-bottom: 32px; }
+    .retry-btn {
+      display: inline-block; padding: 14px 32px;
+      background: white; color: #1e2275; border-radius: 12px;
+      font-size: 15px; font-weight: 700; text-decoration: none;
+      cursor: pointer; border: none; font-family: inherit;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .retry-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+    .footer { margin-top: 24px; font-size: 12px; color: rgba(255,255,255,0.35); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="assets/images/crs_emblem.png" class="emblem" alt="CRS">
+    <div class="icon">📡</div>
+    <h1>No Connection</h1>
+    <p>You appear to be offline. Please check your internet connection and try again. Your data is safe — nothing has been lost.</p>
+    <button class="retry-btn" onclick="window.location.reload()">Try Again</button>
+    <div class="footer">CRS-PDVS · Cross River State Pension Board</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CRS-PDVS — Notifications. Official communications from the Cross River State Pension Board.">
+  <meta name="theme-color" content="#1e2275">
+  <title>CRS-PDVS — Notifications</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+  <style>
+    body { background: var(--neutral-50); min-height: 100vh; display: flex; flex-direction: column; }
+
+    .notif-page {
+      flex: 1; max-width: 660px; margin: 0 auto; width: 100%;
+      padding: var(--space-10) var(--space-6) var(--space-16);
+      animation: fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── Page header ── */
+    .notif-page__header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-8);
+    }
+    .notif-page__title {
+      font-size: var(--font-size-2xl); font-weight: var(--font-weight-extra);
+      color: var(--color-text-primary); letter-spacing: var(--letter-spacing-tight); margin: 0;
+    }
+    .notif-page__sub {
+      font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: var(--space-1); margin-bottom: 0;
+    }
+
+    /* Unread badge on title */
+    .unread-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--red-500); color: white;
+      font-size: 11px; font-weight: var(--font-weight-bold);
+      margin-left: var(--space-2); vertical-align: middle;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .unread-badge.hidden { transform: scale(0); opacity: 0; }
+
+    /* Mark all button */
+    .mark-all-btn {
+      background: none; border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); padding: var(--space-2) var(--space-4);
+      font-size: var(--font-size-sm); font-weight: var(--font-weight-semi);
+      color: var(--crs-blue-500); cursor: pointer; transition: background 0.15s;
+      white-space: nowrap; font-family: inherit;
+    }
+    .mark-all-btn:hover { background: var(--crs-blue-50); }
+    .mark-all-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: var(--font-size-xs); font-weight: var(--font-weight-semi);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--color-text-muted); margin-bottom: var(--space-3); padding-left: 2px;
+    }
+
+    /* ── Notification item ── */
+    .notif-item {
+      display: flex; gap: var(--space-4); padding: var(--space-5);
+      background: white; border: 1px solid var(--color-border-light);
+      border-left: 4px solid transparent;
+      border-radius: var(--radius-xl); margin-bottom: var(--space-3);
+      transition: box-shadow 0.2s, opacity 0.4s, transform 0.4s, border-color 0.25s;
+      position: relative; cursor: default;
+    }
+    .notif-item:hover { box-shadow: var(--shadow-sm); }
+    .notif-item.unread { background: var(--crs-blue-50); border-color: var(--crs-blue-100); }
+
+    /* Reading transition */
+    .notif-item.marking-read {
+      opacity: 0.5;
+      transform: scale(0.99);
+    }
+
+    /* Left accent by type */
+    .notif-item--reminder { border-left-color: var(--crs-blue-500); }
+    .notif-item--success  { border-left-color: var(--green-500); }
+    .notif-item--review   { border-left-color: var(--amber-500); }
+    .notif-item--account  { border-left-color: var(--neutral-400); }
+    .notif-item--action   { border-left-color: var(--red-500); }
+
+    /* Unread indicator dot */
+    .unread-dot {
+      position: absolute; top: var(--space-4); right: var(--space-4);
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--crs-blue-500);
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .unread-dot.fade-out { transform: scale(0); opacity: 0; }
+
+    /* Icon */
+    .notif-icon {
+      width: 44px; height: 44px; border-radius: var(--radius-lg);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 20px;
+    }
+    .notif-icon--reminder { background: var(--crs-blue-50); }
+    .notif-icon--success  { background: var(--green-50); }
+    .notif-icon--review   { background: var(--amber-50); }
+    .notif-icon--account  { background: var(--neutral-100); }
+    .notif-icon--action   { background: var(--red-50); }
+
+    /* Content */
+    .notif-content { flex: 1; min-width: 0; }
+    .notif-header  { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); margin-bottom: var(--space-1); }
+    .notif-title { font-size: var(--font-size-base); font-weight: var(--font-weight-semi); color: var(--color-text-primary); line-height: var(--line-height-tight); }
+    .notif-time  { font-size: var(--font-size-xs); color: var(--color-text-muted); white-space: nowrap; flex-shrink: 0; }
+    .notif-body  { font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: var(--line-height-relaxed); margin-bottom: var(--space-3); }
+    .notif-action {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: var(--font-size-sm); font-weight: var(--font-weight-semi);
+      color: var(--crs-blue-500); text-decoration: none;
+      transition: color 0.15s;
+    }
+    .notif-action:hover { color: var(--crs-blue-700); text-decoration: underline; }
+
+    /* Mark-read on click indicator */
+    .notif-mark-read {
+      position: absolute; bottom: var(--space-3); right: var(--space-4);
+      font-size: 10px; color: var(--crs-blue-400); opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .notif-item.unread:hover .notif-mark-read { opacity: 1; }
+
+    /* ── All-read empty state ── */
+    .all-read-state {
+      display: none;
+      text-align: center; padding: var(--space-16) var(--space-6);
+      background: white; border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-2xl);
+      animation: fadeUp 0.4s ease both;
+    }
+    .all-read-state.visible { display: block; }
+    .all-read-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--green-50); color: var(--green-500);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto var(--space-5); font-size: 28px;
+      box-shadow: 0 0 0 10px rgba(22,163,74,0.06);
+      animation: popIn 0.45s cubic-bezier(0.17,0.67,0.36,1.2) both;
+    }
+    @keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+    .all-read-title { font-size: var(--font-size-xl); font-weight: var(--font-weight-extra); color: var(--color-text-primary); margin-bottom: var(--space-2); }
+    .all-read-desc  { font-size: var(--font-size-sm); color: var(--color-text-muted); line-height: var(--line-height-relaxed); max-width: 340px; margin: 0 auto var(--space-6); }
+
+    /* ── Source attribution ── */
+    .notif-source {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-4) var(--space-5); background: white;
+      border: 1px solid var(--color-border-light); border-radius: var(--radius-lg);
+      margin-top: var(--space-8);
+    }
+    .notif-source img { width: 28px; height: 28px; object-fit: contain; opacity: 0.55; }
+    .notif-source p   { font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0; line-height: var(--line-height-relaxed); }
+  </style>
+</head>
+<body>
+
+  <!-- SITE HEADER -->
+  <header class="site-header" id="site-header">
+    <div class="site-header__inner">
+      <a href="index.html" class="site-header__brand" aria-label="CRS-PDVS Home">
+        <div class="site-header__logo">
+          <img src="assets/images/crs_emblem.png" alt="Cross River State" width="44" height="44" style="object-fit:contain;">
+        </div>
+        <div>
+          <div class="site-header__title">CRS-PDVS</div>
+          <div class="site-header__subtitle">Pension Verification</div>
+        </div>
+      </a>
+      <nav class="site-header__nav" id="header-nav" aria-label="Main navigation">
+        <!-- Populated by pensioner-auth.js — static fallback below -->
+        <a href="dashboard.html" class="site-header__link">My Dashboard</a>
+        <a href="pensioner-profile.html" class="site-header__link">My Profile</a>
+        <button class="site-header__link" style="background:none;border:none;cursor:pointer;color:inherit;font:inherit;padding:0;"
+          onclick="PensionerAuth && PensionerAuth.signOut()">Sign Out</button>
+      </nav>
+      <button class="site-header__menu-btn" id="header-menu-btn" aria-label="Open navigation" aria-expanded="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+
+  <main class="notif-page" role="main">
+
+    <!-- Page header -->
+    <div class="notif-page__header">
+      <div>
+        <h1 class="notif-page__title">
+          Notifications
+          <span class="unread-badge" id="unread-count-badge" aria-label="unread notifications">3</span>
+        </h1>
+        <p class="notif-page__sub">Official messages from the Cross River State Pension Board.</p>
+      </div>
+      <button class="mark-all-btn" id="mark-all-btn" onclick="markAllRead()">Mark all as read</button>
+    </div>
+
+    <!-- UNREAD SECTION -->
+    <div id="unread-section">
+      <div class="section-label" id="unread-label">Unread</div>
+      <div id="unread-list"></div>
+    </div>
+
+    <!-- EARLIER SECTION -->
+    <div id="earlier-section" style="margin-top:var(--space-7);">
+      <div class="section-label">Earlier</div>
+      <div id="earlier-list"></div>
+    </div>
+
+    <!-- ALL-READ empty state -->
+    <div class="all-read-state" id="all-read-state">
+      <div class="all-read-icon">✓</div>
+      <div class="all-read-title">You're all caught up!</div>
+      <p class="all-read-desc">
+        No unread notifications. We'll let you know when there are updates about your pension verification cycle.
+      </p>
+      <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap;">
+        <a href="dashboard.html" class="btn btn-primary btn-sm">Go to Dashboard</a>
+        <a href="verify.html" class="btn btn-secondary btn-sm">Start Verification</a>
+      </div>
+    </div>
+
+    <!-- Source attribution -->
+    <div class="notif-source" id="notif-source">
+      <img src="assets/images/crs_emblem.png" alt="CRS Emblem">
+      <p>
+        These are official communications from the Cross River State Pension Board.
+        For queries, call <strong>08033000000</strong> (Mon–Fri, 8am–4pm).
+      </p>
+    </div>
+
+  </main>
+
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/pensioner-auth.js"></script>
+  <script>
+  (function () {
+    const session = PensionerAuth.guard();
+    if (!session) return;
+
+    PensionerAuth.updateHeader({ activePage: 'notifications' });
+
+    const name         = session.firstName || 'Pensioner';
+    const lastVerified = session.lastVerified
+      ? new Date(session.lastVerified).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })
+      : '15 December 2025';
+
+    // ── Notification data (personalised from session) ──
+    const NOTIFS = [
+      {
+        id: 'N001', type: 'reminder', icon: '🔔', unread: true,
+        title: 'Your Q1 2026 Verification Window is Open',
+        body: `Dear ${name}, your pension verification for Q1 2026 (January – March) is now open. Please complete it before 31 March 2026 to avoid any interruption to your pension payment.`,
+        action: { label: 'Start Verification', href: 'verify.html' },
+        time: '2 days ago',
+        timeMs: Date.now() - (2 * 24 * 60 * 60 * 1000),
+      },
+      {
+        id: 'N002', type: 'success', icon: '✅', unread: true,
+        title: 'Q4 2025 Verification Confirmed',
+        body: `Your verification for Q4 2025 was completed successfully on ${lastVerified}. Your pension payment for the quarter has been approved.`,
+        action: null,
+        time: '12 weeks ago',
+        timeMs: Date.now() - (84 * 24 * 60 * 60 * 1000),
+      },
+      {
+        id: 'N003', type: 'action', icon: '⚠️', unread: true,
+        title: 'Action Required — Liveness Check Needs Retry',
+        body: `Dear ${name}, your latest liveness check on 10 March 2026 could not be completed automatically. Please retry the verification or visit an approved Assisted Verification Centre.`,
+        action: { label: 'Retry Verification', href: 'verify.html' },
+        time: '17 days ago',
+        timeMs: Date.now() - (17 * 24 * 60 * 60 * 1000),
+      },
+      {
+        id: 'N004', type: 'review', icon: '⏳', unread: false,
+        title: 'Your Q3 2025 Verification is Under Review',
+        body: 'Your most recent verification attempt has been escalated for manual review by a verification officer. You will be notified once a decision is reached. Expected within 3 working days.',
+        action: null,
+        time: '6 months ago',
+        timeMs: Date.now() - (180 * 24 * 60 * 60 * 1000),
+      },
+      {
+        id: 'N005', type: 'account', icon: '🔐', unread: false,
+        title: 'Account Created — Welcome to CRS-PDVS',
+        body: `Welcome, ${name}! Your CRS-PDVS account has been successfully created and linked to your pension record. Please keep your Pension ID and password secure at all times.`,
+        action: { label: 'View My Dashboard', href: 'dashboard.html' },
+        time: '3 months ago',
+        timeMs: Date.now() - (90 * 24 * 60 * 60 * 1000),
+      },
+      {
+        id: 'N006', type: 'account', icon: '📋', unread: false,
+        title: 'Phone Number Update Received',
+        body: 'A request to update your registered phone number was received on 5 January 2026. This change requires Pension Board review and will take effect within 5 working days.',
+        action: null,
+        time: '3 months ago',
+        timeMs: Date.now() - (85 * 24 * 60 * 60 * 1000),
+      },
+      {
+        id: 'N007', type: 'reminder', icon: '🔔', unread: false,
+        title: 'Q3 2025 Verification Cycle Closing Soon',
+        body: 'You had 7 days remaining to complete your Q3 2025 pension verification. Pensioners who did not verify were referred for in-person verification at their LGA center.',
+        action: null,
+        time: '6 months ago',
+        timeMs: Date.now() - (185 * 24 * 60 * 60 * 1000),
+      },
+    ];
+
+    const typeCls = {
+      reminder: 'notif-item--reminder', success: 'notif-item--success',
+      review:   'notif-item--review',   account: 'notif-item--account',
+      action:   'notif-item--action',
+    };
+    const iconCls = {
+      reminder: 'notif-icon--reminder', success: 'notif-icon--success',
+      review:   'notif-icon--review',   account: 'notif-icon--account',
+      action:   'notif-icon--action',
+    };
+
+    /* ── Build one notification element ── */
+    function buildItem(n) {
+      const actionHtml = n.action
+        ? `<a href="${n.action.href}" class="notif-action">${n.action.label} →</a>`
+        : '';
+
+      const div = document.createElement('div');
+      div.className = `notif-item ${typeCls[n.type] || ''} ${n.unread ? 'unread' : ''}`;
+      div.dataset.id = n.id;
+      div.setAttribute('role', 'article');
+      div.innerHTML = `
+        ${n.unread ? '<div class="unread-dot"></div>' : ''}
+        <div class="notif-icon ${iconCls[n.type] || ''}" aria-hidden="true">${n.icon}</div>
+        <div class="notif-content">
+          <div class="notif-header">
+            <div class="notif-title">${n.title}</div>
+            <div class="notif-time">${n.time}</div>
+          </div>
+          <p class="notif-body">${n.body}</p>
+          ${actionHtml}
+        </div>
+        ${n.unread ? '<div class="notif-mark-read">Click to mark as read</div>' : ''}
+      `;
+
+      // Click to mark individual as read
+      if (n.unread) {
+        div.addEventListener('click', function (e) {
+          if (e.target.closest('.notif-action')) return; // don't intercept link clicks
+          markOneRead(n.id, div);
+        });
+      }
+
+      return div;
+    }
+
+    /* ── Render: split into unread / earlier ── */
+    function render() {
+      const unreadList  = document.getElementById('unread-list');
+      const earlierList = document.getElementById('earlier-list');
+      const unreadSec   = document.getElementById('unread-section');
+      const earlierSec  = document.getElementById('earlier-section');
+      const markAllBtn  = document.getElementById('mark-all-btn');
+      const allReadEl   = document.getElementById('all-read-state');
+      const sourceel    = document.getElementById('notif-source');
+      const badge       = document.getElementById('unread-count-badge');
+
+      const unread  = NOTIFS.filter(n => n.unread);
+      const earlier = NOTIFS.filter(n => !n.unread);
+
+      // Unread count badge
+      if (unread.length > 0) {
+        badge.textContent = unread.length;
+        badge.classList.remove('hidden');
+        markAllBtn.disabled = false;
+      } else {
+        badge.classList.add('hidden');
+        markAllBtn.disabled = true;
+      }
+
+      // Unread section
+      unreadList.innerHTML = '';
+      if (unread.length > 0) {
+        unreadSec.style.display = 'block';
+        unread.forEach(function (n) { unreadList.appendChild(buildItem(n)); });
+      } else {
+        unreadSec.style.display = 'none';
+      }
+
+      // Earlier section
+      earlierList.innerHTML = '';
+      if (earlier.length > 0) {
+        earlierSec.style.display = 'block';
+        earlier.forEach(function (n) { earlierList.appendChild(buildItem(n)); });
+      } else {
+        earlierSec.style.display = 'none';
+      }
+
+      // All-read empty state
+      const allRead = NOTIFS.every(n => !n.unread);
+      if (allRead) {
+        allReadEl.classList.add('visible');
+        sourceel.style.marginTop = 'var(--space-5)';
+      } else {
+        allReadEl.classList.remove('visible');
+        sourceel.style.marginTop = 'var(--space-8)';
+      }
+    }
+
+    /* ── Mark one as read (animated) ── */
+    function markOneRead(id, el) {
+      const n = NOTIFS.find(x => x.id === id);
+      if (!n || !n.unread) return;
+
+      // Animate dot out
+      const dot = el.querySelector('.unread-dot');
+      if (dot) {
+        dot.classList.add('fade-out');
+      }
+
+      // Brief "marking" state, then re-render
+      el.classList.add('marking-read');
+      setTimeout(function () {
+        n.unread = false;
+        render();
+      }, 380);
+    }
+
+    /* ── Mark all as read ── */
+    window.markAllRead = function () {
+      // Animate all unread items out before re-rendering
+      const items = document.querySelectorAll('.notif-item.unread');
+      items.forEach(function (el) {
+        const dot = el.querySelector('.unread-dot');
+        if (dot) dot.classList.add('fade-out');
+        el.classList.add('marking-read');
+      });
+
+      setTimeout(function () {
+        NOTIFS.forEach(n => n.unread = false);
+        render();
+      }, 400);
+    };
+
+    // Initial render
+    render();
+
+    // Mobile menu
+    const menuBtn = document.getElementById('header-menu-btn');
+    const nav     = document.getElementById('header-nav');
+    if (menuBtn && nav) {
+      menuBtn.addEventListener('click', () => {
+        const open = nav.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', open);
+      });
+    }
+  })();
+  </script>
+
+</body>
+</html>

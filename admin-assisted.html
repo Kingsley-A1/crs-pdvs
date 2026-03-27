@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRS-PDVS — Assisted Verification Console</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/admin-shell.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+  <style>
+    /* ===== CONSOLE LAYOUT ===== */
+    .console-wrap { display:grid; grid-template-columns:390px 1fr; gap:20px; align-items:start; }
+    @media (max-width:1100px) { .console-wrap { grid-template-columns:1fr; } }
+
+    /* ===== STEP INDICATOR ===== */
+    .step-bar { display:flex; align-items:center; margin-bottom:24px; }
+    .step-unit { display:flex; align-items:center; }
+    .step-circle {
+      width:28px; height:28px; border-radius:50%;
+      font-size:11px; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+      background:#e5e7eb; color:#9ca3af;
+      transition:all 0.2s; flex-shrink:0;
+    }
+    .step-circle.done   { background:#15803d; color:white; }
+    .step-circle.active { background:#1e2275; color:white; box-shadow:0 0 0 4px rgba(30,34,117,0.15); }
+    .step-lbl { font-size:11.5px; color:#9ca3af; margin:0 8px; white-space:nowrap; }
+    .step-lbl.done   { color:#15803d; font-weight:600; }
+    .step-lbl.active { color:#1e2275; font-weight:700; }
+    .step-line { flex:1; height:1px; background:#e5e7eb; min-width:12px; }
+    .step-line.done { background:#15803d; }
+
+    /* ===== WORKFLOW PANELS ===== */
+    .workflow-panel { display:none; animation:fadeUp 0.2s ease; }
+    .workflow-panel.visible { display:block; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ===== SEARCH ===== */
+    .search-row { display:flex; gap:8px; margin-bottom:14px; }
+    .search-row input { flex:1; padding:10px 14px; border:1px solid #e5e7eb; border-radius:8px; font-size:13.5px; outline:none; color:#111827; }
+    .search-row input:focus { border-color:#2b35b5; }
+    .search-row button { padding:10px 16px; background:#1e2275; color:white; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; flex-shrink:0; }
+    .search-row button:hover { background:#141762; }
+
+    .search-result-item {
+      padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px;
+      margin-bottom:7px; cursor:pointer; background:#fafafa;
+      transition:background 0.12s, border-color 0.12s;
+    }
+    .search-result-item:hover { background:#f0f2fc; border-color:#c7d2f6; }
+    .sri-name  { font-weight:600; font-size:13.5px; color:#111827; }
+    .sri-sub   { font-size:11.5px; color:#9ca3af; font-family:monospace; }
+
+    .selected-card {
+      display:none; border:1.5px solid #1e2275; border-radius:10px;
+      padding:16px; background:#f0f2fc;
+      animation:fadeUp 0.2s ease;
+    }
+    .selected-card.visible { display:block; }
+    .sc-name  { font-size:16px; font-weight:700; color:#111827; margin-bottom:5px; }
+    .sc-id    { font-family:monospace; font-size:11.5px; color:#1e2275; font-weight:600; margin-bottom:10px; }
+    .sc-meta  { display:grid; grid-template-columns:1fr 1fr; gap:7px 12px; }
+    .sc-meta label { font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; color:#9ca3af; display:block; margin-bottom:1px; }
+    .sc-meta span  { font-size:12.5px; color:#111827; font-weight:500; }
+
+    /* ===== IDENTITY FIELDS ===== */
+    .id-field { margin-bottom:13px; }
+    .id-label { font-size:11.5px; font-weight:600; color:#374151; margin-bottom:4px; display:block; }
+    .id-input {
+      width:100%; padding:10px 12px; border:1px solid #e5e7eb;
+      border-radius:8px; font-size:13.5px; outline:none;
+      color:#111827; transition:border-color 0.15s; background:white;
+    }
+    .id-input:focus   { border-color:#2b35b5; }
+    .id-input.good    { border-color:#15803d; background:#f0fdf4; color:#15803d; }
+    .id-input.bad     { border-color:#dc2626; background:#fff1f2; }
+    .id-hint          { font-size:10.5px; color:#9ca3af; margin-top:2px; }
+    .id-hint.pass     { color:#15803d; }
+
+    /* ===== CHECKLIST ===== */
+    .chk-list { list-style:none; display:flex; flex-direction:column; gap:9px; }
+    .chk-item {
+      display:flex; align-items:flex-start; gap:10px; padding:12px 13px;
+      border-radius:8px; background:#fafafa; border:1px solid #f3f4f6;
+      cursor:pointer; transition:background 0.14s;
+    }
+    .chk-item:hover { background:#f0f2fc; }
+    .chk-item.checked { background:#f0fdf4; border-color:#bbf7d0; }
+    .chk-box {
+      width:18px; height:18px; border-radius:4px;
+      border:2px solid #d1d5db; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      transition:all 0.14s; margin-top:1px;
+    }
+    .chk-box.checked { background:#15803d; border-color:#15803d; }
+    .chk-title { font-size:13px; font-weight:600; color:#111827; }
+    .chk-sub   { font-size:11px; color:#6b7280; margin-top:1px; }
+
+    /* ===== OUTCOME GRID ===== */
+    .outcome-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+    .outcome-opt {
+      padding:13px; border-radius:10px; border:1.5px solid #e5e7eb;
+      cursor:pointer; text-align:center; background:white;
+      transition:all 0.14s;
+    }
+    .outcome-opt:hover { border-color:#2b35b5; background:#f0f2fc; }
+    .outcome-opt.sel-verified  { border-color:#15803d; background:#f0fdf4; }
+    .outcome-opt.sel-pending   { border-color:#d97706; background:#fffbeb; }
+    .outcome-opt.sel-failed    { border-color:#dc2626; background:#fff1f2; }
+    .outcome-opt.sel-referred  { border-color:#7c3aed; background:#f5f3ff; }
+    .outcome-icon  { font-size:22px; margin-bottom:5px; }
+    .outcome-label { font-size:12.5px; font-weight:600; color:#111827; }
+    .outcome-desc  { font-size:10.5px; color:#6b7280; margin-top:2px; }
+
+    /* ===== NOTES INPUT ===== */
+    .notes-ta {
+      width:100%; border:1px solid #e5e7eb; border-radius:8px;
+      padding:10px 12px; font-size:13px; font-family:inherit;
+      resize:vertical; min-height:75px; outline:none;
+    }
+    .notes-ta:focus { border-color:#2b35b5; }
+
+    /* ===== ACTION ROW ===== */
+    .action-row { display:flex; gap:8px; margin-top:14px; }
+    .btn-back { padding:9px 14px; border:1px solid #e5e7eb; border-radius:8px; background:white; font-size:13px; font-weight:600; color:#374151; cursor:pointer; }
+    .btn-next { flex:1; padding:9px 18px; border:none; border-radius:8px; background:#1e2275; color:white; font-size:13.5px; font-weight:600; cursor:pointer; transition:background 0.15s; }
+    .btn-next:hover { background:#141762; }
+    .btn-next:disabled { opacity:0.45; cursor:not-allowed; }
+
+    /* ===== SESSION LOG ===== */
+    .log-list { display:flex; flex-direction:column; gap:11px; max-height:460px; overflow-y:auto; }
+    .log-item { padding:12px 14px; border-radius:8px; border-left:3px solid #1e2275; background:#fafafa; }
+    .log-item.log--verified { border-left-color:#15803d; }
+    .log-item.log--pending  { border-left-color:#d97706; }
+    .log-item.log--failed   { border-left-color:#dc2626; }
+    .log-item.log--referred { border-left-color:#7c3aed; }
+    .log-meta { font-size:10.5px; color:#9ca3af; margin-bottom:3px; }
+    .log-ref  { font-family:monospace; font-size:10.5px; color:#2b35b5; }
+    .log-name { font-size:13px; font-weight:600; color:#111827; margin-bottom:1px; }
+    .log-sub  { font-size:11px; color:#9ca3af; margin-bottom:3px; }
+    .log-note { font-size:12px; color:#6b7280; line-height:1.4; margin-top:4px; }
+    .log-checks { font-size:10.5px; color:#9ca3af; margin-top:3px; }
+    .log-badge {
+      display:inline-flex; align-items:center; gap:4px; gap:4px;
+      padding:2px 8px; border-radius:12px; font-size:10.5px; font-weight:600; margin-top:5px;
+    }
+    .log-badge--verified { background:#f0fdf4; color:#15803d; }
+    .log-badge--pending  { background:#fffbeb; color:#b45309; }
+    .log-badge--failed   { background:#fff1f2; color:#b91c1c; }
+    .log-badge--referred { background:#f5f3ff; color:#6d28d9; }
+
+    /* ===== SUCCESS OVERLAY ===== */
+    .suc-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:500; align-items:center; justify-content:center; }
+    .suc-overlay.active { display:flex; }
+    .suc-modal { background:white; border-radius:16px; max-width:420px; width:95%; padding:36px 28px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.2); animation:fadeUp 0.2s ease; }
+    .suc-icon  { width:64px; height:64px; border-radius:50%; margin:0 auto 18px; display:flex; align-items:center; justify-content:center; }
+    .suc-icon--verified { background:#f0fdf4; }
+    .suc-icon--pending  { background:#fffbeb; }
+    .suc-icon--failed   { background:#fff1f2; }
+    .suc-icon--referred { background:#f5f3ff; }
+    .suc-title  { font-size:19px; font-weight:700; color:#111827; margin-bottom:7px; }
+    .suc-detail { font-size:13px; color:#6b7280; line-height:1.6; margin-bottom:16px; }
+    .suc-ref    { font-family:monospace; font-size:11.5px; background:#f3f4f6; padding:6px 12px; border-radius:6px; display:inline-block; margin-bottom:18px; color:#374151; }
+  </style>
+</head>
+<body>
+
+<!-- Success overlay -->
+<div class="suc-overlay" id="suc-overlay">
+  <div class="suc-modal">
+    <div class="suc-icon" id="suc-icon"></div>
+    <div class="suc-title"  id="suc-title">Session Recorded</div>
+    <p class="suc-detail"   id="suc-detail">Outcome saved.</p>
+    <div class="suc-ref"    id="suc-ref">REF: —</div>
+    <button class="btn-next" style="flex:none;padding:10px 28px;" onclick="resetConsole()">New Session</button>
+  </div>
+</div>
+
+<div class="adm-wrap">
+  <div id="adm-sidebar-mount"></div>
+  <div class="adm-body">
+    <div id="adm-topbar-mount"></div>
+    <div class="adm-content">
+
+      <div class="adm-page-header">
+        <div class="adm-page-header__left">
+          <h1>Assisted Verification Console</h1>
+          <p>Search for a pensioner, confirm identity, guide the process, and record the outcome.</p>
+        </div>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="adm-stat-row" id="console-stats"></div>
+
+      <!-- Step bar -->
+      <div class="step-bar" id="step-bar"></div>
+
+      <div class="console-wrap">
+        <!-- LEFT: Workflow -->
+        <div>
+
+          <!-- STEP 1: SEARCH -->
+          <div class="workflow-panel visible adm-card" id="panel-1">
+            <div class="adm-card-header">
+              <div class="adm-card-title">Step 1 — Find Pensioner</div>
+              <span style="font-size:11px;color:#9ca3af;">Name · Pension ID · Phone</span>
+            </div>
+            <div class="adm-card-body">
+              <div class="search-row">
+                <input id="search-inp" type="text" placeholder="e.g. Margaret Effiom or CRS-PEN-2024-0001…" oninput="liveSearch(this.value)">
+                <button onclick="clearSearch()">Clear</button>
+              </div>
+              <div id="results-list"></div>
+              <div id="no-result" style="display:none;padding:16px;text-align:center;color:#9ca3af;font-size:13px;">No matching pensioner found.</div>
+              <div class="selected-card" id="selected-card">
+                <div class="sc-name" id="sc-name">—</div>
+                <div class="sc-id"   id="sc-id">—</div>
+                <div class="sc-meta" id="sc-meta"></div>
+                <button class="btn-next" style="margin-top:14px;width:100%;" onclick="goStep(2)">Proceed with this Pensioner →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: IDENTITY -->
+          <div class="workflow-panel adm-card" id="panel-2">
+            <div class="adm-card-header">
+              <div class="adm-card-title">Step 2 — Confirm Identity</div>
+              <button onclick="goStep(1)" style="background:none;border:none;font-size:12px;color:#6b7280;cursor:pointer;">← Back</button>
+            </div>
+            <div class="adm-card-body">
+              <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Verbally ask the pensioner to provide each of the following. Confirm against the record on file.</p>
+              <div class="id-field">
+                <label class="id-label">1. Full Name (as stated)</label>
+                <input class="id-input" id="id-name" type="text" placeholder="Ask pensioner to state their full name…" oninput="chkField('name')">
+                <div class="id-hint" id="id-name-hint"></div>
+              </div>
+              <div class="id-field">
+                <label class="id-label">2. Date of Birth</label>
+                <input class="id-input" id="id-dob"  type="text" placeholder="DD/MM/YYYY…" oninput="chkField('dob')">
+                <div class="id-hint" id="id-dob-hint"></div>
+              </div>
+              <div class="id-field">
+                <label class="id-label">3. LGA of Residence</label>
+                <input class="id-input" id="id-lga"  type="text" placeholder="e.g. Calabar Municipality…" oninput="chkField('lga')">
+                <div class="id-hint" id="id-lga-hint"></div>
+              </div>
+              <div class="id-field">
+                <label class="id-label">4. Last 4 Digits of Bank Account</label>
+                <input class="id-input" id="id-bank" type="text" maxlength="4" placeholder="e.g. 4821" oninput="chkField('bank')">
+                <div class="id-hint" id="id-bank-hint"></div>
+              </div>
+              <div class="action-row">
+                <button class="btn-back" onclick="goStep(1)">← Back</button>
+                <button class="btn-next" id="btn-id-next" disabled onclick="goStep(3)">Confirm &amp; Proceed →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: GUIDE -->
+          <div class="workflow-panel adm-card" id="panel-3">
+            <div class="adm-card-header">
+              <div class="adm-card-title">Step 3 — Guide Verification</div>
+              <button onclick="goStep(2)" style="background:none;border:none;font-size:12px;color:#6b7280;cursor:pointer;">← Back</button>
+            </div>
+            <div class="adm-card-body">
+              <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Walk the pensioner through each check. Tick each step as completed or attempted.</p>
+              <ul class="chk-list" id="chk-list"></ul>
+              <div class="action-row" style="margin-top:18px;">
+                <button class="btn-back" onclick="goStep(2)">← Back</button>
+                <button class="btn-next" id="btn-guide-next" disabled onclick="goStep(4)">Record Outcome →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 4: OUTCOME -->
+          <div class="workflow-panel adm-card" id="panel-4">
+            <div class="adm-card-header">
+              <div class="adm-card-title">Step 4 — Record Outcome</div>
+              <button onclick="goStep(3)" style="background:none;border:none;font-size:12px;color:#6b7280;cursor:pointer;">← Back</button>
+            </div>
+            <div class="adm-card-body">
+              <p style="font-size:13px;color:#6b7280;margin-bottom:13px;">Select the verification outcome for this session.</p>
+              <div class="outcome-grid" id="outcome-grid"></div>
+              <div class="id-field">
+                <label class="id-label">Session Notes (optional)</label>
+                <textarea class="notes-ta" id="session-notes" placeholder="e.g. Pensioner calm and cooperative. Physical ID sighted…"></textarea>
+              </div>
+              <div class="action-row">
+                <button class="btn-back" onclick="goStep(3)">← Back</button>
+                <button class="btn-next" id="btn-submit" disabled onclick="submitSession()">Submit &amp; Record →</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /left -->
+
+        <!-- RIGHT: Session log -->
+        <div class="adm-card" style="align-self:start;">
+          <div class="adm-card-header">
+            <div class="adm-card-title">Today's Session Log</div>
+            <span id="log-count" style="font-size:12px;color:#6b7280;"></span>
+          </div>
+          <div class="adm-card-body">
+            <div class="log-list" id="log-list"></div>
+          </div>
+        </div>
+
+      </div><!-- /console-wrap -->
+    </div><!-- /adm-content -->
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/admin-shell.js"></script>
+<script>
+(function () {
+  const { user, D } = AdminShell.init('assisted', 'Assisted Verification Console');
+  const { fmtDate } = AdminShell;
+
+  // ---- Stats ----
+  const sessions = D.verificationSessions;
+  const consStats = [
+    { label:'Assisted Sessions (Cycle)', val: D.analytics.summary.assistedVerifications, accent:'teal' },
+    { label:'Assisted Today',           val: sessions.filter(s=>s.type==='Assisted').length,          accent:'blue' },
+    { label:'Open Support Cases',       val: D.supportCases.filter(c=>c.status!=='Resolved').length,  accent:'amber' },
+    { label:'Avg. Duration Today',      val: '6m 14s',                                                accent:'slate' },
+  ];
+  const csEl = document.getElementById('console-stats');
+  consStats.forEach(s => csEl.insertAdjacentHTML('beforeend',
+    `<div class="adm-stat-card accent--${s.accent}">
+       <div class="adm-stat-val">${s.val}</div>
+       <div class="adm-stat-lbl">${s.label}</div>
+     </div>`
+  ));
+
+  /* ============================================================
+     STEP BAR
+     ============================================================ */
+  const STEPS = ['Search','Confirm Identity','Guide & Verify','Record Outcome'];
+  let currentStep = 1;
+
+  function renderStepBar() {
+    const bar = document.getElementById('step-bar');
+    bar.innerHTML = STEPS.map((label, i) => {
+      const n = i + 1;
+      const isDone   = n < currentStep;
+      const isActive = n === currentStep;
+      const connDone = n < currentStep;
+      const cirCls   = isDone ? 'done' : isActive ? 'active' : '';
+      const lblCls   = isDone ? 'done' : isActive ? 'active' : '';
+      const line     = n < STEPS.length
+        ? `<div class="step-line${connDone ? ' done' : ''}"></div>` : '';
+      return `
+        <div class="step-unit">
+          <div class="step-circle ${cirCls}">${isDone ? '✓' : n}</div>
+          <div class="step-lbl ${lblCls}">${label}</div>
+        </div>${line}
+      `;
+    }).join('');
+  }
+
+  window.goStep = function (n) {
+    if (n < 1 || n > 4) return;
+    currentStep = n;
+    renderStepBar();
+    document.querySelectorAll('.workflow-panel').forEach((el, i) => {
+      el.classList.toggle('visible', i + 1 === n);
+    });
+  };
+  renderStepBar();
+
+  /* ============================================================
+     STEP 1 — SEARCH
+     ============================================================ */
+  let selectedPensioner = null;
+
+  window.liveSearch = function (q) {
+    const list   = document.getElementById('results-list');
+    const noRes  = document.getElementById('no-result');
+    const selCrd = document.getElementById('selected-card');
+    selCrd.classList.remove('visible');
+
+    if (!q || q.length < 2) { list.innerHTML = ''; noRes.style.display = 'none'; return; }
+
+    const low = q.toLowerCase();
+    const hits = D.pensioners.filter(p =>
+      (p.firstName + ' ' + p.lastName).toLowerCase().includes(low) ||
+      p.id.toLowerCase().includes(low) ||
+      (p.phoneRaw || '').includes(q)
+    );
+
+    list.innerHTML = '';
+    if (hits.length === 0) { noRes.style.display = 'block'; return; }
+    noRes.style.display = 'none';
+
+    hits.forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'search-result-item';
+      el.innerHTML = `<div class="sri-name">${p.firstName} ${p.lastName}</div>
+                      <div class="sri-sub">${p.id} · ${p.lga}</div>`;
+      el.onclick = () => pickPensioner(p.id);
+      list.appendChild(el);
+    });
+  };
+
+  window.clearSearch = function () {
+    document.getElementById('search-inp').value = '';
+    document.getElementById('results-list').innerHTML = '';
+    document.getElementById('no-result').style.display = 'none';
+    document.getElementById('selected-card').classList.remove('visible');
+    selectedPensioner = null;
+  };
+
+  window.pickPensioner = function (id) {
+    selectedPensioner = D.pensioners.find(p => p.id === id);
+    if (!selectedPensioner) return;
+    const p = selectedPensioner;
+
+    document.getElementById('results-list').innerHTML = '';
+    document.getElementById('no-result').style.display = 'none';
+    document.getElementById('search-inp').value = p.firstName + ' ' + p.lastName;
+    document.getElementById('sc-name').textContent = p.firstName + ' ' + p.lastName;
+    document.getElementById('sc-id').textContent   = p.id;
+    document.getElementById('sc-meta').innerHTML = `
+      <div><label>LGA</label><span>${p.lga}</span></div>
+      <div><label>Category</label><span>${p.category}</span></div>
+      <div><label>Date of Birth</label><span>${fmtDate(p.dateOfBirth)}</span></div>
+      <div><label>Account Status</label><span>${p.status}</span></div>
+      <div><label>Phone (masked)</label><span>${p.phone}</span></div>
+      <div><label>Last Verified</label><span>${fmtDate(p.lastVerified) || 'Never'}</span></div>
+    `;
+    document.getElementById('selected-card').classList.add('visible');
+    resetIdFields();
+  };
+
+  /* ============================================================
+     STEP 2 — IDENTITY CHECKS
+     ============================================================ */
+  const idState = { name:false, dob:false, lga:false, bank:false };
+
+  function resetIdFields() {
+    idState.name = idState.dob = idState.lga = idState.bank = false;
+    ['name','dob','lga','bank'].forEach(f => {
+      const inp = document.getElementById('id-' + f);
+      if (inp) { inp.value = ''; inp.className = 'id-input'; }
+      const hint = document.getElementById('id-' + f + '-hint');
+      if (hint) { hint.textContent = ''; hint.className = 'id-hint'; }
+    });
+    updateIdBtn();
+  }
+
+  const validators = {
+    name : () => {
+      if (!selectedPensioner) return false;
+      const v   = document.getElementById('id-name').value.trim().toLowerCase();
+      const exp = (selectedPensioner.firstName + ' ' + selectedPensioner.lastName).toLowerCase();
+      return v.length > 2 && exp.includes(v.split(' ')[0]);
+    },
+    dob  : () => document.getElementById('id-dob').value.trim().length >= 6,
+    lga  : () => {
+      if (!selectedPensioner) return false;
+      const v = document.getElementById('id-lga').value.trim().toLowerCase();
+      return v.length > 2 && selectedPensioner.lga.toLowerCase().startsWith(v.split(' ')[0]);
+    },
+    bank : () => selectedPensioner && document.getElementById('id-bank').value.trim() === selectedPensioner.accountLast4,
+  };
+  const hints = {
+    name: 'Name matches record.', dob: 'Date confirmed.', lga: 'LGA matches.', bank: 'Account confirmed.',
+  };
+
+  window.chkField = function (field) {
+    const pass = validators[field]();
+    idState[field] = pass;
+    const inp  = document.getElementById('id-' + field);
+    const hint = document.getElementById('id-' + field + '-hint');
+    inp.className  = 'id-input' + (pass ? ' good' : '');
+    hint.textContent = pass ? '✓ ' + hints[field] : '';
+    hint.className = 'id-hint' + (pass ? ' pass' : '');
+    updateIdBtn();
+  };
+
+  function updateIdBtn() {
+    const passing = Object.values(idState).filter(Boolean).length;
+    document.getElementById('btn-id-next').disabled = passing < 3;
+  }
+
+  /* ============================================================
+     STEP 3 — CHECKLIST
+     ============================================================ */
+  const CHK_ITEMS = [
+    { id:'ck1', title:'Physical ID Sighted',              sub:'Pension ID card, NIN slip, or govt-issued photo ID' },
+    { id:'ck2', title:'Biometric Guidance Delivered',     sub:'Pensioner positioned for camera and prompts explained' },
+    { id:'ck3', title:'Liveness Prompts Observed',        sub:'Blink and head-turn confirmed by agent' },
+    { id:'ck4', title:'Identity Verbally Re-confirmed',   sub:'Name, LGA, and bank digits re-stated by pensioner' },
+    { id:'ck5', title:'No Coercion or Duress Observed',   sub:'Pensioner appears present and participating willingly' },
+  ];
+  const checked = new Set();
+
+  (function buildChecklist () {
+    const ul = document.getElementById('chk-list');
+    CHK_ITEMS.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'chk-item';
+      li.id = 'li-' + item.id;
+      li.innerHTML = `
+        <div class="chk-box" id="box-${item.id}"></div>
+        <div><div class="chk-title">${item.title}</div><div class="chk-sub">${item.sub}</div></div>
+      `;
+      li.onclick = () => toggleChk(item.id);
+      ul.appendChild(li);
+    });
+  })();
+
+  window.toggleChk = function (id) {
+    const li  = document.getElementById('li-'  + id);
+    const box = document.getElementById('box-' + id);
+    if (checked.has(id)) {
+      checked.delete(id);
+      li.classList.remove('checked');
+      box.classList.remove('checked');
+      box.innerHTML = '';
+    } else {
+      checked.add(id);
+      li.classList.add('checked');
+      box.classList.add('checked');
+      box.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    }
+    document.getElementById('btn-guide-next').disabled = checked.size < 3;
+  };
+
+  /* ============================================================
+     STEP 4 — OUTCOMES
+     ============================================================ */
+  const OUTCOMES = [
+    { key:'verified', icon:'✅', label:'Verified',         desc:'All checks passed',             sel:'sel-verified' },
+    { key:'pending',  icon:'⏳', label:'Pending Review',   desc:'Officer review required',       sel:'sel-pending'  },
+    { key:'failed',   icon:'❌', label:'Could Not Verify', desc:'Verification unsuccessful',     sel:'sel-failed'   },
+    { key:'referred', icon:'🔁', label:'Referred',         desc:'Escalate to another center',    sel:'sel-referred' },
+  ];
+  let selectedOutcome = null;
+
+  (function buildOutcomes () {
+    const grid = document.getElementById('outcome-grid');
+    OUTCOMES.forEach(o => {
+      const el = document.createElement('div');
+      el.className = 'outcome-opt';
+      el.id = 'opt-' + o.key;
+      el.innerHTML = `<div class="outcome-icon">${o.icon}</div><div class="outcome-label">${o.label}</div><div class="outcome-desc">${o.desc}</div>`;
+      el.onclick = () => {
+        selectedOutcome = o.key;
+        OUTCOMES.forEach(x => document.getElementById('opt-'+x.key).className = 'outcome-opt' + (x.key===o.key ? ' '+x.sel : ''));
+        document.getElementById('btn-submit').disabled = false;
+      };
+      grid.appendChild(el);
+    });
+  })();
+
+  /* ============================================================
+     SUBMIT
+     ============================================================ */
+  const sessionLog = [];
+  let sessionCounter = sessionLog.length;
+
+  function genRef() {
+    return 'AV-' + new Date().getFullYear() + '-' + String(sessionCounter + 3310 + Math.floor(Math.random()*9+1));
+  }
+
+  const OUTCOME_LABELS = { verified:'Verified', pending:'Pending Review', failed:'Could Not Verify', referred:'Referred' };
+  const ICON_SVG = {
+    verified: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+    pending:  '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    failed:   '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    referred: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  };
+
+  window.submitSession = function () {
+    if (!selectedOutcome || !selectedPensioner) return;
+    const ref   = genRef();
+    const notes = document.getElementById('session-notes').value.trim();
+    const now   = new Date();
+    const time  = now.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'}) + ' · ' +
+                  now.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+
+    // Show success modal
+    document.getElementById('suc-icon').className = `suc-icon suc-icon--${selectedOutcome}`;
+    document.getElementById('suc-icon').innerHTML  = ICON_SVG[selectedOutcome];
+    document.getElementById('suc-title').textContent  = `Session Recorded — ${OUTCOME_LABELS[selectedOutcome]}`;
+    document.getElementById('suc-detail').textContent =
+      `Assisted session for ${selectedPensioner.firstName} ${selectedPensioner.lastName} recorded by ${user.firstName} ${user.lastName}.`;
+    document.getElementById('suc-ref').textContent   = 'Session Ref: ' + ref;
+    document.getElementById('suc-overlay').classList.add('active');
+
+    // Log entry
+    sessionLog.unshift({ ref, outcome:selectedOutcome,
+      pensioner: selectedPensioner.firstName + ' ' + selectedPensioner.lastName,
+      pensionerId: selectedPensioner.id, lga: selectedPensioner.lga,
+      agent: user.firstName + ' ' + user.lastName,
+      time, notes, checks: checked.size + ' / ' + CHK_ITEMS.length + ' protocol steps' });
+    sessionCounter++;
+    renderLog();
+  };
+
+  window.resetConsole = function () {
+    document.getElementById('suc-overlay').classList.remove('active');
+    selectedPensioner = null;
+    selectedOutcome   = null;
+    checked.clear();
+    Object.keys(idState).forEach(k => idState[k] = false);
+    resetIdFields();
+    document.getElementById('chk-list').querySelectorAll('.chk-item').forEach(el => {
+      el.classList.remove('checked');
+      el.querySelector('.chk-box').classList.remove('checked');
+      el.querySelector('.chk-box').innerHTML = '';
+    });
+    OUTCOMES.forEach(o => { document.getElementById('opt-'+o.key).className = 'outcome-opt'; });
+    document.getElementById('session-notes').value = '';
+    document.getElementById('btn-submit').disabled = true;
+    document.getElementById('btn-guide-next').disabled = true;
+    document.getElementById('btn-id-next').disabled = true;
+    document.getElementById('selected-card').classList.remove('visible');
+    document.getElementById('search-inp').value = '';
+    goStep(1);
+  };
+
+  /* ============================================================
+     SESSION LOG
+     ============================================================ */
+  function renderLog() {
+    const list = document.getElementById('log-list');
+    document.getElementById('log-count').textContent = sessionLog.length + ' session' + (sessionLog.length !== 1 ? 's' : '') + ' today';
+    list.innerHTML = sessionLog.length === 0
+      ? '<div style="text-align:center;padding:24px;color:#9ca3af;font-size:13px;">No sessions recorded yet today.</div>'
+      : sessionLog.map(e => `
+          <div class="log-item log--${e.outcome}">
+            <div class="log-meta">${e.time} <span class="log-ref">${e.ref}</span></div>
+            <div class="log-name">${e.pensioner}</div>
+            <div class="log-sub">${e.pensionerId} · ${e.lga}</div>
+            ${e.notes ? `<div class="log-note">${e.notes}</div>` : ''}
+            <div class="log-checks">${e.checks}</div>
+            <div class="log-badge log-badge--${e.outcome}">${OUTCOME_LABELS[e.outcome]}</div>
+          </div>
+        `).join('');
+  }
+
+  // Pre-populate with 2 demo prior sessions
+  [
+    { ref:'AV-2026-3312', outcome:'verified', pensioner:'Comfort Ayuk', pensionerId:'CRS-PEN-2024-0009', lga:'Boki',     agent:'Mary Ogar', time:'09:42 · 27 Mar 2026', notes:'In-person at Boki LGA Center. All checks passed.', checks:'5 / 5 protocol steps' },
+    { ref:'AV-2026-3311', outcome:'referred', pensioner:'Rose Etim',    pensionerId:'CRS-PEN-2024-0007', lga:'Odukpani', agent:'Mary Ogar', time:'08:15 · 27 Mar 2026', notes:'Vision difficulty — unable to complete liveness prompts.', checks:'4 / 5 protocol steps' },
+  ].forEach(e => sessionLog.push(e));
+  renderLog();
+
+})();
+</script>
+
+</body>
+</html>

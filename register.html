@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CRS-PDVS — Create your digital pension verification account. Register with your Pension ID issued by the Cross River State Pension Board.">
+  <meta name="theme-color" content="#1e2275">
+  <title>CRS-PDVS — Create Account</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+  <style>
+    body { background: var(--neutral-50); min-height: 100vh; display: flex; flex-direction: column; }
+
+    .reg-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-10) var(--space-6) var(--space-16);
+    }
+
+    /* ── Greeting bar ── */
+    .sos-greeting {
+      text-align: center;
+      margin-bottom: var(--space-8);
+      animation: fadeInUp 0.55s ease both;
+    }
+    .sos-greeting__eyebrow {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-1) var(--space-4);
+      background: var(--crs-blue-50); border: 1px solid var(--crs-blue-100);
+      border-radius: var(--radius-full); font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semi); color: var(--crs-blue-500);
+      letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: var(--space-3);
+    }
+    .sos-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--crs-blue-400); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.85)} }
+    .sos-greeting__title {
+      font-size: var(--font-size-2xl); font-weight: var(--font-weight-extra);
+      color: var(--color-text-primary); letter-spacing: var(--letter-spacing-tight); margin-bottom: var(--space-1);
+    }
+    .sos-greeting__season {
+      font-size: var(--font-size-sm); color: var(--crs-blue-500);
+      font-weight: var(--font-weight-medium); font-style: italic;
+    }
+
+    /* ── Stepper ── */
+    .reg-stepper { width: 100%; max-width: 540px; margin-bottom: var(--space-8); }
+    .reg-stepper__row { display: flex; align-items: center; }
+    .reg-step { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); flex: 1; }
+    .reg-step__circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--font-size-sm); font-weight: var(--font-weight-bold);
+      border: 2px solid var(--crs-blue-100);
+      background: white; color: var(--color-text-muted);
+      transition: all 0.35s cubic-bezier(0.22,1,0.36,1);
+    }
+    .reg-step--active .reg-step__circle {
+      background: var(--crs-blue-600); border-color: var(--crs-blue-600);
+      color: white; box-shadow: 0 0 0 5px var(--crs-blue-100);
+    }
+    .reg-step--done .reg-step__circle {
+      background: var(--green-500); border-color: var(--green-500); color: white;
+    }
+    .reg-step__label { font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); color: var(--color-text-muted); white-space: nowrap; }
+    .reg-step--active .reg-step__label { color: var(--crs-blue-600); font-weight: var(--font-weight-semi); }
+    .reg-step--done  .reg-step__label  { color: var(--green-500); }
+    .reg-step__connector { flex: 1; height: 2px; background: var(--crs-blue-100); margin-bottom: 20px; transition: background 0.4s; }
+    .reg-step__connector--done { background: var(--green-300); }
+
+    /* ── Card ── */
+    .reg-card {
+      width: 100%; max-width: 540px;
+      background: white; border-radius: var(--radius-2xl);
+      border: 1px solid var(--color-border-light);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+
+    .reg-card__banner {
+      background: linear-gradient(135deg, var(--crs-blue-800) 0%, var(--crs-blue-600) 100%);
+      padding: var(--space-6) var(--space-8);
+      position: relative; overflow: hidden;
+    }
+    .reg-card__banner::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 90% 20%, rgba(255,255,255,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 5% 80%, rgba(255,255,255,0.04) 0%, transparent 40%);
+      pointer-events: none;
+    }
+    .reg-card__banner::after {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 50px 50px; pointer-events: none;
+    }
+    .reg-card__banner-inner {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: var(--space-4);
+    }
+    .reg-card__banner-icon {
+      width: 48px; height: 48px; border-radius: var(--radius-xl);
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18);
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.9); flex-shrink: 0;
+    }
+    .reg-card__banner-title {
+      font-size: var(--font-size-xl); font-weight: var(--font-weight-extra);
+      color: white; letter-spacing: var(--letter-spacing-tight); margin-bottom: 2px;
+    }
+    .reg-card__banner-sub {
+      font-size: var(--font-size-sm); color: rgba(255,255,255,0.6); margin: 0;
+    }
+
+    .reg-card__body   { padding: var(--space-7) var(--space-8); }
+
+    /* ── Privacy note ── */
+    .privacy-note {
+      display: flex; align-items: flex-start; gap: var(--space-3);
+      padding: var(--space-4); background: var(--crs-blue-50);
+      border: 1px solid var(--crs-blue-100); border-radius: var(--radius-md);
+      margin-bottom: var(--space-6);
+    }
+    .privacy-note__icon { color: var(--crs-blue-400); flex-shrink: 0; margin-top: 1px; }
+    .privacy-note__text { font-size: var(--font-size-sm); color: var(--crs-blue-700); line-height: var(--line-height-relaxed); margin: 0; }
+
+    /* ── Form layout ── */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* ── Field states ── */
+    .form-input.input--verified { border-color: var(--green-500); background: var(--green-50); }
+    .form-input.input--locked   { background: var(--neutral-50); color: var(--color-text-muted); cursor: not-allowed; }
+    .form-input.input--error    { border-color: var(--color-error) !important; box-shadow: 0 0 0 3px rgba(220,38,38,0.08) !important; }
+
+    .field-err {
+      display: none;
+      font-size: var(--font-size-xs); color: var(--color-error);
+      margin-top: var(--space-1);
+      animation: fadeInUp 0.2s ease;
+    }
+    .field-err.visible { display: flex; align-items: center; gap: 5px; }
+
+    .record-found-badge {
+      display: none;
+      align-items: center; gap: var(--space-2);
+      font-size: var(--font-size-sm); color: var(--green-500);
+      font-weight: var(--font-weight-semi); margin-top: var(--space-2);
+    }
+    .record-found-badge.visible { display: flex; }
+
+    /* ── Phone input ── */
+    .phone-group {
+      display: flex; border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .phone-group:focus-within {
+      border-color: var(--crs-blue-500); box-shadow: 0 0 0 3px var(--crs-blue-100);
+    }
+    .phone-group.grp--error { border-color: var(--color-error); box-shadow: 0 0 0 3px rgba(220,38,38,0.08); }
+    .phone-prefix {
+      display: flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-4); background: var(--neutral-50);
+      border-right: 1px solid var(--color-border-light);
+      font-size: var(--font-size-sm); color: var(--color-text-secondary);
+      font-weight: var(--font-weight-medium); white-space: nowrap; user-select: none;
+    }
+    .phone-inner {
+      flex: 1; border: none; outline: none; padding: var(--space-4) var(--space-5);
+      font-size: var(--font-size-base); font-family: var(--font-family);
+      color: var(--color-text-primary); background: transparent; min-width: 0;
+    }
+
+    /* ── Password ── */
+    .pw-wrap { position: relative; }
+    .pw-input { padding-right: 3rem !important; }
+    .pw-toggle {
+      position: absolute; right: var(--space-4); top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--color-text-muted);
+      transition: color 0.15s; line-height: 0; padding: 0;
+    }
+    .pw-toggle:hover { color: var(--crs-blue-600); }
+    .pw-strength { margin-top: var(--space-2); }
+    .pw-strength__bar { height: 4px; border-radius: 2px; background: var(--neutral-100); margin-bottom: 4px; overflow: hidden; }
+    .pw-strength__fill { height: 100%; border-radius: 2px; width: 0; transition: width 0.35s, background 0.35s; }
+    .pw-strength__label { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+
+    /* ── Photo upload ── */
+    .photo-zone {
+      border: 2px dashed var(--crs-blue-200); border-radius: var(--radius-xl);
+      padding: var(--space-6); text-align: center; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative; overflow: hidden;
+    }
+    .photo-zone:hover { border-color: var(--crs-blue-400); background: var(--crs-blue-50); }
+    .photo-zone.has-photo { border-style: solid; border-color: var(--crs-blue-300); }
+    .photo-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .photo-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--crs-blue-200); margin: 0 auto var(--space-3); display: none; }
+    .photo-initials {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--crs-blue-100); color: var(--crs-blue-600);
+      font-size: var(--font-size-xl); font-weight: var(--font-weight-bold);
+      display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-3);
+    }
+    .photo-lbl { font-size: var(--font-size-sm); color: var(--crs-blue-600); font-weight: var(--font-weight-semi); }
+    .photo-sub { font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: 2px; }
+
+    /* ── Consent ── */
+    .consent-row {
+      display: flex; align-items: flex-start; gap: var(--space-3);
+      padding: var(--space-4); background: var(--neutral-50);
+      border: 1px solid var(--color-border-light); border-radius: var(--radius-md);
+      margin-bottom: var(--space-5);
+    }
+    .consent-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--crs-blue-600); cursor: pointer; flex-shrink: 0; margin-top: 1px; }
+    .consent-row label { font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: var(--line-height-relaxed); cursor: pointer; }
+    .consent-row.has-error { border-color: var(--color-error); background: var(--red-50); }
+
+    /* ── Confirmed identity strip ── */
+    .confirmed-strip {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-4); background: var(--green-50);
+      border: 1px solid var(--green-100); border-radius: var(--radius-md);
+      margin-bottom: var(--space-6);
+    }
+    .conf-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--green-100); color: var(--green-600);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: var(--font-weight-bold); font-size: var(--font-size-base); flex-shrink: 0;
+    }
+    .conf-name { font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
+    .conf-id   { font-size: var(--font-size-xs); color: var(--color-text-muted); font-family: monospace; }
+    .conf-badge {
+      margin-left: auto;
+      font-size: 11px; background: var(--green-100); color: var(--green-600);
+      padding: 3px 10px; border-radius: var(--radius-full); font-weight: var(--font-weight-semi);
+      white-space: nowrap;
+    }
+
+    /* ── Screen visibility ── */
+    .reg-screen { display: none; }
+    .reg-screen.active { display: block; animation: cardSlideIn 0.35s cubic-bezier(0.22,1,0.36,1) both; }
+    @keyframes cardSlideIn { from{opacity:0;transform:translateX(18px)} to{opacity:1;transform:translateX(0)} }
+
+    /* ── Success screen ── */
+    .success-screen { padding: var(--space-12) var(--space-8) var(--space-10); text-align: center; }
+    .success-icon {
+      width: 84px; height: 84px; border-radius: 50%;
+      background: var(--green-50); color: var(--green-500);
+      box-shadow: 0 0 0 12px rgba(22,163,74,0.08);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto var(--space-6); font-size: 36px;
+      animation: successPop 0.55s cubic-bezier(0.17,0.67,0.36,1.2) both;
+    }
+    @keyframes successPop { from{transform:scale(0.3);opacity:0} to{transform:scale(1);opacity:1} }
+    .success-title { font-size: var(--font-size-2xl); font-weight: var(--font-weight-extra); color: var(--color-text-primary); letter-spacing: var(--letter-spacing-tight); margin-bottom: var(--space-2); }
+    .success-season { font-size: var(--font-size-base); font-weight: var(--font-weight-semi); color: var(--crs-blue-500); margin-bottom: var(--space-4); font-style: italic; }
+    .success-desc { font-size: var(--font-size-base); color: var(--color-text-muted); line-height: var(--line-height-relaxed); max-width: 380px; margin: 0 auto var(--space-8); }
+    .redirect-note { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: var(--space-3); }
+    #redirect-count { font-weight: var(--font-weight-bold); color: var(--crs-blue-500); }
+
+    /* ── Animations ── */
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── Button loading ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-spinner {
+      display: none; width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.35); border-top-color: white;
+      border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0;
+    }
+
+    /* ── Help strip ── */
+    .help-strip { width: 100%; max-width: 540px; margin-top: var(--space-5); text-align: center; font-size: var(--font-size-sm); color: var(--color-text-muted); }
+    .help-strip a { color: var(--crs-blue-500); text-decoration: none; font-weight: var(--font-weight-medium); }
+    .help-strip a:hover { text-decoration: underline; }
+
+    @media (max-width: 440px) {
+      .reg-card__body { padding: var(--space-6); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SITE HEADER -->
+  <header class="site-header" id="site-header">
+    <div class="site-header__inner">
+      <a href="index.html" class="site-header__brand" aria-label="CRS-PDVS Home">
+        <div class="site-header__logo">
+          <img src="assets/images/crs_emblem.png" alt="Cross River State Logo" width="44" height="44" style="object-fit:contain;">
+        </div>
+        <div>
+          <div class="site-header__title">CRS-PDVS</div>
+          <div class="site-header__subtitle">Pension Verification</div>
+        </div>
+      </a>
+      <nav class="site-header__nav" id="header-nav" aria-label="Main navigation">
+        <a href="index.html" class="site-header__link">Home</a>
+        <a href="pensioner-login.html" class="site-header__link">Sign In</a>
+      </nav>
+      <button class="site-header__menu-btn" id="header-menu-btn" aria-label="Open navigation" aria-expanded="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+
+  <main class="reg-page" role="main">
+
+    <!-- Greeting -->
+    <div class="sos-greeting">
+      <div class="sos-greeting__eyebrow"><span class="sos-dot"></span> Official Cross River State Service</div>
+      <h1 class="sos-greeting__title">Create Your Account</h1>
+      <p class="sos-greeting__season">Pension Digital Verification — Season of Sweetness is here.</p>
+    </div>
+
+    <!-- Stepper -->
+    <div class="reg-stepper" id="reg-stepper" aria-label="Registration progress">
+      <div class="reg-stepper__row">
+        <div class="reg-step reg-step--active" id="step-node-1">
+          <div class="reg-step__circle" id="step-circle-1">1</div>
+          <span class="reg-step__label">Personal Details</span>
+        </div>
+        <div class="reg-step__connector" id="step-connector"></div>
+        <div class="reg-step" id="step-node-2">
+          <div class="reg-step__circle" id="step-circle-2">2</div>
+          <span class="reg-step__label">Security &amp; Photo</span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════
+         SCREEN 1 — PERSONAL DETAILS
+    ════════════════════════════════════ -->
+    <div class="reg-card reg-screen active" id="screen-1">
+
+      <!-- Banner -->
+      <div class="reg-card__banner">
+        <div class="reg-card__banner-inner">
+          <div class="reg-card__banner-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <div class="reg-card__banner-title">Identity Verification</div>
+            <p class="reg-card__banner-sub">Step 1 of 2 — Confirm your Pension Board record.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reg-card__body">
+
+        <!-- Privacy note -->
+        <div class="privacy-note">
+          <svg class="privacy-note__icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <p class="privacy-note__text">
+            Your Pension ID must match an existing record with the Cross River State Pension Board.
+            All fields are verified against your official pension record.
+          </p>
+        </div>
+
+        <!-- Error banner -->
+        <div id="s1-error" style="display:none; margin-bottom:var(--space-5);">
+          <div class="banner banner--error" role="alert">
+            <span class="banner__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </span>
+            <div class="banner__content" id="s1-error-text"></div>
+          </div>
+        </div>
+
+        <form id="form-step1" novalidate>
+
+          <!-- Pension ID -->
+          <div class="form-group" id="fg-pension-id">
+            <label class="form-label" for="reg-pension-id">
+              Pension ID <span style="color:var(--color-error);" aria-hidden="true">*</span>
+            </label>
+            <input class="form-input" id="reg-pension-id" type="text"
+              placeholder="e.g. CRS-PEN-2024-0001"
+              autocomplete="off" spellcheck="false" required autofocus>
+            <span class="form-hint">Your Pension ID is printed on your pension documentation.</span>
+            <div class="record-found-badge" id="record-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Record found — please verify your details below.
+            </div>
+            <span class="field-err" id="err-pension-id">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </span>
+          </div>
+
+          <!-- Name -->
+          <div class="form-row">
+            <div class="form-group" id="fg-first">
+              <label class="form-label" for="reg-first">First Name <span style="color:var(--color-error);">*</span></label>
+              <input class="form-input" id="reg-first" type="text" placeholder="First name" required>
+              <span class="field-err" id="err-first">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              </span>
+            </div>
+            <div class="form-group" id="fg-last">
+              <label class="form-label" for="reg-last">Last Name <span style="color:var(--color-error);">*</span></label>
+              <input class="form-input" id="reg-last" type="text" placeholder="Last name" required>
+              <span class="field-err" id="err-last">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <!-- DOB -->
+          <div class="form-group" id="fg-dob">
+            <label class="form-label" for="reg-dob">
+              Date of Birth <span style="color:var(--color-error);">*</span>
+            </label>
+            <input class="form-input" id="reg-dob" type="date" max="2006-01-01" required>
+            <span class="form-hint">Must match the date of birth on your pension record.</span>
+            <span class="field-err" id="err-dob">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </span>
+          </div>
+
+          <!-- Phone -->
+          <div class="form-group" id="fg-phone">
+            <label class="form-label" for="reg-phone">
+              Phone Number <span style="color:var(--color-error);">*</span>
+            </label>
+            <div class="phone-group" id="phone-group-wrap">
+              <div class="phone-prefix">🇳🇬 +234</div>
+              <input class="phone-inner" id="reg-phone" type="tel"
+                placeholder="080 0000 0000" maxlength="11" required>
+            </div>
+            <span class="form-hint">The number registered with the Pension Board.</span>
+            <span class="field-err" id="err-phone">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </span>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label class="form-label" for="reg-email">Email Address <span style="color:var(--color-text-muted);font-weight:400;">(Optional)</span></label>
+            <input class="form-input" id="reg-email" type="email" placeholder="you@example.com">
+            <span class="form-hint">For notifications about your verification cycle.</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary"
+            style="width:100%;display:flex;align-items:center;justify-content:center;gap:var(--space-2);"
+            id="btn-step1">
+            <span class="btn-spinner" id="spinner-1"></span>
+            <span id="btn1-label">Continue to Security Setup →</span>
+          </button>
+
+        </form>
+      </div>
+    </div><!-- /screen-1 -->
+
+
+    <!-- ════════════════════════════════════
+         SCREEN 2 — SECURITY & PHOTO
+    ════════════════════════════════════ -->
+    <div class="reg-card reg-screen" id="screen-2">
+
+      <!-- Banner -->
+      <div class="reg-card__banner">
+        <div class="reg-card__banner-inner">
+          <div class="reg-card__banner-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div>
+            <div class="reg-card__banner-title">Security &amp; Profile Photo</div>
+            <p class="reg-card__banner-sub">Step 2 of 2 — Set your password and add a photo.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reg-card__body">
+
+        <!-- Confirmed identity -->
+        <div class="confirmed-strip">
+          <div class="conf-avatar" id="conf-initials">—</div>
+          <div>
+            <div class="conf-name" id="conf-name">—</div>
+            <div class="conf-id"   id="conf-id">—</div>
+          </div>
+          <span class="conf-badge">✓ Verified</span>
+        </div>
+
+        <!-- Error banner -->
+        <div id="s2-error" style="display:none; margin-bottom:var(--space-5);">
+          <div class="banner banner--error" role="alert">
+            <div class="banner__content" id="s2-error-text"></div>
+          </div>
+        </div>
+
+        <form id="form-step2" novalidate>
+
+          <!-- Photo -->
+          <div class="form-group">
+            <label class="form-label">Profile Photo <span style="color:var(--color-text-muted);font-weight:400;">(Optional)</span></label>
+            <div class="photo-zone" id="photo-zone">
+              <input type="file" id="photo-input" accept="image/*" aria-label="Upload profile photo">
+              <div class="photo-initials" id="photo-initials">—</div>
+              <img class="photo-preview" id="photo-preview" alt="Profile preview">
+              <div class="photo-lbl">Tap to upload a photo</div>
+              <div class="photo-sub">JPG or PNG · max 5 MB</div>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group" id="fg-pw1">
+            <label class="form-label" for="reg-pw">Password <span style="color:var(--color-error);">*</span></label>
+            <div class="pw-wrap">
+              <input class="form-input pw-input" id="reg-pw" type="password"
+                placeholder="Minimum 8 characters" required autocomplete="new-password">
+              <button type="button" class="pw-toggle" onclick="togglePw('reg-pw','eye1-show','eye1-hide')" aria-label="Show password">
+                <svg id="eye1-show" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg id="eye1-hide" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+            <div class="pw-strength" id="pw-strength" style="display:none;">
+              <div class="pw-strength__bar"><div class="pw-strength__fill" id="pw-fill"></div></div>
+              <span class="pw-strength__label" id="pw-label"></span>
+            </div>
+            <span class="field-err" id="err-pw1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </span>
+          </div>
+
+          <!-- Confirm password -->
+          <div class="form-group" id="fg-pw2">
+            <label class="form-label" for="reg-pw2">Confirm Password <span style="color:var(--color-error);">*</span></label>
+            <div class="pw-wrap">
+              <input class="form-input pw-input" id="reg-pw2" type="password"
+                placeholder="Re-enter your password" required autocomplete="new-password">
+              <button type="button" class="pw-toggle" onclick="togglePw('reg-pw2','eye2-show','eye2-hide')" aria-label="Show confirm password">
+                <svg id="eye2-show" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg id="eye2-hide" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+            <span class="field-err" id="err-pw2">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </span>
+          </div>
+
+          <!-- Consent -->
+          <div class="consent-row" id="consent-row">
+            <input type="checkbox" id="reg-consent" required>
+            <label for="reg-consent">
+              I confirm this is my own pension record and all information provided is accurate.
+              I understand this account will be linked to my pension file with the Cross River State Pension Board.
+            </label>
+          </div>
+
+          <div style="display:flex;gap:var(--space-3);">
+            <button type="button" class="btn btn-secondary" onclick="goBack()" style="flex-shrink:0;">← Back</button>
+            <button type="submit" class="btn btn-primary"
+              style="flex:1;display:flex;align-items:center;justify-content:center;gap:var(--space-2);"
+              id="btn-step2">
+              <span class="btn-spinner" id="spinner-2"></span>
+              <span id="btn2-label">Create My Account</span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div><!-- /screen-2 -->
+
+
+    <!-- ════════════════════════════════════
+         SCREEN 3 — SUCCESS
+    ════════════════════════════════════ -->
+    <div class="reg-card reg-screen" id="screen-success">
+      <div class="success-screen">
+        <div class="success-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2 class="success-title">Registration Successful</h2>
+        <p class="success-season">Season of Sweetness is here.</p>
+        <p class="success-desc">
+          Your CRS-PDVS account has been created, <strong id="success-name">—</strong>.
+          You now have full access to your pension verification portal.
+        </p>
+        <a href="dashboard.html" class="btn btn-primary" style="min-width:200px;" id="success-cta">
+          Go to My Dashboard →
+        </a>
+        <p class="redirect-note">Redirecting in <span id="redirect-count">3</span> seconds…</p>
+      </div>
+    </div><!-- /screen-success -->
+
+
+    <!-- Help strip -->
+    <div class="help-strip" id="help-strip">
+      Already have an account?
+      <a href="pensioner-login.html" style="margin-left:4px;">Sign in →</a>
+    </div>
+
+  </main>
+
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/pensioner-auth.js"></script>
+  <script>
+  (function () {
+    const D = window.CRS_PDVS_DATA;
+
+    // If already logged in → dashboard
+    if (PensionerAuth.getSession()) {
+      window.location.replace('dashboard.html');
+      return;
+    }
+
+    let step1Data    = {};
+    let photoBase64  = null;
+
+    /* ════ HELPERS ════ */
+    function showError(bannerId, textId, msg) {
+      document.getElementById(bannerId).style.display = 'block';
+      document.getElementById(textId).textContent = msg;
+    }
+    function hideError(bannerId) {
+      document.getElementById(bannerId).style.display = 'none';
+    }
+
+    function setFieldErr(groupId, errId, msg) {
+      const grp = document.getElementById(groupId);
+      const errEl = document.getElementById(errId);
+      if (grp) {
+        const inp = grp.querySelector('.form-input, .phone-inner');
+        if (inp) inp.classList.add('input--error');
+        const wrap = grp.querySelector('.phone-group');
+        if (wrap) wrap.classList.add('grp--error');
+      }
+      if (errEl) {
+        // Append message text after the SVG icon
+        const svg = errEl.querySelector('svg');
+        errEl.textContent = '';
+        if (svg) errEl.appendChild(svg);
+        errEl.appendChild(document.createTextNode(' ' + msg));
+        errEl.classList.add('visible');
+      }
+    }
+
+    function clearFieldErrs() {
+      document.querySelectorAll('.form-input.input--error, .phone-inner.input--error').forEach(el => {
+        el.classList.remove('input--error');
+      });
+      document.querySelectorAll('.phone-group.grp--error').forEach(el => {
+        el.classList.remove('grp--error');
+      });
+      document.querySelectorAll('.field-err.visible').forEach(el => {
+        el.classList.remove('visible');
+      });
+    }
+
+    function normPhone(p) { return p.replace(/\D/g, ''); }
+
+    /* ════ STEP 1 ════ */
+    const form1 = document.getElementById('form-step1');
+
+    // Live record lookup on blur
+    document.getElementById('reg-pension-id').addEventListener('blur', function () {
+      const id     = this.value.trim().toUpperCase();
+      const badge  = document.getElementById('record-badge');
+      const record = D.pensioners.find(p => p.id === id);
+      if (record) {
+        badge.classList.add('visible');
+        // Auto-fill name fields (editable — will be validated on submit)
+        document.getElementById('reg-first').value = record.firstName;
+        document.getElementById('reg-last').value  = record.lastName;
+        // Auto-fill email if available
+        if (record.email) {
+          document.getElementById('reg-email').value = record.email;
+        }
+      } else {
+        badge.classList.remove('visible');
+      }
+    });
+
+    // Password strength meter (step 2)
+    document.getElementById('reg-pw').addEventListener('input', function () {
+      updateStrength(this.value);
+    });
+
+    form1.addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearFieldErrs();
+      hideError('s1-error', 's1-error-text');
+
+      const pensionId = document.getElementById('reg-pension-id').value.trim().toUpperCase();
+      const firstName = document.getElementById('reg-first').value.trim();
+      const lastName  = document.getElementById('reg-last').value.trim();
+      const dob       = document.getElementById('reg-dob').value;
+      const phone     = document.getElementById('reg-phone').value.trim().replace(/\s/g, '');
+      const email     = document.getElementById('reg-email').value.trim();
+
+      // Basic presence check
+      if (!pensionId) { setFieldErr('fg-pension-id', 'err-pension-id', 'Please enter your Pension ID.'); return; }
+      if (!firstName) { setFieldErr('fg-first', 'err-first', 'Please enter your first name.'); return; }
+      if (!lastName)  { setFieldErr('fg-last',  'err-last',  'Please enter your last name.');  return; }
+      if (!dob)       { setFieldErr('fg-dob',   'err-dob',   'Please enter your date of birth.'); return; }
+      if (!phone)     { setFieldErr('fg-phone',  'err-phone', 'Please enter your phone number.'); return; }
+
+      // Already registered?
+      if (sessionStorage.getItem('crs_registered_' + pensionId)) {
+        showError('s1-error', 's1-error-text', 'An account already exists for this Pension ID. Please sign in instead.');
+        return;
+      }
+
+      // Look up record
+      const record = D.pensioners.find(p => p.id === pensionId);
+      if (!record) {
+        setFieldErr('fg-pension-id', 'err-pension-id',
+          'No record found for Pension ID ' + pensionId + '. Visit your LGA Pension Board office to confirm your registration.');
+        return;
+      }
+
+      // ── Cross-validate all fields against record ──
+      const fieldErrors = [];
+
+      if (firstName.toLowerCase() !== record.firstName.toLowerCase()) {
+        fieldErrors.push({ grp: 'fg-first', err: 'err-first', msg: 'First name does not match this Pension ID\'s record.' });
+      }
+      if (lastName.toLowerCase() !== record.lastName.toLowerCase()) {
+        fieldErrors.push({ grp: 'fg-last', err: 'err-last', msg: 'Last name does not match this Pension ID\'s record.' });
+      }
+      if (dob !== record.dateOfBirth) {
+        fieldErrors.push({ grp: 'fg-dob', err: 'err-dob', msg: 'Date of birth does not match the pension record.' });
+      }
+      // Compare last 8 digits to tolerate +234 vs 0 prefix differences
+      const enteredDigits = normPhone(phone);
+      const recordDigits  = normPhone(record.phoneRaw);
+      if (!enteredDigits || enteredDigits.slice(-8) !== recordDigits.slice(-8)) {
+        fieldErrors.push({ grp: 'fg-phone', err: 'err-phone', msg: 'Phone number does not match the pension record.' });
+      }
+
+      if (fieldErrors.length > 0) {
+        fieldErrors.forEach(fe => setFieldErr(fe.grp, fe.err, fe.msg));
+        showError('s1-error', 's1-error-text',
+          fieldErrors.length === 1
+            ? 'One field does not match your pension record. Please check and correct it.'
+            : fieldErrors.length + ' fields do not match your pension record. Please review the highlighted fields.');
+        return;
+      }
+
+      // All good — save step 1 data
+      step1Data = {
+        pensionId: record.id,
+        firstName, lastName, email, phone, dob,
+        lga:                 record.lga,
+        category:            record.category,
+        status:              record.status,
+        lastVerified:        record.lastVerified,
+        nextVerificationDue: record.nextVerificationDue,
+        bankName:            record.bankName,
+        accountLast4:        record.accountLast4,
+      };
+
+      goToStep2();
+    });
+
+    /* ════ STEP 2 ════ */
+    const form2 = document.getElementById('form-step2');
+
+    form2.addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearFieldErrs();
+      hideError('s2-error', 's2-error-text');
+
+      const pw      = document.getElementById('reg-pw').value;
+      const pw2     = document.getElementById('reg-pw2').value;
+      const consent = document.getElementById('reg-consent').checked;
+
+      let hasErr = false;
+      if (pw.length < 8) {
+        setFieldErr('fg-pw1', 'err-pw1', 'Password must be at least 8 characters.');
+        hasErr = true;
+      }
+      if (pw !== pw2) {
+        setFieldErr('fg-pw2', 'err-pw2', 'Passwords do not match.');
+        hasErr = true;
+      }
+      if (!consent) {
+        document.getElementById('consent-row').classList.add('has-error');
+        showError('s2-error', 's2-error-text', 'Please read and accept the declaration before creating your account.');
+        return;
+      }
+      if (hasErr) {
+        showError('s2-error', 's2-error-text', 'Please fix the errors above before continuing.');
+        return;
+      }
+
+      // Loading
+      setStep2Loading(true);
+
+      setTimeout(function () {
+        const user = {
+          ...step1Data,
+          photoUrl:    photoBase64 || null,
+          registeredAt: new Date().toISOString(),
+        };
+
+        sessionStorage.setItem('crs_registered_' + user.pensionId, '1');
+        PensionerAuth.setSession(user);
+        goToSuccess(user);
+      }, 400);
+    });
+
+    /* ════ PHOTO UPLOAD ════ */
+    document.getElementById('photo-input').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Photo must be under 5 MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function (ev) {
+        photoBase64 = ev.target.result;
+        const preview  = document.getElementById('photo-preview');
+        const initials = document.getElementById('photo-initials');
+        preview.src = photoBase64;
+        preview.style.display = 'block';
+        initials.style.display = 'none';
+        document.getElementById('photo-zone').classList.add('has-photo');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    /* ════ PASSWORD STRENGTH ════ */
+    window.updateStrength = function (val) {
+      const wrap = document.getElementById('pw-strength');
+      const fill = document.getElementById('pw-fill');
+      const lbl  = document.getElementById('pw-label');
+      if (!val) { wrap.style.display = 'none'; return; }
+      wrap.style.display = 'block';
+      let score = 0;
+      if (val.length >= 8)  score++;
+      if (val.length >= 12) score++;
+      if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+      if (/[0-9]/.test(val))      score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      const levels = [
+        { pct:'20%', color:'#dc2626', label:'Too weak' },
+        { pct:'40%', color:'#dc2626', label:'Weak' },
+        { pct:'60%', color:'#d97706', label:'Fair' },
+        { pct:'80%', color:'#d97706', label:'Good' },
+        { pct:'100%',color:'#16a34a', label:'Strong' },
+      ];
+      const lv = levels[Math.min(score, 4)];
+      fill.style.width      = lv.pct;
+      fill.style.background = lv.color;
+      lbl.textContent       = lv.label;
+      lbl.style.color       = lv.color;
+    };
+
+    /* ════ NAVIGATION ════ */
+    function goToStep2() {
+      document.getElementById('screen-1').classList.remove('active');
+      document.getElementById('screen-2').classList.add('active');
+
+      // Stepper
+      document.getElementById('step-node-1').classList.remove('reg-step--active');
+      document.getElementById('step-node-1').classList.add('reg-step--done');
+      document.getElementById('step-circle-1').innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+      document.getElementById('step-connector').classList.add('reg-step__connector--done');
+      document.getElementById('step-node-2').classList.add('reg-step--active');
+
+      // Populate confirmed strip
+      const initials = (step1Data.firstName[0] + step1Data.lastName[0]).toUpperCase();
+      document.getElementById('conf-initials').textContent = initials;
+      document.getElementById('conf-name').textContent = step1Data.firstName + ' ' + step1Data.lastName;
+      document.getElementById('conf-id').textContent   = step1Data.pensionId;
+      document.getElementById('photo-initials').textContent = initials;
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.goBack = function () {
+      document.getElementById('screen-2').classList.remove('active');
+      document.getElementById('screen-1').classList.add('active');
+
+      document.getElementById('step-node-2').classList.remove('reg-step--active');
+      document.getElementById('step-node-1').classList.remove('reg-step--done');
+      document.getElementById('step-node-1').classList.add('reg-step--active');
+      document.getElementById('step-circle-1').textContent = '1';
+      document.getElementById('step-connector').classList.remove('reg-step__connector--done');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    function goToSuccess(user) {
+      document.getElementById('screen-2').classList.remove('active');
+      document.getElementById('reg-stepper').style.display = 'none';
+      document.getElementById('help-strip').style.display  = 'none';
+      document.getElementById('screen-success').classList.add('active');
+      document.getElementById('success-name').textContent  = user.firstName;
+
+      let count = 3;
+      const interval = setInterval(function () {
+        count--;
+        document.getElementById('redirect-count').textContent = count;
+        if (count <= 0) {
+          clearInterval(interval);
+          window.location.href = 'dashboard.html';
+        }
+      }, 1000);
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function setStep2Loading(on) {
+      document.getElementById('spinner-2').style.display = on ? 'block' : 'none';
+      document.getElementById('btn2-label').textContent  = on ? 'Creating account…' : 'Create My Account';
+      document.getElementById('btn-step2').classList.toggle('btn--loading', on);
+    }
+
+    /* ════ PASSWORD TOGGLE ════ */
+    window.togglePw = function (inputId, showId, hideId) {
+      const inp  = document.getElementById(inputId);
+      const show = document.getElementById(showId);
+      const hide = document.getElementById(hideId);
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        show.style.display = 'none';
+        hide.style.display = 'block';
+      } else {
+        inp.type = 'password';
+        show.style.display = 'block';
+        hide.style.display = 'none';
+      }
+    };
+
+    // Mobile menu
+    const menuBtn = document.getElementById('header-menu-btn');
+    const nav     = document.getElementById('header-nav');
+    if (menuBtn && nav) {
+      menuBtn.addEventListener('click', () => {
+        const open = nav.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', open);
+      });
+    }
+
+  })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,850 @@
+/* ============================================================
+   CRS-PDVS — Page-Specific Styles
+   Header, Footer, Intro Overlay, Page-level Layout
+   ============================================================ */
+
+
+/* ============================================================
+   1. SITE HEADER
+   ============================================================ */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  height: var(--header-height);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+}
+
+.site-header__logo {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+.site-header__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+}
+
+.site-header__title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.site-header__subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+/* Header Navigation */
+.site-header__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.site-header__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.site-header__link:hover,
+.site-header__link--active {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+/* Mobile hamburger */
+.site-header__menu-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+}
+
+.site-header__menu-btn:hover {
+  background: var(--neutral-100);
+}
+
+@media (max-width: 768px) {
+  .site-header__nav {
+    display: none;
+  }
+
+  .site-header__nav.open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border-light);
+    padding: var(--space-4) var(--space-6);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .site-header__menu-btn {
+    display: flex;
+  }
+
+  .site-header__inner {
+    padding: 0 var(--space-4);
+  }
+}
+
+
+/* ============================================================
+   2. SITE FOOTER
+   ============================================================ */
+
+.site-footer {
+  background: var(--crs-blue-900);
+  color: rgba(255,255,255,0.7);
+  padding: var(--space-12) 0 var(--space-8);
+  margin-top: auto;
+  border-top: 3px solid var(--crs-blue-600);
+}
+
+.site-footer__inner {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.site-footer__grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--space-10);
+  margin-bottom: var(--space-10);
+}
+
+.site-footer__brand-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: white;
+  margin-bottom: var(--space-3);
+}
+
+.site-footer__tagline {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  max-width: 360px;
+}
+
+.site-footer__heading {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semi);
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  margin-bottom: var(--space-4);
+}
+
+.site-footer__links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.site-footer__link {
+  font-size: var(--font-size-sm);
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.site-footer__link:hover {
+  color: white;
+}
+
+.site-footer__bar {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.site-footer__copy {
+  font-size: var(--font-size-xs);
+  color: rgba(255,255,255,0.45);
+}
+
+.site-footer__state-msg {
+  font-size: var(--font-size-xs);
+  color: rgba(255,255,255,0.35);
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .site-footer__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .site-footer__bar {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+
+/* ============================================================
+   3. SEASON OF SWEETNESS — INTRO OVERLAY
+   ============================================================ */
+
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-intro);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(150deg,
+    var(--crs-blue-900) 0%,
+    var(--crs-blue-700) 50%,
+    var(--crs-blue-600) 100%
+  );
+  opacity: 1;
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.intro-overlay.hiding {
+  opacity: 0;
+  transform: scale(1.05);
+  pointer-events: none;
+}
+
+.intro-overlay.removed {
+  display: none;
+}
+
+.intro-overlay__content {
+  text-align: center;
+  color: white;
+  padding: var(--space-8);
+  max-width: 600px;
+  animation: introFadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes introFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.intro-overlay__emblem {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--space-6);
+  border-radius: var(--radius-xl);
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-3xl);
+  animation: introPulse 2.5s ease-in-out infinite;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+@keyframes introPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.15); }
+  50%      { box-shadow: 0 0 0 20px rgba(255,255,255,0); }
+}
+
+.intro-overlay__emblem img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.intro-overlay__season {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semi);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: var(--space-3);
+  animation: introFadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+.intro-overlay__headline {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-extra);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: var(--space-4);
+  line-height: var(--line-height-tight);
+  animation: introFadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+.intro-overlay__sub {
+  font-size: var(--font-size-md);
+  color: rgba(255,255,255,0.75);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--space-8);
+  animation: introFadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+}
+
+.intro-overlay__cta {
+  animation: introFadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+}
+
+.intro-overlay__dismiss {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: white;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semi);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.intro-overlay__dismiss:hover {
+  background: rgba(255,255,255,0.25);
+  transform: translateY(-1px);
+}
+
+/* Decorative floating dots */
+.intro-overlay__dots {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.intro-overlay__dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+}
+
+.intro-overlay__dot:nth-child(1) { top: 15%; left: 10%; animation: floatDot 8s ease-in-out infinite; }
+.intro-overlay__dot:nth-child(2) { top: 30%; right: 15%; animation: floatDot 10s ease-in-out 1s infinite; width: 8px; height: 8px; }
+.intro-overlay__dot:nth-child(3) { bottom: 20%; left: 20%; animation: floatDot 12s ease-in-out 2s infinite; width: 4px; height: 4px; }
+.intro-overlay__dot:nth-child(4) { top: 60%; right: 25%; animation: floatDot 9s ease-in-out 0.5s infinite; }
+.intro-overlay__dot:nth-child(5) { bottom: 35%; left: 40%; animation: floatDot 11s ease-in-out 1.5s infinite; width: 10px; height: 10px; }
+.intro-overlay__dot:nth-child(6) { top: 10%; right: 35%; animation: floatDot 7s ease-in-out 0.8s infinite; width: 5px; height: 5px; }
+
+@keyframes floatDot {
+  0%, 100% { transform: translate(0, 0); opacity: 0.4; }
+  25%  { transform: translate(12px, -20px); opacity: 0.7; }
+  50%  { transform: translate(-8px, -35px); opacity: 0.3; }
+  75%  { transform: translate(15px, -15px); opacity: 0.6; }
+}
+
+/* Progress bar at bottom of overlay */
+.intro-overlay__progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 0 3px 0 0;
+  animation: introProgress 5s linear both;
+}
+
+@keyframes introProgress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+
+/* ============================================================
+   4. PAGE HERO SECTION
+   ============================================================ */
+
+.page-hero {
+  position: relative;
+  background: linear-gradient(135deg, var(--crs-blue-900), var(--crs-blue-700));
+  color: white;
+  padding: var(--space-20) 0 var(--space-16);
+  overflow: hidden;
+}
+
+.page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 30% 0%,
+    rgba(255,255,255,0.05) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+.page-hero__inner {
+  position: relative;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.page-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semi);
+  color: rgba(255,255,255,0.8);
+  margin-bottom: var(--space-6);
+}
+
+.page-hero__title {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-extra);
+  color: white;
+  max-width: 700px;
+  margin-bottom: var(--space-5);
+}
+
+.page-hero__description {
+  font-size: var(--font-size-lg);
+  color: rgba(255,255,255,0.8);
+  max-width: 560px;
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--space-8);
+}
+
+.page-hero__actions {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .page-hero {
+    padding: var(--space-12) 0 var(--space-10);
+  }
+
+  .page-hero__title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .page-hero__description {
+    font-size: var(--font-size-base);
+  }
+}
+
+
+/* ============================================================
+   5. SECTION LAYOUT
+   ============================================================ */
+
+.section {
+  padding: var(--space-16) 0;
+}
+
+.section--alt {
+  background: var(--color-surface);
+}
+
+.section__header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto var(--space-12);
+}
+
+.section__overline {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semi);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+}
+
+.section__title {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-4);
+}
+
+.section__subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-relaxed);
+}
+
+
+/* ============================================================
+   6. ADMIN LAYOUT — Collapsible sidebar
+   Desktop: full 260px ↔ icon rail 64px (content reflows)
+   Mobile:  fixed overlay drawer
+   ============================================================ */
+
+:root {
+  --sidebar-full: 260px;
+  --sidebar-rail:  64px;
+}
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ---- Sidebar base ---- */
+.admin-sidebar {
+  width: var(--sidebar-full);
+  background: var(--crs-blue-900);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  scrollbar-width: none;
+}
+.admin-sidebar::-webkit-scrollbar { display: none; }
+
+/* Desktop collapsed → icon rail */
+.admin-layout.sidebar-collapsed .admin-sidebar {
+  width: var(--sidebar-rail);
+}
+
+/* Main content stretches to fill remaining flex space */
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  background: var(--color-surface-alt);
+}
+
+
+/* ---- Sidebar close button row ---- */
+.admin-sidebar__close {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--space-2) var(--space-3) 0;
+}
+.admin-layout.sidebar-collapsed .admin-sidebar__close {
+  justify-content: center;
+}
+.admin-sidebar__close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.admin-sidebar__close-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+
+/* ---- Brand area ---- */
+.admin-sidebar__brand {
+  padding: var(--space-4) var(--space-4);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+  min-height: 68px;
+}
+
+.admin-sidebar__brand-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  white-space: nowrap;
+}
+
+.admin-sidebar__brand-text {
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  transition: opacity 0.2s ease;
+}
+
+.admin-sidebar__brand-name {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: white;
+  white-space: nowrap;
+}
+.admin-sidebar__brand-sub {
+  font-size: var(--font-size-xs);
+  color: rgba(255,255,255,0.5);
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+/* Collapsed: center icon, collapse text */
+.admin-layout.sidebar-collapsed .admin-sidebar__brand {
+  padding: var(--space-4) 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.admin-layout.sidebar-collapsed .admin-sidebar__brand-inner {
+  justify-content: center;
+}
+.admin-layout.sidebar-collapsed .admin-sidebar__brand-text {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+
+/* ---- Navigation ---- */
+.admin-sidebar__nav {
+  padding: var(--space-3);
+  flex: 1;
+  overflow: hidden;
+}
+
+.admin-sidebar__section-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semi);
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  padding: var(--space-4) var(--space-2) var(--space-2);
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.2s ease, max-height 0.25s ease, padding 0.25s ease;
+  max-height: 40px;
+}
+
+/* Collapsed: collapse section titles to nothing */
+.admin-layout.sidebar-collapsed .admin-sidebar__section-title {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  pointer-events: none;
+}
+
+/* Nav link */
+.admin-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: rgba(255,255,255,0.65);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.admin-sidebar__link:hover {
+  color: white;
+  background: rgba(255,255,255,0.08);
+}
+.admin-sidebar__link--active {
+  color: white;
+  background: rgba(255,255,255,0.12);
+}
+
+/* Icon — always visible, never shrinks */
+.admin-sidebar__link-icon {
+  width: 20px;
+  min-width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Label and badge — hidden when collapsed */
+.admin-sidebar__link-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.admin-sidebar__badge {
+  flex-shrink: 0;
+}
+
+/* Collapsed: centre icon, hide text/badge */
+.admin-layout.sidebar-collapsed .admin-sidebar__link {
+  justify-content: center;
+  padding: var(--space-3) 0;
+}
+.admin-layout.sidebar-collapsed .admin-sidebar__link-label,
+.admin-layout.sidebar-collapsed .admin-sidebar__badge {
+  display: none;
+}
+
+
+/* ---- User info ---- */
+.admin-sidebar__user {
+  padding: var(--space-4);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  overflow: hidden;
+}
+.admin-sidebar__user-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.admin-sidebar__user-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semi);
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.admin-sidebar__user-role {
+  font-size: var(--font-size-xs);
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Collapsed: centre avatar, hide info */
+.admin-layout.sidebar-collapsed .admin-sidebar__user {
+  justify-content: center;
+  padding: var(--space-4) 0;
+}
+.admin-layout.sidebar-collapsed .admin-sidebar__user-info {
+  display: none;
+}
+
+
+/* ---- Top bar ---- */
+.admin-topbar {
+  height: var(--header-height);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+.admin-topbar__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semi);
+  color: var(--color-text-primary);
+}
+.admin-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.admin-content {
+  padding: var(--space-8);
+}
+
+
+/* ============================================================
+   MOBILE — sidebar becomes fixed overlay drawer
+   ============================================================ */
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    width: var(--sidebar-full) !important; /* always full-width as a drawer */
+    overflow-y: auto;
+  }
+
+  /* Mobile open */
+  .admin-layout.sidebar-open .admin-sidebar {
+    transform: translateX(0);
+  }
+
+  /* Desktop collapsed = no effect on mobile */
+  .admin-layout.sidebar-collapsed .admin-sidebar {
+    width: var(--sidebar-full) !important;
+    transform: translateX(-100%);
+  }
+
+  .admin-topbar { padding: 0 var(--space-4); }
+  .admin-content { padding: var(--space-4); }
+}
+

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRS-PDVS — Pensioner Records</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/admin-shell.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+</head>
+<body>
+
+<div class="adm-wrap">
+  <div id="adm-sidebar-mount"></div>
+  <div class="adm-body">
+    <div id="adm-topbar-mount"></div>
+    <div class="adm-content">
+
+      <div class="adm-page-header">
+        <div class="adm-page-header__left">
+          <h1>Pensioner Records</h1>
+          <p>Complete registry. Click a row to view the full pensioner profile.</p>
+        </div>
+        <button class="adm-btn-primary" onclick="alert('Export CSV — prototype only')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="adm-stat-row" id="rec-stats"></div>
+
+      <!-- Filters -->
+      <div class="adm-toolbar">
+        <div class="adm-search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="rec-search" placeholder="Search by name, Pension ID, or phone…">
+        </div>
+        <select class="adm-filter" id="filter-lga"></select>
+        <select class="adm-filter" id="filter-status">
+          <option value="">All Statuses</option>
+          <option value="Active">Active</option>
+          <option value="Pending Review">Pending Review</option>
+          <option value="Awaiting Verification">Awaiting Verification</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+        <select class="adm-filter" id="filter-cat"></select>
+      </div>
+
+      <!-- Table -->
+      <div class="adm-card">
+        <table class="adm-table adm-table--clickable">
+          <thead>
+            <tr>
+              <th>Pensioner</th>
+              <th>Pension ID</th>
+              <th>LGA</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Last Verified</th>
+              <th>Next Due</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rec-tbody"></tbody>
+        </table>
+        <div class="adm-table-footer">
+          <span id="rec-count">Loading…</span>
+          <span style="color:#9ca3af;">Click any row to view full profile</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/admin-shell.js"></script>
+<script>
+(function () {
+  const { user, D } = AdminShell.init('records', 'Pensioner Records');
+  const { fmtDate, statusChip } = AdminShell;
+  const pensioners = D.pensioners;
+
+  // ---- Stats strip ----
+  const statsEl = document.getElementById('rec-stats');
+  const total   = D.analytics.summary.totalPensioners;
+  const recStats = [
+    { label:'Total Enrolled',           val: total.toLocaleString(),                                                      accent:'blue' },
+    { label:'Active Records',           val: pensioners.filter(p=>p.status==='Active').length,                            accent:'green' },
+    { label:'Awaiting Verification',    val: pensioners.filter(p=>p.status==='Awaiting Verification').length,             accent:'amber' },
+    { label:'Pending Review',           val: pensioners.filter(p=>p.status==='Pending Review').length,                    accent:'red' },
+    { label:'Verified This Cycle',      val: D.analytics.summary.verifiedThisCycle.toLocaleString(),                     accent:'teal' },
+    { label:'Avg. Verification Count',  val: (pensioners.reduce((s,p)=>s+(p.verificationCount||0),0)/pensioners.length).toFixed(1) + 'x', accent:'slate' },
+  ];
+  recStats.forEach(s => {
+    statsEl.insertAdjacentHTML('beforeend',
+      `<div class="adm-stat-card accent--${s.accent}">
+        <div class="adm-stat-val">${s.val}</div>
+        <div class="adm-stat-lbl">${s.label}</div>
+       </div>`
+    );
+  });
+
+  // ---- Populate dropdowns ----
+  const lgaSel = document.getElementById('filter-lga');
+  lgaSel.innerHTML = '<option value="">All LGAs</option>';
+  [...new Set(pensioners.map(p => p.lga))].sort().forEach(l =>
+    lgaSel.insertAdjacentHTML('beforeend', `<option value="${l}">${l}</option>`)
+  );
+  const catSel = document.getElementById('filter-cat');
+  catSel.innerHTML = '<option value="">All Categories</option>';
+  [...new Set(pensioners.map(p => p.category))].sort().forEach(c =>
+    catSel.insertAdjacentHTML('beforeend', `<option value="${c}">${c}</option>`)
+  );
+
+  // ---- Render ----
+  function renderTable(list) {
+    const tbody = document.getElementById('rec-tbody');
+    tbody.innerHTML = '';
+    list.forEach(p => {
+      const due = p.nextVerificationDue ? new Date(p.nextVerificationDue) < new Date() : false;
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr onclick="window.location.href='admin-profile.html?id=${encodeURIComponent(p.id)}'">
+          <td>
+            <div class="cell-primary">${p.firstName} ${p.lastName}</div>
+            <div class="cell-secondary">${p.gender} · ${p.phone}</div>
+          </td>
+          <td class="cell-mono">${p.id}</td>
+          <td style="font-size:13px;">${p.lga}</td>
+          <td style="font-size:12px;">${p.category}</td>
+          <td>${statusChip(p.status)}</td>
+          <td style="font-size:12.5px;color:#374151;">${fmtDate(p.lastVerified)}</td>
+          <td style="font-size:12.5px;${due ? 'color:#b91c1c;font-weight:600;' : 'color:#374151;'}">${fmtDate(p.nextVerificationDue)}</td>
+          <td><a class="adm-link" onclick="event.stopPropagation();window.location.href='admin-profile.html?id=${encodeURIComponent(p.id)}'">View →</a></td>
+        </tr>
+      `);
+    });
+    document.getElementById('rec-count').textContent = `Showing ${list.length} of ${pensioners.length} pensioners`;
+  }
+
+  function applyFilters() {
+    const q   = document.getElementById('rec-search').value.toLowerCase();
+    const lga = document.getElementById('filter-lga').value;
+    const st  = document.getElementById('filter-status').value;
+    const cat = document.getElementById('filter-cat').value;
+    renderTable(pensioners.filter(p => {
+      const matchQ   = !q   || (p.firstName+' '+p.lastName).toLowerCase().includes(q) || p.id.toLowerCase().includes(q) || (p.phoneRaw||'').includes(q);
+      const matchLGA = !lga || p.lga === lga;
+      const matchSt  = !st  || p.status === st;
+      const matchCat = !cat || p.category === cat;
+      return matchQ && matchLGA && matchSt && matchCat;
+    }));
+  }
+
+  document.getElementById('rec-search').addEventListener('input', applyFilters);
+  ['filter-lga','filter-status','filter-cat'].forEach(id =>
+    document.getElementById(id).addEventListener('change', applyFilters)
+  );
+
+  renderTable(pensioners);
+})();
+</script>
+
+</body>
+</html>

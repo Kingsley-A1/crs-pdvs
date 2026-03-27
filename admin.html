@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CRS-PDVS Admin Dashboard — Pension Board command centre.">
+  <title>CRS-PDVS — Dashboard</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/admin-shell.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+  <style>
+    /* ---- Welcome banner ---- */
+    .welcome-banner {
+      background: linear-gradient(135deg, #141762 0%, #1e2275 100%);
+      border-radius: 14px; padding: 22px 28px;
+      display: flex; align-items: center; gap: 20px;
+      margin-bottom: 28px; position: relative; overflow: hidden;
+    }
+    .welcome-banner::after { content: ''; position: absolute; right: -40px; top: -40px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(74,92,200,0.15) 0%, transparent 70%); pointer-events: none; }
+    .wb-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(173,184,236,0.15); border: 1px solid rgba(173,184,236,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #adb8ec; }
+    .wb-text { flex: 1; }
+    .wb-greeting { font-size: 15px; font-weight: 700; color: white; margin-bottom: 3px; }
+    .wb-detail { font-size: 12.5px; color: rgba(255,255,255,0.5); }
+    .wb-detail strong { color: rgba(255,255,255,0.75); }
+    .wb-close { background: none; border: none; color: rgba(255,255,255,0.35); cursor: pointer; font-size: 18px; padding: 4px; transition: color 0.15s; line-height: 1; z-index: 1; }
+    .wb-close:hover { color: rgba(255,255,255,0.7); }
+
+    /* ---- Alert banner ---- */
+    .alert-banner { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #fde68a; background: #fffbeb; color: #92400e; font-size: 13px; }
+    .alert-close  { margin-left: auto; background: none; border: none; color: #d97706; cursor: pointer; font-size: 16px; line-height: 1; }
+
+    /* ---- Panel row ---- */
+    .panels-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 1100px) { .panels-row { grid-template-columns: 1fr; } }
+
+    /* ---- Panel card ---- */
+    .panel { background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
+    .panel__header { padding: 14px 20px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; background: #fafafa; }
+    .panel__title { font-size: 13px; font-weight: 700; color: #111827; }
+    .panel__sub   { font-size: 11px; color: #9ca3af; }
+    .panel__action { font-size: 12px; color: #6b7280; text-decoration: none; border: 1px solid #e5e7eb; border-radius: 6px; padding: 4px 10px; background: white; cursor: pointer; transition: background 0.15s; }
+    .panel__action:hover { background: #f3f4f6; color: #111827; }
+
+    /* ---- LGA bars ---- */
+    .lga-row { display: flex; align-items: center; gap: 12px; padding: 9px 16px; border-bottom: 1px solid #f9fafb; }
+    .lga-row:last-child { border-bottom: none; }
+    .lga-name { font-size: 12.5px; color: #374151; font-weight: 500; width: 150px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lga-bar-bg { flex: 1; height: 6px; background: #f3f4f6; border-radius: 3px; overflow: hidden; }
+    .lga-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #1e2275, #4a5cc8); transition: width 0.6s ease; }
+    .lga-pct { font-size: 11.5px; font-weight: 600; color: #374151; width: 36px; text-align: right; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<div class="adm-wrap">
+  <div id="adm-sidebar-mount"></div>
+  <div class="adm-body">
+    <div id="adm-topbar-mount"></div>
+    <div class="adm-content">
+
+      <!-- Alert -->
+      <div class="alert-banner" id="alert-banner">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div>
+          <strong>14 suspicious activity flags</strong> require review this cycle.
+          <a href="admin-review.html" style="color:#d97706;font-weight:600;text-decoration:none;margin-left:6px;">View queue →</a>
+        </div>
+        <button class="alert-close" onclick="this.closest('.alert-banner').remove()">✕</button>
+      </div>
+
+      <!-- Welcome banner -->
+      <div class="welcome-banner" id="welcome-banner">
+        <div class="wb-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="wb-text">
+          <div class="wb-greeting">Welcome back, <span id="wb-name">—</span>.</div>
+          <div class="wb-detail">
+            Signed in as <strong id="wb-role">—</strong>&ensp;·&ensp;
+            Q1 2026 cycle at <strong>65.0% completion</strong>&ensp;·&ensp;
+            Last login: <strong>Today, 07:45</strong>
+          </div>
+        </div>
+        <button class="wb-close" onclick="this.closest('.welcome-banner').remove()">✕</button>
+      </div>
+
+      <!-- Page header -->
+      <div class="adm-page-header">
+        <div class="adm-page-header__left">
+          <h1>Dashboard Overview</h1>
+          <p>Q1 2026 Verification Cycle — 1 January to 31 March 2026</p>
+        </div>
+        <a href="admin-reports.html" class="adm-btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Full Analytics
+        </a>
+      </div>
+
+      <!-- KPI METRIC GRID -->
+      <div class="adm-stat-row" id="metric-grid"></div>
+
+      <!-- REVIEW QUEUE STAT STRIP (from admin-review) -->
+      <div class="adm-page-header" style="margin-top:8px;margin-bottom:14px;">
+        <div class="adm-page-header__left">
+          <h1 style="font-size:15px;">Review Queue at a Glance</h1>
+          <p><a href="admin-review.html" style="color:#1e2275;font-weight:600;">Open review queue →</a></p>
+        </div>
+      </div>
+      <div class="adm-stat-row" id="queue-stat-row" style="margin-bottom:28px;"></div>
+
+      <!-- Panels -->
+      <div class="panels-row">
+
+        <!-- Recent sessions -->
+        <div class="panel">
+          <div class="panel__header">
+            <div>
+              <div class="panel__title">Recent Verification Sessions</div>
+              <div class="panel__sub">Latest 8 across all LGAs</div>
+            </div>
+            <a href="admin-review.html" class="panel__action">View all</a>
+          </div>
+          <table class="adm-table">
+            <thead><tr><th>Pensioner</th><th>Type</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="sessions-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- LGA coverage -->
+        <div class="panel">
+          <div class="panel__header">
+            <div>
+              <div class="panel__title">LGA Coverage Progress</div>
+              <div class="panel__sub">Top 8 LGAs by total pensioner count</div>
+            </div>
+            <a href="admin-reports.html" class="panel__action">Full report</a>
+          </div>
+          <div id="lga-list" style="padding:4px 0;"></div>
+        </div>
+      </div>
+
+      <!-- Second panel row -->
+      <div class="panels-row" style="margin-top:20px;">
+
+        <!-- Support cases -->
+        <div class="panel" id="support-panel">
+          <div class="panel__header">
+            <div>
+              <div class="panel__title">Open Support Cases</div>
+              <div class="panel__sub">Requires attention or assignment</div>
+            </div>
+            <a href="#" class="panel__action">View all</a>
+          </div>
+          <table class="adm-table">
+            <thead><tr><th>Pensioner</th><th>Category</th><th>Priority</th><th>Status</th></tr></thead>
+            <tbody id="support-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Audit log -->
+        <div class="panel">
+          <div class="panel__header">
+            <div>
+              <div class="panel__title">Recent Audit Log</div>
+              <div class="panel__sub">Last 6 recorded system actions</div>
+            </div>
+            <a href="#" class="panel__action">Full log</a>
+          </div>
+          <table class="adm-table">
+            <thead><tr><th>Actor</th><th>Action</th><th>Severity</th><th>Time</th></tr></thead>
+            <tbody id="audit-tbody"></tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div><!-- .adm-content -->
+  </div><!-- .adm-body -->
+</div><!-- .adm-wrap -->
+
+<script src="js/mock-data.js"></script>
+<script src="js/admin-shell.js"></script>
+<script>
+(function () {
+  const { user, D } = AdminShell.init('dashboard', 'Dashboard');
+  const { fmtDate, fmtDateTime, statusChip } = AdminShell;
+
+  // Welcome banner
+  document.getElementById('wb-name').textContent = user.firstName + ' ' + user.lastName;
+  document.getElementById('wb-role').textContent = user.role;
+
+  const S = D.analytics.summary;
+
+  // ---- MAIN METRIC CARDS ----
+  const metrics = [
+    { label: 'Total Pensioners',      val: S.totalPensioners.toLocaleString(),      accent: 'blue',   delta: null },
+    { label: 'Verified This Cycle',   val: S.verifiedThisCycle.toLocaleString(),    accent: 'green',  delta: { dir:'up',   text: D.analytics.verificationRate + '% completion' } },
+    { label: 'Pending Review',        val: S.pendingReview.toLocaleString(),         accent: 'amber',  delta: { dir:'down',  text: 'Needs officer action' } },
+    { label: 'Failed Attempts',       val: S.failedAttempts.toLocaleString(),        accent: 'red',    delta: null },
+    { label: 'Assisted Verifications',val: S.assistedVerifications.toLocaleString(), accent: 'teal',   delta: { dir:'up', text: D.analytics.assistedRate + '% of total' } },
+    { label: 'LGAs Covered',          val: S.lgasCovered + ' / 18',                  accent: 'violet', delta: null },
+    { label: 'Awaiting Verification', val: S.awaitingVerification.toLocaleString(),  accent: 'slate',  delta: null },
+    { label: 'Suspicious Flags',      val: S.suspiciousFlags.toLocaleString(),       accent: 'red',    delta: { dir:'down', text: 'Requires investigation' } },
+  ];
+
+  const grid = document.getElementById('metric-grid');
+  metrics.forEach(m => {
+    const deltaHtml = m.delta
+      ? `<div class="adm-stat-delta ${m.delta.dir === 'up' ? 'delta-up' : 'delta-down'}">${m.delta.dir === 'up' ? '↑' : '↓'} ${m.delta.text}</div>`
+      : '';
+    grid.insertAdjacentHTML('beforeend', `
+      <div class="adm-stat-card accent--${m.accent}">
+        <div class="adm-stat-val">${m.val}</div>
+        <div class="adm-stat-lbl">${m.label}</div>
+        ${deltaHtml}
+      </div>
+    `);
+  });
+
+  // ---- REVIEW QUEUE STATS (Phase 08 KPIs in dashboard) ----
+  const sessions = D.verificationSessions;
+  const queueStats = [
+    { label: 'Pending Review',    val: sessions.filter(s => s.status === 'Pending Review').length, accent: 'amber' },
+    { label: 'Failed Sessions',   val: sessions.filter(s => s.status === 'Failed').length,         accent: 'red' },
+    { label: 'Verified Sessions', val: sessions.filter(s => s.status === 'Verified').length,       accent: 'green' },
+    { label: 'Assisted Sessions', val: sessions.filter(s => s.type === 'Assisted').length,         accent: 'teal' },
+  ];
+
+  const qRow = document.getElementById('queue-stat-row');
+  queueStats.forEach(q => {
+    qRow.insertAdjacentHTML('beforeend', `
+      <div class="adm-stat-card accent--${q.accent}">
+        <div class="adm-stat-val">${q.val}</div>
+        <div class="adm-stat-lbl">${q.label}</div>
+      </div>
+    `);
+  });
+
+  // ---- SESSIONS TABLE ----
+  const sessBody = document.getElementById('sessions-tbody');
+  D.verificationSessions.slice(0, 8).forEach(s => {
+    sessBody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td><div class="cell-primary">${s.pensionerName}</div><div class="cell-secondary">${s.lga}</div></td>
+        <td>${statusChip(s.type)}</td>
+        <td>${statusChip(s.status)}</td>
+        <td style="font-size:12px;color:#9ca3af;">${fmtDate(s.startedAt)}</td>
+      </tr>
+    `);
+  });
+
+  // ---- LGA BARS ----
+  const lgaList = document.getElementById('lga-list');
+  D.analytics.lgaBreakdown.slice(0, 8).forEach(l => {
+    const pct = Math.round((l.verified / l.total) * 100);
+    lgaList.insertAdjacentHTML('beforeend', `
+      <div class="lga-row">
+        <div class="lga-name">${l.lga}</div>
+        <div class="lga-bar-bg"><div class="lga-bar-fill" style="width:${pct}%;"></div></div>
+        <div class="lga-pct">${pct}%</div>
+      </div>
+    `);
+  });
+
+  // ---- SUPPORT CASES ----
+  const suppBody = document.getElementById('support-tbody');
+  D.supportCases.filter(c => c.status !== 'Resolved').forEach(c => {
+    const priChip = c.priority === 'High' ? 'chip--failed' : c.priority === 'Medium' ? 'chip--pending' : 'chip--info';
+    suppBody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td><div class="cell-primary">${c.pensionerName}</div><div class="cell-secondary">${c.lga}</div></td>
+        <td style="font-size:12px;">${c.category}</td>
+        <td><span class="chip ${priChip}">${c.priority}</span></td>
+        <td>${statusChip(c.status)}</td>
+      </tr>
+    `);
+  });
+
+  // ---- AUDIT LOG ----
+  const auditBody = document.getElementById('audit-tbody');
+  D.auditLogs.slice(0, 6).forEach(l => {
+    auditBody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td><div class="cell-primary">${l.actor}</div><div class="cell-secondary">${l.actorRole}</div></td>
+        <td style="font-size:12.5px;">${l.action}</td>
+        <td>${statusChip(l.severity)}</td>
+        <td style="font-size:11px;color:#9ca3af;">${fmtDateTime(l.timestamp)}</td>
+      </tr>
+    `);
+  });
+
+  // Role-gate support panel
+  const supportRoles = ['Pension Board Administrator', 'Verification Officer', 'Supervisor'];
+  if (!supportRoles.includes(user.role)) {
+    const sp = document.getElementById('support-panel');
+    if (sp) sp.style.display = 'none';
+  }
+  if (!['Pension Board Administrator', 'Supervisor'].includes(user.role)) {
+    const ab = document.getElementById('alert-banner');
+    if (ab) ab.style.display = 'none';
+  }
+})();
+</script>
+
+</body>
+</html>

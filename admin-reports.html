@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRS-PDVS — Reports & Analytics</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/admin-shell.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+  <style>
+    /* Chart panel */
+    .chart-card { background:white; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; }
+    .chart-header { padding:14px 20px 12px; border-bottom:1px solid #f3f4f6; display:flex; justify-content:space-between; align-items:center; background:#fafafa; }
+    .chart-title  { font-size:13px; font-weight:700; color:#111827; }
+    .chart-sub    { font-size:11px; color:#9ca3af; }
+    .chart-body   { padding:16px 20px 20px; }
+    .chart-legend { display:flex; gap:14px; flex-wrap:wrap; }
+    .leg-item { display:flex; align-items:center; gap:5px; font-size:11px; color:#6b7280; }
+    .leg-dot  { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+    .panels-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
+    @media (max-width:1100px) { .panels-2 { grid-template-columns:1fr; } }
+    .full-width { grid-column:1/-1; }
+
+    /* SVG chart */
+    .lc-grid      { stroke:#f3f4f6; stroke-width:1; }
+    .lc-axis-lbl  { font-size:10px; fill:#9ca3af; font-family:inherit; }
+    .lc-verified  { fill:none; stroke:#1e2275; stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round; }
+    .lc-pending   { fill:none; stroke:#d97706; stroke-width:2;   stroke-linejoin:round; stroke-dasharray:5 3; }
+    .lc-failed    { fill:none; stroke:#dc2626; stroke-width:1.5; stroke-linejoin:round; stroke-dasharray:3 4; }
+
+    /* Donut */
+    .donut-wrap   { display:flex; align-items:center; gap:20px; padding:4px 0; }
+    .donut-legend { display:flex; flex-direction:column; gap:10px; }
+    .donut-item   { display:flex; align-items:center; gap:8px; font-size:12px; color:#374151; }
+    .donut-swatch { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+    .donut-val    { padding-left:16px; font-weight:700; color:#111827; font-size:12.5px; margin-left:auto; }
+
+    /* LGA bars */
+    .lga-bar-row { display:flex; align-items:center; gap:10px; padding:5px 0; border-bottom:1px solid #f9fafb; }
+    .lga-bar-row:last-child { border-bottom:none; }
+    .lga-bar-name { width:148px; font-size:12px; color:#374151; font-weight:500; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .lga-bar-bg   { flex:1; height:9px; background:#dde2f6; border-radius:5px; overflow:hidden; }
+    .lga-bar-fill { height:100%; background:#1e2275; border-radius:5px; }
+    .lga-bar-pct  { width:40px; text-align:right; font-size:11.5px; font-weight:700; color:#111827; }
+    .lga-bar-cnt  { width:80px; text-align:right; font-size:11px; color:#9ca3af; }
+
+    /* Exception table */
+    .exc-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .exc-table th { padding:10px 16px; font-size:10.5px; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid #f3f4f6; background:#fafafa; text-align:left; }
+    .exc-table td { padding:12px 16px; border-bottom:1px solid #f9fafb; color:#374151; }
+    .exc-table tr:last-child td { border-bottom:none; }
+
+    /* Flags */
+    .flag-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #f9fafb; }
+    .flag-row:last-child { border-bottom:none; }
+    .flag-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .flag-dot--red   { background:#ef4444; }
+    .flag-dot--amber { background:#f59e0b; }
+    .flag-name  { flex:1; font-size:13px; font-weight:500; color:#111827; }
+    .flag-meta  { font-size:11px; color:#9ca3af; }
+    .flag-count { font-size:17px; font-weight:800; color:#111827; min-width:30px; text-align:right; }
+  </style>
+</head>
+<body>
+
+<div class="adm-wrap">
+  <div id="adm-sidebar-mount"></div>
+  <div class="adm-body">
+    <div id="adm-topbar-mount"></div>
+    <div class="adm-content">
+
+      <div class="adm-page-header">
+        <div class="adm-page-header__left">
+          <h1>Reports &amp; Analytics</h1>
+          <p>Q1 2026 — 1 January to 31 March 2026</p>
+        </div>
+        <button class="adm-btn-primary" onclick="alert('Export report — prototype only')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export Report
+        </button>
+      </div>
+
+      <!-- KPI row -->
+      <div class="adm-stat-row" id="kpi-row"></div>
+
+      <!-- Row 1: trend + donut -->
+      <div class="panels-2" style="margin-bottom:20px;">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Verification Trend — Oct 2025 to Mar 2026</div><div class="chart-sub">Verified, Pending, Failed monthly totals</div></div>
+            <div class="chart-legend" id="trend-leg"></div>
+          </div>
+          <div class="chart-body">
+            <svg id="trend-svg" viewBox="0 0 560 160" style="width:100%;height:160px;overflow:visible;"></svg>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Cycle Status Breakdown</div><div class="chart-sub">Distribution of current cycle outcomes</div></div>
+          </div>
+          <div class="chart-body">
+            <div class="donut-wrap">
+              <canvas id="donut-cv" width="130" height="130" style="flex-shrink:0;"></canvas>
+              <div class="donut-legend" id="donut-leg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: LGA bars -->
+      <div style="margin-bottom:20px;">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">LGA Verification Coverage — All 18 LGAs</div><div class="chart-sub">Verified vs. total enrolled</div></div>
+            <div class="chart-legend">
+              <div class="leg-item"><div class="leg-dot" style="background:#1e2275;"></div>Verified</div>
+              <div class="leg-item"><div class="leg-dot" style="background:#dde2f6;"></div>Remaining</div>
+            </div>
+          </div>
+          <div class="chart-body" style="padding-bottom:8px;" id="lga-bars"></div>
+        </div>
+      </div>
+
+      <!-- Row 3: Exception table + Suspicious flags -->
+      <div class="panels-2">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Exception Category Breakdown</div><div class="chart-sub">Why sessions are not completing</div></div>
+          </div>
+          <div style="padding:0;">
+            <table class="exc-table" id="exc-table"></table>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Suspicious Activity Indicators</div><div class="chart-sub">14 total flags this cycle</div></div>
+          </div>
+          <div class="chart-body" id="flags-body"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/admin-shell.js"></script>
+<script>
+(function () {
+  const { user, D } = AdminShell.init('reports', 'Analytics & Reports');
+  const S  = D.analytics.summary;
+  const T  = D.analytics.monthlyTrend;
+  const L  = D.analytics.lgaBreakdown;
+
+  // ---- KPI cards ----
+  const kpis = [
+    { label:'Verified This Cycle',  val:S.verifiedThisCycle.toLocaleString(), accent:'blue',   delta:{ dir:'up',   text:D.analytics.verificationRate+'% completion' } },
+    { label:'Completion Rate',      val:D.analytics.verificationRate+'%',     accent:'green',  delta:{ dir:'up',   text:'↑ 2.1pp month-on-month' } },
+    { label:'Pending Review',       val:S.pendingReview.toLocaleString(),      accent:'amber',  delta:{ dir:'down', text:'↓ 5 since last week' } },
+    { label:'Failed Attempts',      val:S.failedAttempts.toLocaleString(),     accent:'red',    delta:null },
+    { label:'Assisted Sessions',    val:S.assistedVerifications.toLocaleString(), accent:'teal', delta:{ dir:'up', text:D.analytics.assistedRate+'% of total' } },
+    { label:'Suspicious Flags',     val:S.suspiciousFlags.toLocaleString(),    accent:'violet', delta:{ dir:'down', text:'↑ 3 this week' } },
+  ];
+  const kpiRow = document.getElementById('kpi-row');
+  kpis.forEach(k => {
+    const deltaHtml = k.delta
+      ? `<div class="adm-stat-delta ${k.delta.dir==='up'?'delta-up':'delta-down'}">${k.delta.text}</div>`
+      : '';
+    kpiRow.insertAdjacentHTML('beforeend',
+      `<div class="adm-stat-card accent--${k.accent}">
+         <div class="adm-stat-val">${k.val}</div>
+         <div class="adm-stat-lbl">${k.label}</div>
+         ${deltaHtml}
+       </div>`
+    );
+  });
+
+  // ---- SVG Line chart ----
+  const W=560, H=160, PAD={top:12,right:20,bottom:28,left:44};
+  const cW=W-PAD.left-PAD.right, cH=H-PAD.top-PAD.bottom;
+  const maxV=Math.max(...T.map(d=>d.verified)), minV=7000;
+  const sy = v => cH - ((v-minV)/(maxV-minV))*cH;
+  const sx = i => (i/(T.length-1))*cW;
+  const vPts = T.map((d,i)=>`${PAD.left+sx(i)},${PAD.top+sy(d.verified)}`);
+  const pScaled = T.map(d => d.pending * 28 + minV);
+  const fScaled = T.map(d => d.failed  * 50 + minV);
+  const pPts = T.map((d,i)=>`${PAD.left+sx(i)},${PAD.top+sy(pScaled[i])}`);
+  const fPts = T.map((d,i)=>`${PAD.left+sx(i)},${PAD.top+sy(fScaled[i])}`);
+
+  const areaPath = `M ${vPts[0]} ${vPts.slice(1).map(p=>'L '+p).join(' ')} L ${PAD.left+sx(T.length-1)},${PAD.top+cH} L ${PAD.left},${PAD.top+cH} Z`;
+
+  let svgHtml = `<defs><linearGradient id="gv" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e2275"/><stop offset="100%" stop-color="#1e2275" stop-opacity="0"/></linearGradient></defs>`;
+  [0,0.33,0.66,1].forEach(f=>{
+    const y=PAD.top+f*cH;
+    svgHtml += `<line x1="${PAD.left}" y1="${y}" x2="${W-PAD.right}" y2="${y}" class="lc-grid"/>`;
+    if(f===0||f===1) svgHtml += `<text x="${PAD.left-5}" y="${y+3}" class="lc-axis-lbl" text-anchor="end">${f===0?Math.round(maxV/1000)+'k':Math.round(minV/1000)+'k'}</text>`;
+  });
+  T.forEach((d,i)=>{ svgHtml += `<text x="${PAD.left+sx(i)}" y="${H-5}" class="lc-axis-lbl" text-anchor="middle">${d.month.split(' ')[0]}</text>`; });
+  svgHtml += `<path d="${areaPath}" fill="url(#gv)" opacity="0.09"/>`;
+  svgHtml += `<polyline points="${vPts.join(' ')}" class="lc-verified"/>`;
+  svgHtml += `<polyline points="${pPts.join(' ')}" class="lc-pending"/>`;
+  svgHtml += `<polyline points="${fPts.join(' ')}" class="lc-failed"/>`;
+  T.forEach((d,i)=>{ svgHtml += `<circle cx="${PAD.left+sx(i)}" cy="${PAD.top+sy(d.verified)}" r="3.5" fill="white" stroke="#1e2275" stroke-width="2"/>`; });
+  document.getElementById('trend-svg').innerHTML = svgHtml;
+  document.getElementById('trend-leg').innerHTML = `
+    <div class="leg-item"><div class="leg-dot" style="background:#1e2275;"></div>Verified</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#d97706;"></div>Pending</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#dc2626;"></div>Failed</div>
+  `;
+
+  // ---- Donut chart (canvas) ----
+  const donutData = [
+    { label:'Verified',       val:S.verifiedThisCycle,   color:'#1e2275' },
+    { label:'Awaiting',       val:S.awaitingVerification, color:'#93c5fd' },
+    { label:'Pending Review', val:S.pendingReview,        color:'#fbbf24' },
+    { label:'Failed/Referred',val:S.failedAttempts,       color:'#f87171' },
+  ];
+  const donutTotal = donutData.reduce((s,d)=>s+d.val,0);
+  const cv = document.getElementById('donut-cv');
+  const ctx = cv.getContext('2d');
+  let angle = -Math.PI/2;
+  donutData.forEach(d => {
+    const sweep = (d.val/donutTotal)*2*Math.PI;
+    ctx.beginPath(); ctx.moveTo(65,65); ctx.arc(65,65,50,angle,angle+sweep); ctx.closePath();
+    ctx.fillStyle = d.color; ctx.fill();
+    ctx.beginPath(); ctx.arc(65,65,30,0,2*Math.PI);
+    ctx.fillStyle = 'white'; ctx.fill();
+    angle += sweep;
+  });
+  ctx.font = 'bold 14px Inter, sans-serif'; ctx.fillStyle = '#111827'; ctx.textAlign = 'center';
+  ctx.fillText(D.analytics.verificationRate+'%', 65, 67);
+  ctx.font = '9px Inter'; ctx.fillStyle = '#9ca3af';
+  ctx.fillText('Complete', 65, 79);
+
+  const dLeg = document.getElementById('donut-leg');
+  donutData.forEach(d => {
+    const pct = ((d.val/donutTotal)*100).toFixed(1);
+    dLeg.insertAdjacentHTML('beforeend',
+      `<div class="donut-item"><div class="donut-swatch" style="background:${d.color};"></div><span>${d.label}</span><span class="donut-val">${pct}%</span></div>`
+    );
+  });
+
+  // ---- LGA bars ----
+  const lgaBars = document.getElementById('lga-bars');
+  L.forEach(l => {
+    const pct = Math.round((l.verified/l.total)*100);
+    lgaBars.insertAdjacentHTML('beforeend', `
+      <div class="lga-bar-row">
+        <div class="lga-bar-name">${l.lga}</div>
+        <div class="lga-bar-bg"><div class="lga-bar-fill" style="width:${pct}%;"></div></div>
+        <div class="lga-bar-pct">${pct}%</div>
+        <div class="lga-bar-cnt">${l.verified.toLocaleString()} / ${l.total.toLocaleString()}</div>
+      </div>
+    `);
+  });
+
+  // ---- Exception table ----
+  const exceptions = [
+    { cat:'Low Confidence Score',  count:48, pct:'53.9%', sev:'Medium', cls:'chip--pending',  desc:'Poor lighting or camera quality' },
+    { cat:'Low Face Match',        count:22, pct:'24.7%', sev:'Medium', cls:'chip--pending',  desc:'Appearance mismatch or partial view' },
+    { cat:'Physical Limitation',   count:11, pct:'12.4%', sev:'Low',    cls:'chip--info',     desc:'Unable to complete liveness prompts' },
+    { cat:'Suspicious Pattern',    count:5,  pct: '5.6%', sev:'High',   cls:'chip--critical', desc:'Multiple device attempts detected' },
+    { cat:'Session Timeout',       count:3,  pct: '3.4%', sev:'Low',    cls:'chip--info',     desc:'Connection or device interruption' },
+  ];
+  let excHtml = `<thead><tr><th>Exception Category</th><th>Count</th><th>Share</th><th>Severity</th></tr></thead><tbody>`;
+  exceptions.forEach(e => {
+    excHtml += `<tr>
+      <td><div style="font-weight:600;color:#111827;">${e.cat}</div><div style="font-size:11px;color:#9ca3af;">${e.desc}</div></td>
+      <td style="font-size:18px;font-weight:800;color:#111827;">${e.count}</td>
+      <td style="font-weight:600;">${e.pct}</td>
+      <td><span class="chip ${e.cls}">${e.sev}</span></td>
+    </tr>`;
+  });
+  document.getElementById('exc-table').innerHTML = excHtml + '</tbody>';
+
+  // ---- Suspicious flags ----
+  const flags = [
+    { label:'Multiple devices in one session period', count:5, level:'red',   meta:'Last: 18 Mar 2026' },
+    { label:'Face match below 40% threshold',         count:4, level:'red',   meta:'Active investigation' },
+    { label:'Repeated failed liveness (>3 attempts)', count:3, level:'amber', meta:'3 pensioners flagged' },
+    { label:'Session from unregistered location',     count:2, level:'amber', meta:'Under review' },
+  ];
+  const fb = document.getElementById('flags-body');
+  flags.forEach(f => {
+    fb.insertAdjacentHTML('beforeend', `
+      <div class="flag-row">
+        <div class="flag-dot flag-dot--${f.level}"></div>
+        <div><div class="flag-name">${f.label}</div><div class="flag-meta">${f.meta}</div></div>
+        <div class="flag-count">${f.count}</div>
+      </div>
+    `);
+  });
+})();
+</script>
+
+</body>
+</html>

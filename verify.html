@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CRS-PDVS — Locate your pension account to begin verification. Enter your Pension ID and registered phone number.">
+  <meta name="theme-color" content="#1e2275">
+  <title>CRS-PDVS — Find Your Account</title>
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+  <script src="js/pensioner-auth.js"></script>
+
+  <style>
+    /* =====================================================
+       VERIFY PAGE — Layout & Screen States
+       ===================================================== */
+    body {
+      background: var(--neutral-50);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .verify-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-12) var(--space-6) var(--space-16);
+    }
+
+    /* ---- Stepper bar ---- */
+    .verify-stepper {
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: var(--space-10);
+    }
+
+    .verify-stepper__row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .verify-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      flex: 1;
+      cursor: default;
+    }
+
+    .verify-step__circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      transition: all 0.3s ease;
+      border: 2px solid var(--crs-blue-200);
+      background: white;
+      color: var(--color-text-muted);
+    }
+
+    .verify-step--active .verify-step__circle {
+      background: var(--crs-blue-600);
+      border-color: var(--crs-blue-600);
+      color: white;
+      box-shadow: 0 0 0 4px var(--crs-blue-100);
+    }
+
+    .verify-step--done .verify-step__circle {
+      background: var(--green-500);
+      border-color: var(--green-500);
+      color: white;
+    }
+
+    .verify-step__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+
+    .verify-step--active .verify-step__label { color: var(--crs-blue-600); font-weight: var(--font-weight-semi); }
+    .verify-step--done  .verify-step__label  { color: var(--green-600); }
+
+    .verify-step__connector {
+      flex: 1;
+      height: 2px;
+      background: var(--crs-blue-100);
+      margin-bottom: 18px; /* aligns with circle centres */
+    }
+
+    .verify-step__connector--done { background: var(--green-300); }
+    .verify-step__connector--active { background: linear-gradient(90deg, var(--green-300), var(--crs-blue-200)); }
+
+
+    /* ---- Screen card ---- */
+    .verify-card {
+      width: 100%;
+      max-width: 560px;
+      background: white;
+      border-radius: var(--radius-2xl);
+      border: 1px solid var(--color-border-light);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .verify-card__header {
+      padding: var(--space-8) var(--space-8) var(--space-6);
+      border-bottom: 1px solid var(--color-border-light);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-4);
+    }
+
+    .verify-card__icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-xl);
+      background: var(--crs-blue-50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--crs-blue-600);
+    }
+
+    .verify-card__header-text { flex: 1; }
+
+    .verify-card__title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-1);
+    }
+
+    .verify-card__subtitle {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      line-height: var(--line-height-normal);
+      margin: 0;
+    }
+
+    .verify-card__body {
+      padding: var(--space-8);
+    }
+
+    .verify-card__footer {
+      padding: var(--space-5) var(--space-8) var(--space-8);
+    }
+
+
+    /* ---- Privacy note ---- */
+    .privacy-note {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: var(--crs-blue-50);
+      border: 1px solid var(--crs-blue-100);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-6);
+    }
+
+    .privacy-note__icon {
+      color: var(--crs-blue-400);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .privacy-note__text {
+      font-size: var(--font-size-sm);
+      color: var(--crs-blue-700);
+      line-height: var(--line-height-relaxed);
+      margin: 0;
+    }
+
+
+    /* ---- Form ---- */
+    .verify-form .form-group {
+      margin-bottom: var(--space-6);
+    }
+
+    .verify-form .form-label {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semi);
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .verify-form .form-input {
+      font-size: var(--font-size-lg);
+      padding: var(--space-4) var(--space-5);
+      height: auto;
+      letter-spacing: 0.01em;
+    }
+
+    .verify-form .form-hint {
+      margin-top: var(--space-2);
+      font-size: var(--font-size-sm);
+    }
+
+
+    /* ---- Phone input with country prefix ---- */
+    .phone-input-group {
+      display: flex;
+      gap: 0;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .phone-input-group:focus-within {
+      border-color: var(--crs-blue-500);
+      box-shadow: 0 0 0 3px var(--crs-blue-100);
+    }
+
+    .phone-input-group--error {
+      border-color: var(--color-error) !important;
+      box-shadow: 0 0 0 3px rgba(220,38,38,0.1) !important;
+    }
+
+    .phone-prefix {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-4) var(--space-4);
+      background: var(--neutral-50);
+      border-right: 1px solid var(--color-border-light);
+      font-size: var(--font-size-base);
+      color: var(--color-text-secondary);
+      font-weight: var(--font-weight-medium);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .phone-input-inner {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: var(--space-4) var(--space-5);
+      font-size: var(--font-size-lg);
+      font-family: var(--font-family-primary);
+      color: var(--color-text-primary);
+      background: transparent;
+      min-width: 0;
+      letter-spacing: 0.03em;
+    }
+
+    .phone-input-inner::placeholder { color: var(--neutral-400); }
+
+
+    /* ---- Error message inline ---- */
+    .field-error {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-top: var(--space-2);
+      font-size: var(--font-size-sm);
+      color: var(--color-error);
+    }
+
+
+    /* ---- Processing screen ---- */
+    .processing-screen {
+      padding: var(--space-16) var(--space-8);
+      text-align: center;
+    }
+
+    .processing-spinner {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 4px solid var(--crs-blue-100);
+      border-top-color: var(--crs-blue-500);
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto var(--space-6);
+    }
+
+    .processing-title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-3);
+    }
+
+    .processing-desc {
+      font-size: var(--font-size-base);
+      color: var(--color-text-muted);
+      margin: 0;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: var(--line-height-relaxed);
+    }
+
+    .processing-steps {
+      margin-top: var(--space-8);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      max-width: 280px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+    }
+
+    .processing-step {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .processing-step.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .processing-step__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--crs-blue-200);
+      flex-shrink: 0;
+      transition: background 0.3s ease;
+    }
+
+    .processing-step.visible .processing-step__dot { background: var(--crs-blue-500); }
+    .processing-step.done .processing-step__dot    { background: var(--green-500); }
+
+
+    /* ---- Success screen ---- */
+    .success-screen {
+      padding: var(--space-2) 0 0;
+    }
+
+    .success-badge {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-8);
+      background: var(--green-50);
+      border-bottom: 1px solid var(--green-100);
+    }
+
+    .success-badge__icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--green-500);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .success-badge__text {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semi);
+      color: var(--green-700);
+    }
+
+    /* Identity confirmation card */
+    .identity-card {
+      margin: var(--space-6) var(--space-8);
+      background: var(--crs-blue-900);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6) var(--space-7);
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .identity-card::before {
+      content: '';
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      pointer-events: none;
+    }
+
+    .identity-card::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 40px;
+      width: 180px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.025);
+      pointer-events: none;
+    }
+
+    .identity-card__top {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-5);
+    }
+
+    .identity-card__logo {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+      opacity: 0.85;
+    }
+
+    .identity-card__brand {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semi);
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .identity-card__name {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-extra);
+      color: white;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-1);
+    }
+
+    .identity-card__id {
+      font-size: var(--font-size-sm);
+      color: rgba(255,255,255,0.5);
+      font-family: monospace;
+      letter-spacing: 0.04em;
+      margin-bottom: var(--space-5);
+    }
+
+    .identity-card__fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+
+    .identity-card__field {}
+
+    .identity-card__field-label {
+      font-size: var(--font-size-xs);
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: var(--space-1);
+    }
+
+    .identity-card__field-value {
+      font-size: var(--font-size-sm);
+      color: rgba(255,255,255,0.85);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .identity-card__status {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 3px 10px;
+      background: rgba(74,222,128,0.12);
+      border: 1px solid rgba(74,222,128,0.2);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      color: #4ade80;
+      font-weight: var(--font-weight-semi);
+      margin-top: var(--space-1);
+    }
+
+    .identity-card__status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+    }
+
+    /* Action buttons in success */
+    .success-actions {
+      padding: var(--space-6) var(--space-8) var(--space-8);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .verify-divider {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin: var(--space-2) 0;
+    }
+
+    .verify-divider::before,
+    .verify-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--color-border-light);
+    }
+
+    .verify-divider__text {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+
+    /* Consent notice on success */
+    .consent-note {
+      padding: var(--space-4) var(--space-8) var(--space-6);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+    }
+
+    .consent-note__text {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      line-height: var(--line-height-relaxed);
+      margin: 0;
+    }
+
+    /* ---- Error / Not Found screen ---- */
+    .error-screen {
+      padding: var(--space-8);
+    }
+
+    .error-icon-wrap {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--red-50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--space-6);
+      color: var(--color-error);
+      font-size: 28px;
+    }
+
+    .error-title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      text-align: center;
+      margin-bottom: var(--space-3);
+    }
+
+    .error-desc {
+      font-size: var(--font-size-base);
+      color: var(--color-text-muted);
+      text-align: center;
+      line-height: var(--line-height-relaxed);
+      margin: 0 auto var(--space-6);
+      max-width: 380px;
+    }
+
+    .error-tips {
+      background: var(--neutral-50);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+
+    .error-tips__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semi);
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-3);
+    }
+
+    .error-tips__list {
+      margin: 0;
+      padding-left: var(--space-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .error-tips__list li {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      line-height: var(--line-height-normal);
+    }
+
+    .error-actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    /* ---- Attempts tracker ---- */
+    .attempts-note {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background: var(--amber-50);
+      border: 1px solid var(--amber-100);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-5);
+    }
+
+    .attempts-note p {
+      font-size: var(--font-size-sm);
+      color: var(--amber-700);
+      margin: 0;
+    }
+
+    /* Animations */
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-in {
+      animation: fadeIn 0.45s ease both;
+    }
+
+    /* Help strip below card */
+    .help-strip {
+      width: 100%;
+      max-width: 560px;
+      margin-top: var(--space-6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .help-strip a {
+      color: var(--crs-blue-500);
+      text-decoration: none;
+      font-weight: var(--font-weight-medium);
+    }
+
+    .help-strip a:hover { text-decoration: underline; }
+
+    /* Screen visibility */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    @media (max-width: 600px) {
+      .verify-page { padding: var(--space-6) var(--space-4) var(--space-12); }
+      .verify-card__header { padding: var(--space-6) var(--space-6) var(--space-5); }
+      .verify-card__body { padding: var(--space-6); }
+      .verify-card__footer { padding: var(--space-4) var(--space-6) var(--space-6); }
+      .identity-card { margin: var(--space-5) var(--space-5); }
+      .identity-card__fields { grid-template-columns: 1fr; }
+      .success-actions { padding: var(--space-5) var(--space-5) var(--space-6); }
+      .consent-note { padding: var(--space-4) var(--space-5) var(--space-5); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================
+       SITE HEADER
+       ========================================================= -->
+  <header class="site-header" id="site-header">
+    <div class="site-header__inner">
+      <a href="index.html" class="site-header__brand" aria-label="Return to CRS-PDVS Home">
+        <div class="site-header__logo">
+          <img src="assets/images/crs_emblem.png" alt="Cross River State Logo" width="44" height="44" style="object-fit: contain;">
+        </div>
+        <div>
+          <div class="site-header__title">CRS-PDVS</div>
+          <div class="site-header__subtitle">Pension Verification</div>
+        </div>
+      </a>
+
+      <nav class="site-header__nav" id="header-nav" aria-label="Main navigation"></nav>
+
+      <button class="site-header__menu-btn" id="header-menu-btn" aria-label="Open navigation menu" aria-expanded="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+
+  <!-- =========================================================
+       MAIN — VERIFICATION ENTRY FLOW
+       ========================================================= -->
+  <main class="verify-page" id="main">
+
+    <!-- Stepper -->
+    <div class="verify-stepper" id="verify-stepper" aria-label="Verification progress">
+      <div class="verify-stepper__row">
+        <div class="verify-step verify-step--active" id="step-1">
+          <div class="verify-step__circle" id="step-1-circle">1</div>
+          <span class="verify-step__label">Find Account</span>
+        </div>
+        <div class="verify-step__connector" id="connector-1-2"></div>
+        <div class="verify-step" id="step-2">
+          <div class="verify-step__circle" id="step-2-circle">2</div>
+          <span class="verify-step__label">Confirm Identity</span>
+        </div>
+        <div class="verify-step__connector" id="connector-2-3"></div>
+        <div class="verify-step" id="step-3">
+          <div class="verify-step__circle" id="step-3-circle">3</div>
+          <span class="verify-step__label">Face Verification</span>
+        </div>
+        <div class="verify-step__connector" id="connector-3-4"></div>
+        <div class="verify-step" id="step-4">
+          <div class="verify-step__circle" id="step-4-circle">4</div>
+          <span class="verify-step__label">Complete</span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ============================================================
+         SCREEN 1 — LOOKUP FORM
+         ============================================================ -->
+    <div class="verify-card animate-in" id="screen-lookup">
+
+      <div class="verify-card__header">
+        <div class="verify-card__icon-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <div class="verify-card__header-text">
+          <div class="verify-card__title">Find Your Account</div>
+          <p class="verify-card__subtitle">Enter your Pension ID and registered phone number to locate your record.</p>
+        </div>
+      </div>
+
+      <div class="verify-card__body">
+
+        <!-- Privacy note -->
+        <div class="privacy-note">
+          <svg class="privacy-note__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <p class="privacy-note__text">
+            Your details are used only to locate your pension record. We do not store or share them.
+          </p>
+        </div>
+
+        <!-- Error banner (hidden initially) -->
+        <div id="lookup-error-banner" style="display: none; margin-bottom: var(--space-5);">
+          <div class="banner banner--error">
+            <span class="banner__icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </span>
+            <div class="banner__content" id="lookup-error-text">
+              We could not find a matching account. Please check your details and try again.
+            </div>
+          </div>
+        </div>
+
+        <form class="verify-form" id="lookup-form" novalidate>
+
+          <!-- Pension ID -->
+          <div class="form-group">
+            <label class="form-label" for="pension-id">
+              Pension ID
+              <span style="color:var(--color-error);margin-left:2px;" aria-hidden="true">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-input"
+              id="pension-id"
+              name="pensionId"
+              placeholder="e.g., CRS-PEN-2024-0001"
+              autocomplete="off"
+              spellcheck="false"
+              inputmode="text"
+              required
+            >
+            <span class="form-hint">Your Pension ID is printed on your pension documentation from the Pension Board.</span>
+            <div class="field-error" id="pension-id-error" style="display:none;" role="alert">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Please enter your Pension ID.
+            </div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label class="form-label" for="phone-number">
+              Registered Phone Number
+              <span style="color:var(--color-error);margin-left:2px;" aria-hidden="true">*</span>
+            </label>
+            <div class="phone-input-group" id="phone-input-group">
+              <div class="phone-prefix" aria-hidden="true">
+                🇳🇬 +234
+              </div>
+              <input
+                type="tel"
+                class="phone-input-inner"
+                id="phone-number"
+                name="phone"
+                placeholder="0803 000 0000"
+                autocomplete="tel"
+                inputmode="numeric"
+                maxlength="11"
+                required
+              >
+            </div>
+            <span class="form-hint">Enter the phone number you provided when registering with the Pension Board.</span>
+            <div class="field-error" id="phone-error" style="display:none;" role="alert">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Please enter your registered phone number.
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="verify-card__footer">
+        <button class="btn btn-primary btn-full btn-lg" id="lookup-btn" style="font-size: var(--font-size-base);">
+          Find My Account
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:4px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+        <div class="verify-divider" style="margin-top: var(--space-5);">
+          <div class="verify-divider__text">Need help?</div>
+        </div>
+
+        <a href="index.html#support" class="btn btn-secondary btn-full" style="font-size: var(--font-size-sm);">
+          I Need Assistance Finding My Account
+        </a>
+      </div>
+
+    </div><!-- /screen-lookup -->
+
+
+    <!-- ============================================================
+         SCREEN 2 — PROCESSING
+         ============================================================ -->
+    <div class="verify-card" id="screen-processing" style="display:none;">
+      <div class="processing-screen">
+        <div class="processing-spinner" role="status" aria-label="Searching for your account"></div>
+        <div class="processing-title">Searching for Your Account</div>
+        <p class="processing-desc">Please wait while we look up your record in the pension registry.</p>
+
+        <div class="processing-steps" aria-live="polite">
+          <div class="processing-step" id="proc-step-1">
+            <div class="processing-step__dot"></div>
+            Verifying Pension ID format
+          </div>
+          <div class="processing-step" id="proc-step-2">
+            <div class="processing-step__dot"></div>
+            Searching pension registry
+          </div>
+          <div class="processing-step" id="proc-step-3">
+            <div class="processing-step__dot"></div>
+            Confirming phone number
+          </div>
+          <div class="processing-step" id="proc-step-4">
+            <div class="processing-step__dot"></div>
+            Preparing your account details
+          </div>
+        </div>
+      </div>
+    </div><!-- /screen-processing -->
+
+
+    <!-- ============================================================
+         SCREEN 3 — SUCCESS / IDENTITY CONFIRMATION
+         ============================================================ -->
+    <div class="verify-card animate-in" id="screen-success" style="display:none;">
+
+      <div class="success-badge">
+        <div class="success-badge__icon" aria-hidden="true">✓</div>
+        <div class="success-badge__text">Account found. Please confirm this is you before continuing.</div>
+      </div>
+
+      <!-- Identity Card -->
+      <div class="identity-card" id="identity-card" aria-label="Your pension account details">
+        <div class="identity-card__top">
+          <img src="assets/images/crs_emblem.png" alt="" class="identity-card__logo" aria-hidden="true">
+          <div class="identity-card__brand">Cross River State Pension Board</div>
+        </div>
+        <div class="identity-card__name" id="ic-name">—</div>
+        <div class="identity-card__id" id="ic-id">—</div>
+        <div class="identity-card__fields">
+          <div class="identity-card__field">
+            <div class="identity-card__field-label">Local Government</div>
+            <div class="identity-card__field-value" id="ic-lga">—</div>
+          </div>
+          <div class="identity-card__field">
+            <div class="identity-card__field-label">Pension Category</div>
+            <div class="identity-card__field-value" id="ic-category">—</div>
+          </div>
+          <div class="identity-card__field">
+            <div class="identity-card__field-label">Phone Number</div>
+            <div class="identity-card__field-value" id="ic-phone">—</div>
+          </div>
+          <div class="identity-card__field">
+            <div class="identity-card__field-label">Account Status</div>
+            <div>
+              <div class="identity-card__status" id="ic-status">
+                <div class="identity-card__status-dot"></div>
+                <span>Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Consent note -->
+      <div class="consent-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--crs-blue-300)" stroke-width="2" style="flex-shrink:0;margin-top:1px;" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <p class="consent-note__text">
+          By continuing, you confirm this is your account and consent to your identity being verified through the CRS Pension Digital Verification System.
+        </p>
+      </div>
+
+      <div class="success-actions">
+        <button class="btn btn-primary btn-full btn-lg" id="continue-btn" style="font-size: var(--font-size-base);">
+          Yes, This Is Me — Continue
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:4px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+        <div class="verify-divider">
+          <div class="verify-divider__text">Not you?</div>
+        </div>
+
+        <button class="btn btn-secondary btn-full" id="retry-btn" style="font-size: var(--font-size-sm);">
+          This Is Not My Account — Try Again
+        </button>
+
+        <a href="index.html#support" class="btn btn-ghost btn-full" style="font-size: var(--font-size-sm); color: var(--color-text-muted);">
+          I Need Assistance
+        </a>
+      </div>
+
+    </div><!-- /screen-success -->
+
+
+    <!-- ============================================================
+         SCREEN 4 — NOT FOUND / ERROR
+         ============================================================ -->
+    <div class="verify-card animate-in" id="screen-error" style="display:none;">
+
+      <div class="error-screen">
+        <div class="error-icon-wrap" aria-hidden="true">✕</div>
+        <div class="error-title" id="error-title">We Could Not Find Your Account</div>
+        <p class="error-desc" id="error-desc">
+          The Pension ID or phone number you entered does not match any record in our system. Please check your details and try again.
+        </p>
+
+        <!-- Attempts warning (shown after 2+ failed attempts) -->
+        <div class="attempts-note" id="attempts-note" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber-500)" stroke-width="2" style="flex-shrink:0;" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <p id="attempts-text">You have 1 attempt remaining. After that, please visit a support center.</p>
+        </div>
+
+        <div class="error-tips">
+          <div class="error-tips__title">Things to check:</div>
+          <ul class="error-tips__list">
+            <li>Your Pension ID should follow the format: <strong>CRS-PEN-YYYY-XXXX</strong></li>
+            <li>Enter the phone number exactly as registered with the Pension Board</li>
+            <li>Phone number should begin with <strong>0</strong> (e.g., 08031234567)</li>
+            <li>Contact the Pension Board if you do not know your registered details</li>
+          </ul>
+        </div>
+
+        <div class="error-actions">
+          <button class="btn btn-primary btn-full btn-lg" id="try-again-btn" style="font-size:var(--font-size-base);">
+            Try Again
+          </button>
+          <a href="index.html#support" class="btn btn-secondary btn-full" style="font-size:var(--font-size-sm);">
+            I Need Help — Visit a Support Center
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /screen-error -->
+
+
+    <!-- Help strip (always visible below card) -->
+    <div class="help-strip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Need help? <a href="index.html#support">Visit a support center near you</a> or <a href="#">call the Pension Board</a>.
+    </div>
+
+  </main>
+
+
+  <!-- =========================================================
+       SCRIPTS
+       ========================================================= -->
+  <script src="js/mock-data.js"></script>
+  <script src="js/pensioner-auth.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    /* ============================================================
+       CRS-PDVS Verification Entry — Identity Lookup
+       All logic is client-side mock. No real backend calls.
+       ============================================================ */
+    (function () {
+
+      // ---- Auth guard — must be signed in before verifying ----
+      const authSession = PensionerAuth.guard();
+      if (!authSession) return; // redirects to login with ?return=verify.html
+      PensionerAuth.updateHeader();
+
+      // ---- State ----
+      let failedAttempts = 0;
+      const MAX_ATTEMPTS = 3;
+      let matchedPensioner = null;
+
+      // ---- DOM refs ----
+      const screens = {
+        lookup:     document.getElementById('screen-lookup'),
+        processing: document.getElementById('screen-processing'),
+        success:    document.getElementById('screen-success'),
+        error:      document.getElementById('screen-error'),
+      };
+
+      const pensionIdInput  = document.getElementById('pension-id');
+      const phoneInput      = document.getElementById('phone-number');
+      const lookupBtn       = document.getElementById('lookup-btn');
+      const lookupErrorBanner = document.getElementById('lookup-error-banner');
+      const lookupErrorText   = document.getElementById('lookup-error-text');
+      const attemptsNote    = document.getElementById('attempts-note');
+      const attemptsText    = document.getElementById('attempts-text');
+
+      // ---- Screen management ----
+      function showScreen(name) {
+        Object.values(screens).forEach(el => {
+          if (el) el.style.display = 'none';
+        });
+        if (screens[name]) {
+          screens[name].style.display = 'block';
+          screens[name].classList.remove('animate-in');
+          void screens[name].offsetWidth; // force reflow to restart animation
+          screens[name].classList.add('animate-in');
+        }
+      }
+
+      // ---- Stepper helper ----
+      function setStep(activeStep) {
+        for (let i = 1; i <= 4; i++) {
+          const step   = document.getElementById(`step-${i}`);
+          const circle = document.getElementById(`step-${i}-circle`);
+          step.classList.remove('verify-step--active', 'verify-step--done');
+          circle.textContent = i;
+
+          if (i < activeStep) {
+            step.classList.add('verify-step--done');
+            circle.textContent = '✓';
+          } else if (i === activeStep) {
+            step.classList.add('verify-step--active');
+          }
+        }
+        // Connectors
+        for (let j = 1; j <= 3; j++) {
+          const conn = document.getElementById(`connector-${j}-${j+1}`);
+          conn.className = 'verify-step__connector';
+          if (j < activeStep) conn.classList.add('verify-step__connector--done');
+          else if (j === activeStep - 1) conn.classList.add('verify-step__connector--active');
+        }
+      }
+
+      // ---- Validation ----
+      function validatePensionId(val) {
+        return val.trim().length > 0;
+      }
+
+      function validatePhone(val) {
+        const cleaned = val.replace(/\s/g, '');
+        return /^0[789][01]\d{8}$/.test(cleaned);
+      }
+
+      function showFieldError(fieldId, errorId, show) {
+        const field = document.getElementById(fieldId);
+        const errEl = document.getElementById(errorId);
+        if (show) {
+          field.classList.add('form-input--error');
+          if (errEl) errEl.style.display = 'flex';
+        } else {
+          field.classList.remove('form-input--error');
+          if (errEl) errEl.style.display = 'none';
+        }
+      }
+
+      // ---- Mock lookup logic ----
+      function lookupPensioner(pensionId, phone) {
+        const cleanedPhone = phone.replace(/\s/g, '');
+        const cleanedId    = pensionId.trim().toUpperCase();
+
+        return CRS_PDVS_DATA.pensioners.find(p => {
+          const idMatch    = p.id.toUpperCase() === cleanedId;
+          const phoneMatch = p.phoneRaw === cleanedPhone;
+          return idMatch && phoneMatch;
+        }) || null;
+      }
+
+      // ---- Mask phone ----
+      function maskPhone(phone) {
+        if (!phone || phone.length < 7) return '—';
+        return phone.slice(0, 4) + '****' + phone.slice(-3);
+      }
+
+      // ---- Populate identity card ----
+      function populateCard(pensioner) {
+        document.getElementById('ic-name').textContent     =
+          `${pensioner.firstName} ${pensioner.lastName}`;
+        document.getElementById('ic-id').textContent       = pensioner.id;
+        document.getElementById('ic-lga').textContent      = pensioner.lga;
+        document.getElementById('ic-category').textContent = pensioner.category;
+        document.getElementById('ic-phone').textContent    = maskPhone(pensioner.phoneRaw);
+
+        const statusEl = document.getElementById('ic-status');
+        const statusText = pensioner.status === 'Active' ? 'Active' :
+                           pensioner.status === 'Inactive' ? 'Inactive' : pensioner.status;
+        statusEl.querySelector('span').textContent = statusText;
+        if (pensioner.status === 'Inactive') {
+          statusEl.style.background = 'rgba(220,38,38,0.1)';
+          statusEl.style.borderColor = 'rgba(220,38,38,0.2)';
+          statusEl.querySelector('.identity-card__status-dot').style.background = '#f87171';
+          statusEl.querySelector('span').style.color = '#f87171';
+        }
+      }
+
+      // ---- Processing animation steps ----
+      function runProcessingSteps(callback, isMatch) {
+        const stepIds  = ['proc-step-1', 'proc-step-2', 'proc-step-3', 'proc-step-4'];
+        const delays   = [400, 850, 1350, 1750];
+        const doneMark = [300, 500, 500, 400];
+
+        stepIds.forEach((id, i) => {
+          setTimeout(() => {
+            const el = document.getElementById(id);
+            el.classList.add('visible');
+            setTimeout(() => el.classList.add('done'), doneMark[i]);
+          }, delays[i]);
+        });
+
+        // Total duration before revealing result
+        setTimeout(() => {
+          callback(isMatch);
+        }, 2400);
+      }
+
+      // ---- Submit ----
+      function handleSubmit() {
+        const pensionId = pensionIdInput.value;
+        const phone     = phoneInput.value;
+
+        // Clear previous errors
+        lookupErrorBanner.style.display = 'none';
+        showFieldError('pension-id', 'pension-id-error', false);
+        document.getElementById('phone-input-group').classList.remove('phone-input-group--error');
+        document.getElementById('phone-error').style.display = 'none';
+
+        let hasError = false;
+
+        if (!validatePensionId(pensionId)) {
+          showFieldError('pension-id', 'pension-id-error', true);
+          hasError = true;
+        }
+
+        if (!validatePhone(phone)) {
+          document.getElementById('phone-input-group').classList.add('phone-input-group--error');
+          document.getElementById('phone-error').style.display = 'flex';
+          hasError = true;
+        }
+
+        if (hasError) return;
+
+        // Check max attempts
+        if (failedAttempts >= MAX_ATTEMPTS) {
+          lookupErrorText.textContent =
+            'You have reached the maximum number of attempts. Please visit an approved support center for assistance.';
+          lookupErrorBanner.style.display = 'block';
+          lookupBtn.disabled = true;
+          lookupBtn.textContent = 'Too Many Attempts';
+          return;
+        }
+
+        // Simulate lookup
+        const found = lookupPensioner(pensionId, phone);
+
+        // Show processing screen
+        showScreen('processing');
+        // Reset processing step states
+        ['proc-step-1','proc-step-2','proc-step-3','proc-step-4'].forEach(id => {
+          const el = document.getElementById(id);
+          el.classList.remove('visible', 'done');
+        });
+
+        runProcessingSteps((match) => {
+          if (match) {
+            matchedPensioner = found;
+            populateCard(found);
+            setStep(2);
+            showScreen('success');
+          } else {
+            failedAttempts++;
+            setStep(1);
+            showScreen('error');
+
+            const remaining = MAX_ATTEMPTS - failedAttempts;
+            if (failedAttempts >= 2) {
+              attemptsNote.style.display = 'flex';
+              attemptsText.textContent = remaining > 0
+                ? `You have ${remaining} attempt${remaining === 1 ? '' : 's'} remaining. After that, please visit a support center.`
+                : 'You have reached the maximum number of attempts. Please visit a support center.';
+            }
+
+            if (failedAttempts >= MAX_ATTEMPTS) {
+              document.getElementById('try-again-btn').disabled = true;
+              document.getElementById('try-again-btn').textContent = 'No More Attempts';
+              document.getElementById('error-title').textContent = 'Maximum Attempts Reached';
+              document.getElementById('error-desc').textContent =
+                'For your security, further attempts have been locked. Please visit an approved support center or call the Pension Board for assistance.';
+            }
+          }
+        }, !!found);
+      }
+
+      // ---- Event listeners ----
+      if (lookupBtn) {
+        lookupBtn.addEventListener('click', handleSubmit);
+      }
+
+      // Allow Enter key to submit
+      [pensionIdInput, phoneInput].forEach(input => {
+        if (input) {
+          input.addEventListener('keydown', e => {
+            if (e.key === 'Enter') handleSubmit();
+          });
+          // Clear field error on input
+          input.addEventListener('input', () => {
+            showFieldError(input.id, `${input.id}-error`, false);
+            if (input.id === 'phone-number') {
+              document.getElementById('phone-input-group').classList.remove('phone-input-group--error');
+              document.getElementById('phone-error').style.display = 'none';
+            }
+            lookupErrorBanner.style.display = 'none';
+          });
+        }
+      });
+
+      // Retry button (from success card — "Not my account")
+      const retryBtn = document.getElementById('retry-btn');
+      if (retryBtn) {
+        retryBtn.addEventListener('click', () => {
+          matchedPensioner = null;
+          setStep(1);
+          showScreen('lookup');
+          pensionIdInput.value = '';
+          phoneInput.value = '';
+          pensionIdInput.focus();
+        });
+      }
+
+      // Try Again button (from error screen)
+      const tryAgainBtn = document.getElementById('try-again-btn');
+      if (tryAgainBtn) {
+        tryAgainBtn.addEventListener('click', () => {
+          setStep(1);
+          showScreen('lookup');
+          lookupErrorBanner.style.display = 'none';
+          pensionIdInput.focus();
+        });
+      }
+
+      // Continue button (from success card) — hand off to onboarding
+      const continueBtn = document.getElementById('continue-btn');
+      if (continueBtn) {
+        continueBtn.addEventListener('click', () => {
+          if (matchedPensioner) {
+            try {
+              sessionStorage.setItem('crs_matched_pensioner', JSON.stringify(matchedPensioner));
+            } catch (e) {}
+          }
+          // Navigate to Phase 04 onboarding flow
+          window.location.href = 'onboard.html';
+        });
+      }
+
+      // // ---- Demo hints (remove in production) ----
+      // // Quick-fill links for testing
+      // const hintContainer = document.createElement('div');
+      // hintContainer.style.cssText = `
+      //   margin-top: var(--space-4);
+      //   padding: var(--space-4);
+      //   background: var(--amber-50);
+      //   border: 1px solid var(--amber-200);
+      //   border-radius: var(--radius-md);
+      //   font-size: var(--font-size-xs);
+      //   color: var(--amber-700);
+      // `;
+      // hintContainer.innerHTML = `
+      //   <div style="font-weight:600;margin-bottom:6px;">🧪 Prototype test hints</div>
+      //   <div style="display:flex;flex-direction:column;gap:6px;">
+      //     <div>
+      //       <strong>Valid match:</strong> ID <code style="background:rgba(0,0,0,0.06);padding:1px 4px;border-radius:3px;">CRS-PEN-2024-0001</code>  
+      //       &nbsp;Phone <code style="background:rgba(0,0,0,0.06);padding:1px 4px;border-radius:3px;">08034567721</code>
+      //       &nbsp;<button onclick="document.getElementById('pension-id').value='CRS-PEN-2024-0001';document.getElementById('phone-number').value='08034567721';" style="background:var(--amber-600);color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:11px;">Fill</button>
+      //     </div>
+      //     <div>
+      //       <strong>Another match:</strong> ID <code style="background:rgba(0,0,0,0.06);padding:1px 4px;border-radius:3px;">CRS-PEN-2024-0005</code>
+      //       &nbsp;Phone <code style="background:rgba(0,0,0,0.06);padding:1px 4px;border-radius:3px;">08133216902</code>
+      //       &nbsp;<button onclick="document.getElementById('pension-id').value='CRS-PEN-2024-0005';document.getElementById('phone-number').value='08133216902';" style="background:var(--amber-600);color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:11px;">Fill</button>
+      //     </div>
+      //     <div>
+      //       <strong>No match (error):</strong> Use any wrong ID/phone combination.
+      //     </div>
+      //   </div>
+      // `;
+      const formEl = document.getElementById('lookup-form');
+      if (formEl) formEl.appendChild(hintContainer);
+
+      // ---- Set current year in footer ----
+      const yearEl = document.getElementById('footer-year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    })();
+  </script>
+
+</body>
+</html>

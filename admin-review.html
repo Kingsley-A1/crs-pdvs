@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRS-PDVS — Review Queue</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/admin-shell.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+  <style>
+    /* Modal */
+    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.42); z-index:500; align-items:center; justify-content:center; }
+    .modal-backdrop.active { display:flex; }
+    .modal { background:white; border-radius:14px; max-width:460px; width:94%; padding:28px; box-shadow:0 20px 40px rgba(0,0,0,0.2); animation:scaleIn 0.2s ease; }
+    @keyframes scaleIn { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }
+    .modal h3 { font-size:17px; font-weight:700; color:#111827; margin-bottom:8px; }
+    .modal p  { font-size:13px; color:#6b7280; margin-bottom:16px; line-height:1.6; }
+    .modal textarea { width:100%; border:1px solid #e5e7eb; border-radius:8px; padding:10px 12px; font-size:13px; font-family:inherit; outline:none; resize:vertical; min-height:80px; }
+    .modal textarea:focus { border-color:#2b35b5; }
+    .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+    .btn-modal-cancel  { padding:8px 16px; border-radius:8px; border:1px solid #e5e7eb; background:white; font-size:13px; font-weight:600; color:#374151; cursor:pointer; }
+    .btn-modal-confirm { padding:8px 16px; border-radius:8px; border:none; background:#1e2275; color:white; font-size:13px; font-weight:600; cursor:pointer; }
+    .btn-modal-confirm.green  { background:#15803d; }
+    .btn-modal-confirm.red    { background:#b91c1c; }
+    .btn-modal-confirm.purple { background:#6d28d9; }
+  </style>
+</head>
+<body>
+
+<!-- Action modal -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <h3 id="modal-title">Review Session</h3>
+    <p id="modal-desc">Record your findings.</p>
+    <textarea id="modal-note" placeholder="Add case note (optional)…"></textarea>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-modal-confirm" id="modal-btn" onclick="confirmModal()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="adm-wrap">
+  <div id="adm-sidebar-mount"></div>
+  <div class="adm-body">
+    <div id="adm-topbar-mount"></div>
+    <div class="adm-content">
+
+      <div class="adm-page-header">
+        <div class="adm-page-header__left">
+          <h1>Verification Review Queue</h1>
+          <p>Sessions requiring officer review. Act promptly on pending and escalated cases.</p>
+        </div>
+      </div>
+
+      <!-- Queue KPI stats -->
+      <div class="adm-stat-row" id="queue-stats"></div>
+
+      <!-- Filters -->
+      <div class="adm-toolbar">
+        <div class="adm-search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="q-search" placeholder="Search by pensioner name or LGA…">
+        </div>
+        <select class="adm-filter" id="q-status">
+          <option value="">All Statuses</option>
+          <option value="Pending Review">Pending Review</option>
+          <option value="Failed">Failed</option>
+          <option value="Verified">Verified</option>
+        </select>
+        <select class="adm-filter" id="q-type">
+          <option value="">All Types</option>
+          <option value="Self-Service">Self-Service</option>
+          <option value="Assisted">Assisted</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="adm-card">
+        <table class="adm-table">
+          <thead>
+            <tr>
+              <th>Pensioner</th>
+              <th>Session ID</th>
+              <th>Type</th>
+              <th>Reason Flag</th>
+              <th>Status</th>
+              <th>Liveness / Face</th>
+              <th>Date &amp; Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="queue-tbody"></tbody>
+        </table>
+        <div class="adm-table-footer">
+          <span id="queue-count">Loading…</span>
+          <span style="color:#9ca3af;">Click a pensioner name to view full profile</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/admin-shell.js"></script>
+<script>
+(function () {
+  const { user, D } = AdminShell.init('review', 'Review Queue');
+  const { fmtDateTime, statusChip } = AdminShell;
+
+  const sessions = D.verificationSessions;
+
+  // ---- KPI stats ----
+  const qStats = [
+    { label:'Pending Review',              val: sessions.filter(s=>s.status==='Pending Review').length, accent:'amber' },
+    { label:'Failed Sessions',             val: sessions.filter(s=>s.status==='Failed').length,          accent:'red' },
+    { label:'Verified Sessions',           val: sessions.filter(s=>s.status==='Verified').length,        accent:'green' },
+    { label:'Assisted Sessions',           val: sessions.filter(s=>s.type==='Assisted').length,          accent:'teal' },
+    { label:'Avg. Session Duration',       val: '4m 32s',                                                accent:'slate' },
+    { label:'Self-Service Sessions',       val: sessions.filter(s=>s.type==='Self-Service').length,      accent:'blue' },
+  ];
+  const qs = document.getElementById('queue-stats');
+  qStats.forEach(q => {
+    qs.insertAdjacentHTML('beforeend',
+      `<div class="adm-stat-card accent--${q.accent}">
+         <div class="adm-stat-val">${q.val}</div>
+         <div class="adm-stat-lbl">${q.label}</div>
+       </div>`
+    );
+  });
+
+  // ---- Modal ----
+  let _action = null, _sessionId = null;
+  const MODAL_CFG = {
+    review:   { title:'Review Session',           desc:'Record your officer review findings.',                   cls:'',       label:'Save Review' },
+    approve:  { title:'Approve Verification',     desc:'This session will be marked Verified.',                 cls:'green',  label:'Approve' },
+    escalate: { title:'Escalate to Supervisor',   desc:'Case will be escalated for senior review.',             cls:'red',    label:'Escalate' },
+    refer:    { title:'Refer to Support Center',  desc:'Pensioner referred for in-person assisted verification.',cls:'purple', label:'Refer' },
+  };
+
+  window.openAction = function(action, id) {
+    _action = action; _sessionId = id;
+    const c = MODAL_CFG[action];
+    document.getElementById('modal-title').textContent = c.title;
+    document.getElementById('modal-desc').textContent  = c.desc;
+    const btn = document.getElementById('modal-btn');
+    btn.textContent  = c.label;
+    btn.className    = 'btn-modal-confirm ' + c.cls;
+    document.getElementById('modal-note').value = '';
+    document.getElementById('modal-backdrop').classList.add('active');
+  };
+  window.closeModal   = () => document.getElementById('modal-backdrop').classList.remove('active');
+  window.confirmModal = () => {
+    alert(`Action "${_action}" recorded for session ${_sessionId}.\nNote: ${document.getElementById('modal-note').value || '(none)'}`);
+    closeModal();
+  };
+  document.getElementById('modal-backdrop').addEventListener('click', e => { if(e.target.id==='modal-backdrop') closeModal(); });
+
+  // ---- Render table ----
+  const reasonChipCls = {
+    'Low Confidence': 'chip--low-conf',
+    'Low Face Match': 'chip--pending',
+    'Physical Limitation': 'chip--phys-lim',
+  };
+
+  function renderTable(list) {
+    const tbody = document.getElementById('queue-tbody');
+    tbody.innerHTML = '';
+    list.forEach(s => {
+      const reasonHtml = s.reasonTag
+        ? `<span class="chip ${reasonChipCls[s.reasonTag] || 'chip--info'}">${s.reasonTag}</span>`
+        : '<span style="color:#9ca3af;">—</span>';
+      const scores = s.livenessScore != null
+        ? `<div style="font-size:12px;color:#374151;">Live: <b>${(s.livenessScore*100).toFixed(0)}%</b> · Face: <b>${(s.faceMatchScore*100).toFixed(0)}%</b></div>`
+        : '<span style="color:#9ca3af;">—</span>';
+
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr>
+          <td>
+            <a href="admin-profile.html?id=${encodeURIComponent(s.pensionerId)}" style="font-weight:600;color:#1e2275;text-decoration:none;">${s.pensionerName}</a>
+            <div class="cell-secondary">${s.lga}</div>
+          </td>
+          <td class="cell-mono">${s.sessionId}</td>
+          <td>${statusChip(s.type)}</td>
+          <td>${reasonHtml}</td>
+          <td>${statusChip(s.status)}</td>
+          <td>${scores}</td>
+          <td style="font-size:12px;color:#6b7280;">${fmtDateTime(s.startedAt)}</td>
+          <td>
+            <div class="adm-act-row">
+              <button class="adm-act-btn adm-act-btn--review"   onclick="openAction('review','${s.sessionId}')">Review</button>
+              <button class="adm-act-btn adm-act-btn--approve"  onclick="openAction('approve','${s.sessionId}')">Approve</button>
+              <button class="adm-act-btn adm-act-btn--escalate" onclick="openAction('escalate','${s.sessionId}')">Escalate</button>
+              <button class="adm-act-btn adm-act-btn--refer"    onclick="openAction('refer','${s.sessionId}')">Refer</button>
+            </div>
+          </td>
+        </tr>
+      `);
+    });
+    document.getElementById('queue-count').textContent =
+      `Showing ${list.length} of ${sessions.length} sessions`;
+    if (list.length === 0) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:#9ca3af;">No sessions match your filters.</td></tr>`;
+  }
+
+  function applyFilters() {
+    const q  = document.getElementById('q-search').value.toLowerCase();
+    const st = document.getElementById('q-status').value;
+    const ty = document.getElementById('q-type').value;
+    renderTable(sessions.filter(s => {
+      const matchQ  = !q  || s.pensionerName.toLowerCase().includes(q) || s.lga.toLowerCase().includes(q);
+      const matchSt = !st || s.status === st;
+      const matchTy = !ty || s.type === ty;
+      return matchQ && matchSt && matchTy;
+    }));
+  }
+
+  ['q-search','q-status','q-type'].forEach(id => {
+    document.getElementById(id).addEventListener(id === 'q-search' ? 'input' : 'change', applyFilters);
+  });
+
+  renderTable(sessions);
+})();
+</script>
+
+</body>
+</html>

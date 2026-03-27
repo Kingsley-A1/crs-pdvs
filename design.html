@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CRS-PDVS Design System — Colour tokens, typography, components, and UI conventions for the Cross River State Pensioners Digital Verification System.">
+  <title>CRS-PDVS — Design System</title>
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+
+  <style>
+    /* ---- Design page specific ---- */
+    body { background: var(--neutral-50); }
+
+    .ds-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar TOC */
+    .ds-sidebar {
+      width: 240px;
+      background: var(--white);
+      border-right: 1px solid var(--color-border-light);
+      padding: var(--space-8) var(--space-5);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .ds-sidebar__logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-8);
+      padding-bottom: var(--space-6);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .ds-sidebar__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+    }
+
+    .ds-sidebar__sub {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .ds-sidebar__section {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semi);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-2);
+      margin-top: var(--space-6);
+    }
+
+    .ds-sidebar__link {
+      display: block;
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+      margin-bottom: 1px;
+    }
+
+    .ds-sidebar__link:hover {
+      background: var(--crs-blue-50);
+      color: var(--crs-blue-600);
+    }
+
+    /* Main content */
+    .ds-main {
+      flex: 1;
+      min-width: 0;
+      padding: var(--space-12) var(--space-10);
+    }
+
+    .ds-page-header {
+      margin-bottom: var(--space-12);
+      padding-bottom: var(--space-8);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .ds-page-title {
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-extra);
+      color: var(--color-text-primary);
+      letter-spacing: -0.03em;
+      margin-bottom: var(--space-3);
+    }
+
+    .ds-page-desc {
+      font-size: var(--font-size-md);
+      color: var(--color-text-muted);
+      max-width: 600px;
+      line-height: var(--line-height-relaxed);
+      margin: 0;
+    }
+
+    /* Section */
+    .ds-section {
+      margin-bottom: var(--space-16);
+      scroll-margin-top: var(--space-8);
+    }
+
+    .ds-section-title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-2);
+      padding-bottom: var(--space-3);
+      border-bottom: 2px solid var(--crs-blue-100);
+    }
+
+    .ds-section-desc {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-6);
+      line-height: var(--line-height-relaxed);
+    }
+
+    /* Sub-section */
+    .ds-subsection {
+      margin-bottom: var(--space-8);
+    }
+
+    .ds-subsection-title {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semi);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-4);
+    }
+
+    /* Canvas — component preview area */
+    .ds-canvas {
+      background: var(--white);
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+    }
+
+    .ds-canvas--dark {
+      background: var(--crs-blue-900);
+    }
+
+    .ds-canvas--grey {
+      background: var(--neutral-100);
+    }
+
+    /* Colour swatch */
+    .color-swatches {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: var(--space-3);
+    }
+
+    .swatch {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--color-border-light);
+    }
+
+    .swatch__block {
+      height: 72px;
+    }
+
+    .swatch__info {
+      padding: var(--space-2) var(--space-3) var(--space-3);
+      background: white;
+    }
+
+    .swatch__name {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semi);
+      color: var(--color-text-primary);
+    }
+
+    .swatch__hex {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      font-family: monospace;
+    }
+
+    /* Typography specimens */
+    .type-specimen {
+      padding: var(--space-4) 0;
+      border-bottom: 1px solid var(--color-border-light);
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-8);
+    }
+
+    .type-specimen:last-child { border-bottom: none; }
+
+    .type-specimen__meta {
+      min-width: 160px;
+      flex-shrink: 0;
+    }
+
+    .type-specimen__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semi);
+      color: var(--color-text-muted);
+      margin-bottom: 2px;
+    }
+
+    .type-specimen__value {
+      font-size: var(--font-size-xs);
+      color: var(--neutral-400);
+      font-family: monospace;
+    }
+
+    /* Spacing scale */
+    .space-scale {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .space-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .space-block {
+      height: 20px;
+      background: var(--crs-blue-200);
+      border-radius: 3px;
+    }
+
+    .space-label {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      font-family: monospace;
+      min-width: 120px;
+    }
+
+    /* Token table */
+    .token-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-size-sm);
+    }
+
+    .token-table th {
+      text-align: left;
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semi);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: var(--neutral-50);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .token-table td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--neutral-100);
+      vertical-align: middle;
+    }
+
+    .token-table tr:last-child td { border-bottom: none; }
+
+    .token-name {
+      font-family: monospace;
+      font-size: var(--font-size-xs);
+      background: var(--neutral-100);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--crs-blue-700);
+    }
+
+    .token-value {
+      font-family: monospace;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .color-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.1);
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 1024px) {
+      .ds-sidebar { display: none; }
+      .ds-main { padding: var(--space-8) var(--space-6); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ds-layout">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="ds-sidebar">
+      <div class="ds-sidebar__logo">
+        <img src="assets/images/crs_emblem.png" alt="CRS Logo" width="32" height="32" style="object-fit: contain;">
+        <div>
+          <div class="ds-sidebar__title">Design System</div>
+          <div class="ds-sidebar__sub">CRS-PDVS v1.0</div>
+        </div>
+      </div>
+
+      <div class="ds-sidebar__section">Foundation</div>
+      <a href="#colors" class="ds-sidebar__link">Colour Palette</a>
+      <a href="#typography" class="ds-sidebar__link">Typography</a>
+      <a href="#spacing" class="ds-sidebar__link">Spacing</a>
+      <a href="#tokens" class="ds-sidebar__link">Semantic Tokens</a>
+
+      <div class="ds-sidebar__section">Components</div>
+      <a href="#buttons" class="ds-sidebar__link">Buttons</a>
+      <a href="#chips" class="ds-sidebar__link">Chips &amp; Tags</a>
+      <a href="#cards" class="ds-sidebar__link">Cards</a>
+      <a href="#forms" class="ds-sidebar__link">Form Controls</a>
+      <a href="#banners" class="ds-sidebar__link">Banners</a>
+      <a href="#modals" class="ds-sidebar__link">Modals</a>
+      <a href="#tables" class="ds-sidebar__link">Tables</a>
+      <a href="#stepper" class="ds-sidebar__link">Stepper</a>
+      <a href="#status-alerts" class="ds-sidebar__link">Status Alerts</a>
+
+      <div class="ds-sidebar__section">Identity</div>
+      <a href="#logo" class="ds-sidebar__link">Logo Usage</a>
+      <a href="#voice" class="ds-sidebar__link">Voice &amp; Copy</a>
+
+      <div class="ds-sidebar__section">Links</div>
+      <a href="index.html" class="ds-sidebar__link">← Public Site</a>
+      <a href="admin.html" class="ds-sidebar__link">Admin Portal</a>
+    </aside>
+
+
+    <!-- ========== MAIN ========== -->
+    <main class="ds-main">
+
+      <div class="ds-page-header">
+        <div style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-4);">
+          <img src="assets/images/crs_emblem.png" alt="CRS Logo" width="48" height="48" style="object-fit: contain;">
+          <div>
+            <div style="font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.08em;">CRS-PDVS</div>
+          </div>
+        </div>
+        <h1 class="ds-page-title">Design System</h1>
+        <p class="ds-page-desc">
+          The visual language and component conventions for the Cross River State Pensioners Digital Verification System. All colours, type styles, and components are defined here and referenced throughout the prototype.
+        </p>
+      </div>
+
+
+      <!-- ============================
+           COLOURS
+           ============================ -->
+      <section class="ds-section" id="colors">
+        <h2 class="ds-section-title">Colour Palette</h2>
+        <p class="ds-section-desc">Drawn from the Cross River State official brand identity. The deep navy is the primary colour; used in headers, the intro overlay, the admin sidebar, and the footer. The action blue (#2b35b5) is used exclusively for primary call-to-action buttons.</p>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Cross River State Navy — Primary Brand</div>
+          <div class="color-swatches">
+            <div class="swatch">
+              <div class="swatch__block" style="background:#0d0f4a;"></div>
+              <div class="swatch__info"><div class="swatch__name">Navy 900</div><div class="swatch__hex">#0d0f4a</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#141762;"></div>
+              <div class="swatch__info"><div class="swatch__name">Navy 800</div><div class="swatch__hex">#141762</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#1a1f7a;"></div>
+              <div class="swatch__info"><div class="swatch__name">Navy 700</div><div class="swatch__hex">#1a1f7a</div></div>
+            </div>
+            <div class="swatch" style="outline: 2px solid #2b35b5; outline-offset: 2px;">
+              <div class="swatch__block" style="background:#1e2275;"></div>
+              <div class="swatch__info"><div class="swatch__name">Navy 600 ★</div><div class="swatch__hex">#1e2275</div></div>
+            </div>
+            <div class="swatch" style="outline: 2px solid #2b35b5; outline-offset: 2px;">
+              <div class="swatch__block" style="background:#2b35b5;"></div>
+              <div class="swatch__info"><div class="swatch__name">Action 500 ★</div><div class="swatch__hex">#2b35b5</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#4a5cc8;"></div>
+              <div class="swatch__info"><div class="swatch__name">Blue 400</div><div class="swatch__hex">#4a5cc8</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#7585db;"></div>
+              <div class="swatch__info"><div class="swatch__name">Blue 300</div><div class="swatch__hex">#7585db</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#adb8ec;"></div>
+              <div class="swatch__info"><div class="swatch__name">Blue 200</div><div class="swatch__hex">#adb8ec</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#dde2f6;"></div>
+              <div class="swatch__info"><div class="swatch__name">Blue 100</div><div class="swatch__hex">#dde2f6</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#f0f2fc; border: 1px solid #e0e4f5;"></div>
+              <div class="swatch__info"><div class="swatch__name">Blue 50</div><div class="swatch__hex">#f0f2fc</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Status Colours</div>
+          <div class="color-swatches">
+            <div class="swatch">
+              <div class="swatch__block" style="background:#16794a;"></div>
+              <div class="swatch__info"><div class="swatch__name">Success</div><div class="swatch__hex">#16794a</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#d7f2e4; border: 1px solid #c2ecda;"></div>
+              <div class="swatch__info"><div class="swatch__name">Success Light</div><div class="swatch__hex">#d7f2e4</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#b45309;"></div>
+              <div class="swatch__info"><div class="swatch__name">Warning</div><div class="swatch__hex">#b45309</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#fef3c7; border: 1px solid #fde89f;"></div>
+              <div class="swatch__info"><div class="swatch__name">Warning Light</div><div class="swatch__hex">#fef3c7</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#b91c1c;"></div>
+              <div class="swatch__info"><div class="swatch__name">Error</div><div class="swatch__hex">#b91c1c</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#fee2e2; border: 1px solid #fecdcd;"></div>
+              <div class="swatch__info"><div class="swatch__name">Error Light</div><div class="swatch__hex">#fee2e2</div></div>
+            </div>
+            <div class="swatch">
+              <div class="swatch__block" style="background:#0d7377;"></div>
+              <div class="swatch__info"><div class="swatch__name">Info (Teal)</div><div class="swatch__hex">#0d7377</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Neutrals</div>
+          <div class="color-swatches">
+            <div class="swatch"><div class="swatch__block" style="background:#1a1d23;"></div><div class="swatch__info"><div class="swatch__name">900</div><div class="swatch__hex">#1a1d23</div></div></div>
+            <div class="swatch"><div class="swatch__block" style="background:#3f434e;"></div><div class="swatch__info"><div class="swatch__name">700</div><div class="swatch__hex">#3f434e</div></div></div>
+            <div class="swatch"><div class="swatch__block" style="background:#6e7280;"></div><div class="swatch__info"><div class="swatch__name">500</div><div class="swatch__hex">#6e7280</div></div></div>
+            <div class="swatch"><div class="swatch__block" style="background:#b4b8c3;"></div><div class="swatch__info"><div class="swatch__name">300</div><div class="swatch__hex">#b4b8c3</div></div></div>
+            <div class="swatch"><div class="swatch__block" style="background:#ecedf0; border: 1px solid #e0e2e6;"></div><div class="swatch__info"><div class="swatch__name">100</div><div class="swatch__hex">#ecedf0</div></div></div>
+            <div class="swatch"><div class="swatch__block" style="background:#f6f7f8; border: 1px solid #e8e9ec;"></div><div class="swatch__info"><div class="swatch__name">50</div><div class="swatch__hex">#f6f7f8</div></div></div>
+            <div class="swatch"><div class="swatch__block" style="background:#ffffff; border: 1px solid #e8e9ec;"></div><div class="swatch__info"><div class="swatch__name">White</div><div class="swatch__hex">#ffffff</div></div></div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           TYPOGRAPHY
+           ============================ -->
+      <section class="ds-section" id="typography">
+        <h2 class="ds-section-title">Typography</h2>
+        <p class="ds-section-desc">Inter is used throughout. Pensioner-facing screens use larger body text (18px+) and high-contrast. Admin screens use tighter sizing. No decorative fonts.</p>
+
+        <div class="ds-canvas">
+          <div class="type-specimen">
+            <div class="type-specimen__meta">
+              <div class="type-specimen__label">Display / H1</div>
+              <div class="type-specimen__value">48px / 800 / −0.03em</div>
+            </div>
+            <h1 style="font-size: 3rem; margin: 0; letter-spacing: -0.03em; line-height: 1.1;">Pension Verification</h1>
+          </div>
+          <div class="type-specimen">
+            <div class="type-specimen__meta">
+              <div class="type-specimen__label">H2</div>
+              <div class="type-specimen__value">36px / 700 / −0.02em</div>
+            </div>
+            <h2 style="margin: 0; letter-spacing: -0.02em;">How It Works</h2>
+          </div>
+          <div class="type-specimen">
+            <div class="type-specimen__meta">
+              <div class="type-specimen__label">H3</div>
+              <div class="type-specimen__value">30px / 700 / −0.02em</div>
+            </div>
+            <h3 style="margin: 0;">Verification Successful</h3>
+          </div>
+          <div class="type-specimen">
+            <div class="type-specimen__meta">
+              <div class="type-specimen__label">H4</div>
+              <div class="type-specimen__value">24px / 700</div>
+            </div>
+            <h4 style="margin: 0;">Cross River State Pension Board</h4>
+          </div>
+          <div class="type-specimen">
+            <div class="type-specimen__meta">
+              <div class="type-specimen__label">Body Large</div>
+              <div class="type-specimen__value">18px / 400 / 1.75 lh</div>
+            </div>
+            <p style="font-size: 1.125rem; margin: 0; color: var(--color-text-secondary); line-height: 1.75;">Complete your pension verification securely from your phone.</p>
+          </div>
+          <div class="type-specimen">
+            <div class="type-specimen__meta">
+              <div class="type-specimen__label">Body</div>
+              <div class="type-specimen__value">16px / 400 / 1.75 lh</div>
+            </div>
+            <p style="margin: 0; color: var(--color-text-secondary); line-height: 1.75;">Your identity and personal data are protected throughout the verification process.</p>
+          </div>
+          <div class="type-specimen">
+            <div class="type-specimen__meta">
+              <div class="type-specimen__label">Body Small</div>
+              <div class="type-specimen__value">14px / 400 / 1.5 lh</div>
+            </div>
+            <p style="font-size: 0.875rem; margin: 0; color: var(--color-text-muted); line-height: 1.5;">Enter your Pension ID as shown on your pension documentation.</p>
+          </div>
+          <div class="type-specimen">
+            <div class="type-specimen__meta">
+              <div class="type-specimen__label">Caption / Label</div>
+              <div class="type-specimen__value">12px / 600 / uppercase</div>
+            </div>
+            <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-muted);">Pension ID</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           SPACING
+           ============================ -->
+      <section class="ds-section" id="spacing">
+        <h2 class="ds-section-title">Spacing Scale</h2>
+        <p class="ds-section-desc">An 8px base scale. Used consistently across padding, gap, and margin. Prefer the named custom properties rather than raw values.</p>
+
+        <div class="ds-canvas">
+          <div class="space-scale">
+            <div class="space-row"><div class="space-block" style="width: 4px;"></div><div class="space-label">--space-1 (4px)</div></div>
+            <div class="space-row"><div class="space-block" style="width: 8px;"></div><div class="space-label">--space-2 (8px)</div></div>
+            <div class="space-row"><div class="space-block" style="width: 12px;"></div><div class="space-label">--space-3 (12px)</div></div>
+            <div class="space-row"><div class="space-block" style="width: 16px;"></div><div class="space-label">--space-4 (16px)</div></div>
+            <div class="space-row"><div class="space-block" style="width: 20px;"></div><div class="space-label">--space-5 (20px)</div></div>
+            <div class="space-row"><div class="space-block" style="width: 24px;"></div><div class="space-label">--space-6 (24px)</div></div>
+            <div class="space-row"><div class="space-block" style="width: 32px;"></div><div class="space-label">--space-8 (32px)</div></div>
+            <div class="space-row"><div class="space-block" style="width: 40px;"></div><div class="space-label">--space-10 (40px)</div></div>
+            <div class="space-row"><div class="space-block" style="width: 48px;"></div><div class="space-label">--space-12 (48px)</div></div>
+            <div class="space-row"><div class="space-block" style="width: 64px;"></div><div class="space-label">--space-16 (64px)</div></div>
+            <div class="space-row"><div class="space-block" style="width: 80px;"></div><div class="space-label">--space-20 (80px)</div></div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           SEMANTIC TOKENS
+           ============================ -->
+      <section class="ds-section" id="tokens">
+        <h2 class="ds-section-title">Semantic Tokens</h2>
+        <p class="ds-section-desc">Use semantic tokens in components and pages — never raw hex values. This ensures consistency and makes theming possible.</p>
+
+        <div class="ds-canvas" style="padding: 0; overflow: hidden;">
+          <table class="token-table">
+            <thead>
+              <tr><th>Token</th><th>Value</th><th>Preview</th><th>Usage</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="token-name">--color-primary</span></td>
+                <td><span class="token-value">--crs-blue-600 (#1e2275)</span></td>
+                <td><span class="color-dot" style="background:#1e2275;"></span></td>
+                <td>Sidebar BG, footer, intro overlay, brand uses</td>
+              </tr>
+              <tr>
+                <td><span class="token-name">--crs-blue-500</span></td>
+                <td><span class="token-value">#2b35b5</span></td>
+                <td><span class="color-dot" style="background:#2b35b5;"></span></td>
+                <td>Primary CTA buttons only</td>
+              </tr>
+              <tr>
+                <td><span class="token-name">--color-text-primary</span></td>
+                <td><span class="token-value">--neutral-900 (#1a1d23)</span></td>
+                <td><span class="color-dot" style="background:#1a1d23;"></span></td>
+                <td>Headings, strong text</td>
+              </tr>
+              <tr>
+                <td><span class="token-name">--color-text-secondary</span></td>
+                <td><span class="token-value">--neutral-600 (#555963)</span></td>
+                <td><span class="color-dot" style="background:#555963;"></span></td>
+                <td>Body paragraphs</td>
+              </tr>
+              <tr>
+                <td><span class="token-name">--color-text-muted</span></td>
+                <td><span class="token-value">--neutral-400 (#9095a0)</span></td>
+                <td><span class="color-dot" style="background:#9095a0;"></span></td>
+                <td>Captions, hints, descriptive labels</td>
+              </tr>
+              <tr>
+                <td><span class="token-name">--color-surface</span></td>
+                <td><span class="token-value">white</span></td>
+                <td><span class="color-dot" style="background:#fff; border: 1px solid #ddd;"></span></td>
+                <td>Cards, modals, panels</td>
+              </tr>
+              <tr>
+                <td><span class="token-name">--color-surface-alt</span></td>
+                <td><span class="token-value">--neutral-50 (#f6f7f8)</span></td>
+                <td><span class="color-dot" style="background:#f6f7f8; border: 1px solid #ddd;"></span></td>
+                <td>Page background</td>
+              </tr>
+              <tr>
+                <td><span class="token-name">--color-border</span></td>
+                <td><span class="token-value">--neutral-200 (#d5d8de)</span></td>
+                <td><span class="color-dot" style="background:#d5d8de;"></span></td>
+                <td>Input borders</td>
+              </tr>
+              <tr>
+                <td><span class="token-name">--color-success</span></td>
+                <td><span class="token-value">--green-500 (#1a9058)</span></td>
+                <td><span class="color-dot" style="background:#1a9058;"></span></td>
+                <td>Verified chip, success banner</td>
+              </tr>
+              <tr>
+                <td><span class="token-name">--color-warning</span></td>
+                <td><span class="token-value">--amber-500 (#d97706)</span></td>
+                <td><span class="color-dot" style="background:#d97706;"></span></td>
+                <td>Pending chip, warning banner</td>
+              </tr>
+              <tr>
+                <td><span class="token-name">--color-error</span></td>
+                <td><span class="token-value">--red-500 (#dc2626)</span></td>
+                <td><span class="color-dot" style="background:#dc2626;"></span></td>
+                <td>Failed chip, error banner, danger button</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           BUTTONS
+           ============================ -->
+      <section class="ds-section" id="buttons">
+        <h2 class="ds-section-title">Buttons</h2>
+        <p class="ds-section-desc">Primary and secondary buttons carry clear visual hierarchy. Ghost buttons for tertiary actions. Danger/Success for admin review actions only. Always use large size (btn-lg) on pensioner-facing screens.</p>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Variants</div>
+          <div class="ds-canvas" style="display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center;">
+            <button class="btn btn-primary">Primary</button>
+            <button class="btn btn-secondary">Secondary</button>
+            <button class="btn btn-ghost">Ghost</button>
+            <button class="btn btn-success">Approve</button>
+            <button class="btn btn-danger">Reject</button>
+            <button class="btn btn-primary" disabled>Disabled</button>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Sizes</div>
+          <div class="ds-canvas" style="display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm">Small</button>
+            <button class="btn btn-primary">Default</button>
+            <button class="btn btn-primary btn-lg">Large</button>
+            <button class="btn btn-primary btn-xl">Extra Large</button>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">On Dark Background (Hero CTAs)</div>
+          <div class="ds-canvas ds-canvas--dark" style="display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap;">
+            <a href="#" style="display:inline-flex;align-items:center;gap:8px;padding:16px 32px;background:white;color:var(--crs-blue-700);font-size:16px;font-weight:700;border-radius:12px;text-decoration:none;border:2px solid white;">Start Verification →</a>
+            <a href="#" style="display:inline-flex;align-items:center;gap:8px;padding:16px 32px;background:transparent;color:rgba(255,255,255,0.9);font-size:16px;font-weight:600;border-radius:12px;text-decoration:none;border:2px solid rgba(255,255,255,0.35);">Get Help</a>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           CHIPS
+           ============================ -->
+      <section class="ds-section" id="chips">
+        <h2 class="ds-section-title">Chips &amp; Status Tags</h2>
+        <p class="ds-section-desc">Used to communicate verification status, case priority, and session type. Always include the dot. Do not use chips for primary navigation.</p>
+
+        <div class="ds-canvas" style="display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center;">
+          <span class="chip chip--green"><span class="chip__dot"></span>Verified</span>
+          <span class="chip chip--amber"><span class="chip__dot"></span>Pending Review</span>
+          <span class="chip chip--red"><span class="chip__dot"></span>Failed</span>
+          <span class="chip chip--blue"><span class="chip__dot"></span>Awaiting Verification</span>
+          <span class="chip chip--teal"><span class="chip__dot"></span>Referred to Support</span>
+          <span class="chip chip--neutral"><span class="chip__dot"></span>Expired</span>
+          <span class="chip chip--blue">Self-Service</span>
+          <span class="chip chip--teal">Assisted</span>
+          <span class="chip chip--red">Alert</span>
+          <span class="chip chip--amber">Warning</span>
+          <span class="chip chip--blue">Info</span>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           CARDS
+           ============================ -->
+      <section class="ds-section" id="cards">
+        <h2 class="ds-section-title">Cards</h2>
+        <p class="ds-section-desc">Cards contain discrete content blocks. Use stat-cards on dashboards. Use bordered cards to signal status at a glance.</p>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Content Card</div>
+          <div class="ds-canvas">
+            <div class="card" style="max-width: 360px;">
+              <div class="card__header">
+                <div class="card__title">Verification Status</div>
+                <span class="chip chip--green"><span class="chip__dot"></span>Active</span>
+              </div>
+              <div class="card__body">Your last verification was completed on 15 December 2025. Your next cycle is due by June 2026.</div>
+              <div class="card__footer">
+                <button class="btn btn-primary btn-sm">Verify Now</button>
+                <button class="btn btn-ghost btn-sm">View History</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Stat Cards (Dashboard)</div>
+          <div class="ds-canvas">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4);">
+              <div class="stat-card"><div class="stat-card__icon stat-card__icon--blue">👥</div><div class="stat-card__value">14,832</div><div class="stat-card__label">Total Pensioners</div></div>
+              <div class="stat-card"><div class="stat-card__icon stat-card__icon--green">✓</div><div class="stat-card__value">9,641</div><div class="stat-card__label">Verified This Cycle</div></div>
+              <div class="stat-card"><div class="stat-card__icon stat-card__icon--amber">⏳</div><div class="stat-card__value">237</div><div class="stat-card__label">Pending Review</div></div>
+              <div class="stat-card"><div class="stat-card__icon stat-card__icon--red">⚠</div><div class="stat-card__value">14</div><div class="stat-card__label">Suspicious Flags</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">Bordered Status Cards</div>
+          <div class="ds-canvas" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4);">
+            <div class="card card--bordered-green"><div class="card__title">Verified</div><div style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: var(--space-2);">Left border signals positive status.</div></div>
+            <div class="card card--bordered-amber"><div class="card__title">Pending</div><div style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: var(--space-2);">Left border signals review-needed.</div></div>
+            <div class="card card--bordered-red"><div class="card__title">Failed</div><div style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: var(--space-2);">Left border signals error state.</div></div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           FORMS
+           ============================ -->
+      <section class="ds-section" id="forms">
+        <h2 class="ds-section-title">Form Controls</h2>
+        <p class="ds-section-desc">All pensioner-facing forms use large inputs (form-input--lg) with generous padding. Labels are always visible — never rely on placeholder text as a label. Error states are written in plain English.</p>
+
+        <div class="ds-canvas">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+            <div>
+              <div class="form-group">
+                <label class="form-label form-label--required" for="ds-pension-id">Pension ID</label>
+                <input type="text" class="form-input" id="ds-pension-id" placeholder="e.g., CRS-PEN-2024-0001">
+                <span class="form-hint">As shown on your pension documentation.</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label--required" for="ds-dob">Date of Birth</label>
+                <input type="date" class="form-input" id="ds-dob">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ds-lga">Local Government Area</label>
+                <select class="form-select" id="ds-lga">
+                  <option>Select your LGA</option>
+                  <option>Calabar Municipality</option>
+                  <option>Ogoja</option>
+                </select>
+              </div>
+              <button class="btn btn-primary btn-full">Look Up My Account</button>
+            </div>
+            <div>
+              <div class="form-group">
+                <label class="form-label" for="ds-error-demo">Pension ID (Error State)</label>
+                <input type="text" class="form-input form-input--error" id="ds-error-demo" value="INVALID-ID">
+                <span class="form-error">We could not find an account with this Pension ID. Please check and try again.</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ds-textarea">Case Notes</label>
+                <textarea class="form-textarea" id="ds-textarea" placeholder="Enter notes here..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           BANNERS
+           ============================ -->
+      <section class="ds-section" id="banners">
+        <h2 class="ds-section-title">Banners</h2>
+        <p class="ds-section-desc">Used for system-level messages. Always dismissible. Keep banner copy short — one or two sentences maximum. Do not stack multiple banners.</p>
+
+        <div class="ds-canvas" style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <div class="banner banner--info">
+            <span class="banner__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+            <div class="banner__content"><div class="banner__title">Information</div>Your next verification is due on 15 June 2026.</div>
+            <button class="banner__dismiss">✕</button>
+          </div>
+          <div class="banner banner--success">
+            <span class="banner__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+            <div class="banner__content"><div class="banner__title">Verification Successful</div>Reference: CRS-VER-2026-0521 · Verified 15 Dec 2025.</div>
+            <button class="banner__dismiss">✕</button>
+          </div>
+          <div class="banner banner--warning">
+            <span class="banner__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+            <div class="banner__content"><div class="banner__title">Pending Review</div>Your verification is under manual review. You will be notified of the outcome within 3 working days.</div>
+            <button class="banner__dismiss">✕</button>
+          </div>
+          <div class="banner banner--error">
+            <span class="banner__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>
+            <div class="banner__content"><div class="banner__title">Verification Could Not Be Completed</div>Please try again or visit an approved support center.</div>
+            <button class="banner__dismiss">✕</button>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           MODAL
+           ============================ -->
+      <section class="ds-section" id="modals">
+        <h2 class="ds-section-title">Modal Shell</h2>
+        <p class="ds-section-desc">Modals must have a close button, a title, a body, and a footer with actions. Dismissible by close button, backdrop click, or Escape key. Do not nest modals.</p>
+
+        <div class="ds-canvas">
+          <button class="btn btn-secondary" onclick="CRS_APP.openModal('ds-demo-modal')">Open Example Modal</button>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           TABLES
+           ============================ -->
+      <section class="ds-section" id="tables">
+        <h2 class="ds-section-title">Tables</h2>
+        <p class="ds-section-desc">Used for pensioner records, verification queues, and audit logs. Always wrap in .table-wrapper for horizontal scroll on mobile. Generous padding — rows must not feel cramped.</p>
+
+        <div class="ds-canvas" style="padding: 0; overflow: hidden;">
+          <div class="table-wrapper" style="border: none; border-radius: 0;">
+            <table class="table" id="ds-demo-table">
+              <thead>
+                <tr><th>Pensioner</th><th>Pension ID</th><th>LGA</th><th>Status</th><th>Last Verified</th></tr>
+              </thead>
+              <tbody>
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           STEPPER
+           ============================ -->
+      <section class="ds-section" id="stepper">
+        <h2 class="ds-section-title">Stepper</h2>
+        <p class="ds-section-desc">Used on all multi-step pensioner flows. Always show all steps so the pensioner knows what remains. Show text labels on desktop. Never hide progress.</p>
+
+        <div class="ds-canvas" style="display: flex; flex-direction: column; gap: var(--space-6);">
+          <div>
+            <div class="ds-subsection-title" style="margin-bottom: var(--space-3);">Step 2 of 4 Active</div>
+            <div class="stepper">
+              <div class="stepper__step stepper__step--complete"><div class="stepper__indicator stepper__indicator--complete">✓</div><span class="stepper__label">Identity</span></div>
+              <div class="stepper__connector stepper__connector--active"></div>
+              <div class="stepper__step stepper__step--active"><div class="stepper__indicator stepper__indicator--active">2</div><span class="stepper__label">Confirmation</span></div>
+              <div class="stepper__connector"></div>
+              <div class="stepper__step"><div class="stepper__indicator stepper__indicator--pending">3</div><span class="stepper__label">Verification</span></div>
+              <div class="stepper__connector"></div>
+              <div class="stepper__step"><div class="stepper__indicator stepper__indicator--pending">4</div><span class="stepper__label">Complete</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           STATUS ALERTS
+           ============================ -->
+      <section class="ds-section" id="status-alerts">
+        <h2 class="ds-section-title">Status Alerts (Full-Screen)</h2>
+        <p class="ds-section-desc">Used after verification to show the outcome. Always include a primary and secondary action. Keep the message calm and in plain English.</p>
+
+        <div class="ds-canvas" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+          <div class="status-alert">
+            <div class="status-alert__icon status-alert__icon--success">✓</div>
+            <div class="status-alert__title">Verification Successful</div>
+            <div class="status-alert__message">Your identity has been verified. Your pension record is now up to date.</div>
+            <div class="status-alert__actions">
+              <button class="btn btn-primary btn-sm">View Dashboard</button>
+              <button class="btn btn-ghost btn-sm">Download Receipt</button>
+            </div>
+          </div>
+          <div class="status-alert">
+            <div class="status-alert__icon status-alert__icon--warning">⏳</div>
+            <div class="status-alert__title">Under Review</div>
+            <div class="status-alert__message">Your verification has been submitted for manual review. You will be notified within 3 working days.</div>
+            <div class="status-alert__actions">
+              <button class="btn btn-secondary btn-sm">Track Status</button>
+              <button class="btn btn-ghost btn-sm">Get Help</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           LOGO USAGE
+           ============================ -->
+      <section class="ds-section" id="logo">
+        <h2 class="ds-section-title">Logo Usage</h2>
+        <p class="ds-section-desc">Use the circular Cross River State emblem (.png) as the primary mark. Use the Think Cross River wordmark (think_cross_river.jpg) only in the footer strip and landing-page context — never as a header logo.</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+          <div class="ds-canvas" style="display: flex; flex-direction: column; align-items: center; gap: var(--space-4);">
+            <img src="assets/images/crs_emblem.png" alt="CRS State Emblem" width="80" height="80" style="object-fit: contain;">
+            <div class="text-sm text-muted text-center">State Emblem — header, intro overlay, footer</div>
+          </div>
+          <div class="ds-canvas ds-canvas--dark" style="display: flex; flex-direction: column; align-items: center; gap: var(--space-4);">
+            <img src="assets/images/think_cross_river.jpg" alt="Think Cross River" style="height: 60px; object-fit: contain; filter: brightness(0) invert(1);">
+            <div class="text-sm text-center" style="color: rgba(255,255,255,0.5);">Think Cross River — landing strip, footer tagline only</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================
+           VOICE & COPY
+           ============================ -->
+      <section class="ds-section" id="voice">
+        <h2 class="ds-section-title">Voice &amp; Copy Conventions</h2>
+        <p class="ds-section-desc">All copy must be calm, plain, and respectful. Pensioners should never feel confused or rushed.</p>
+
+        <div class="ds-canvas" style="padding: 0; overflow: hidden;">
+          <table class="token-table">
+            <thead><tr><th>Context</th><th style="color: var(--red-600);">❌ Avoid</th><th style="color: var(--green-600);">✓ Prefer</th></tr></thead>
+            <tbody>
+              <tr><td>CTA button</td><td>Get Started!</td><td>Start Verification</td></tr>
+              <tr><td>Success message</td><td>Woohoo! You're verified! 🎉</td><td>Your verification is complete.</td></tr>
+              <tr><td>Error message</td><td>Oops! Something went wrong.</td><td>We could not complete your verification. Please try again.</td></tr>
+              <tr><td>Support prompt</td><td>Need help? Chat with us!</td><td>If you need assistance, visit an approved center or call the Pension Board.</td></tr>
+              <tr><td>Admin label</td><td>Zap this record</td><td>Approve Verification</td></tr>
+              <tr><td>Loading state</td><td>Hang tight… almost there!</td><td>Processing your verification. Please wait.</td></tr>
+              <tr><td>Branding tone</td><td>"Season of Sweetness" on every page</td><td>Restrained; intro overlay only</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+
+    </main>
+  </div>
+
+
+  <!-- Demo Modal -->
+  <div class="modal-overlay" id="ds-demo-modal">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title">Confirm Action</h3>
+        <button class="modal__close" onclick="CRS_APP.closeModal('ds-demo-modal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p>Modals carry a title, body, and footer with at least one action. Backdrop click and Escape key dismiss this modal.</p>
+        <div class="banner banner--info" style="margin-top: var(--space-4);">
+          <span class="banner__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+          <div class="banner__content">Use restrained modal language. Keep the message concise.</div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn-ghost" onclick="CRS_APP.closeModal('ds-demo-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="CRS_APP.closeModal('ds-demo-modal')">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    (function () {
+      // Populate demo table
+      const tbody = document.querySelector('#ds-demo-table tbody');
+      if (!tbody) return;
+      CRS_PDVS_DATA.pensioners.slice(0, 5).forEach(p => {
+        const statusClass = CRS_APP.getStatusChipClass(p.status);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><div style="display:flex;align-items:center;gap:12px;"><div class="avatar avatar--sm">${p.firstName[0]}${p.lastName[0]}</div><div><div class="font-medium">${p.firstName} ${p.lastName}</div></div></div></td>
+          <td><code style="font-size:11px;background:var(--neutral-100);padding:2px 6px;border-radius:4px;">${p.id}</code></td>
+          <td class="text-sm">${p.lga}</td>
+          <td><span class="chip ${statusClass}"><span class="chip__dot"></span>${p.status}</span></td>
+          <td class="text-sm text-muted">${CRS_PDVS_DATA.formatDate(p.lastVerified)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // Banner dismiss
+      document.querySelectorAll('.banner__dismiss').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const b = btn.closest('.banner');
+          if (b) { b.style.opacity = '0'; setTimeout(() => b.remove(), 250); }
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>
