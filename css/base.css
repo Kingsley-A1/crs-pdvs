@@ -17,7 +17,7 @@
   --crs-blue-900: #0d0f4a;   /* Deepest navy */
   --crs-blue-800: #141762;   /* Very dark navy */
   --crs-blue-700: #1a1f7a;   /* Dark navy */
-  --crs-blue-600: #1e2275;   /* Official CRS navy — logo primary */
+  --crs-blue-600: #000080;   /* Official CRS navy — logo primary */
   --crs-blue-500: #2b35b5;   /* Primary action blue — wing stripe */
   --crs-blue-400: #4a5cc8;
   --crs-blue-300: #7585db;
@@ -64,7 +64,7 @@
   --teal-50:  #f0fdfa;
 
   /* --- Semantic Tokens --- */
-  --color-primary:       var(--crs-blue-600);   /* #1e2275 deep navy */
+  --color-primary:       var(--crs-blue-600);   /* #000080 deep navy */
   --color-primary-hover: var(--crs-blue-700);   /* #1a1f7a */
   --color-primary-action: var(--crs-blue-500);  /* #2b35b5 for CTAs */
   --color-primary-light: var(--crs-blue-50);
