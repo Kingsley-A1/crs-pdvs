@@ -1,0 +1,20 @@
+# ─────────────────────────────────────────────────────────────
+#  CRS-PDVS — .gitignore
+# ─────────────────────────────────────────────────────────────
+
+# Large binary document folders (DOCX / ZIP — keep local only)
+CRS-PDVS_10_Executive_Documents_DOCX/
+Executive Briefs Planning Docs/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories
+.vscode/
+.idea/
+
+# Node (if ever bundled)
+node_modules/
+dist/
