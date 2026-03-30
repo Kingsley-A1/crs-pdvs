@@ -8,7 +8,7 @@
    - External resources (Google Fonts): Cache-first with expiry check
    ================================================================ */
 
-const CACHE_VERSION  = 'v1';
+const CACHE_VERSION  = 'v2';
 const STATIC_CACHE   = 'crs-pdvs-static-' + CACHE_VERSION;
 const PAGES_CACHE    = 'crs-pdvs-pages-'  + CACHE_VERSION;
 const FONTS_CACHE    = 'crs-pdvs-fonts-'  + CACHE_VERSION;
@@ -44,7 +44,10 @@ const PAGES = [
   'admin-review.html',
   'admin-records.html',
   'admin-reports.html',
+  'admin-pensioners-profile.html',
+  'admin-users.html',
   'admin-profile.html',
+  'admin-settings.html',
   'admin-assisted.html',
 ];
 
