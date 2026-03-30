@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRS-PDVS — Pensioner Profile</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/admin-shell.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+  <style>
+    /* Profile hero */
+    .profile-hero { background:linear-gradient(135deg,#141762 0%,#1e2275 100%); border-radius:14px; padding:26px 30px; display:flex; align-items:center; gap:22px; margin-bottom:22px; position:relative; overflow:hidden; }
+    .profile-hero::after { content:''; position:absolute; right:-50px; top:-50px; width:240px; height:240px; border-radius:50%; background:radial-gradient(circle,rgba(74,92,200,0.15) 0%,transparent 70%); pointer-events:none; }
+    .ph-avatar { width:70px; height:70px; border-radius:50%; background:rgba(173,184,236,0.15); border:2px solid rgba(173,184,236,0.3); color:#adb8ec; font-size:26px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ph-info { flex:1; min-width:0; }
+    .ph-name { font-size:22px; font-weight:800; color:white; margin-bottom:5px; letter-spacing:-0.02em; }
+    .ph-meta { font-size:12.5px; color:rgba(255,255,255,0.5); display:flex; gap:16px; flex-wrap:wrap; }
+    .ph-meta span { display:flex; align-items:center; gap:5px; }
+    .ph-actions { display:flex; gap:8px; z-index:1; flex-shrink:0; }
+    .btn-white-outline { padding:7px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.25); background:rgba(255,255,255,0.06); color:white; font-size:12.5px; font-weight:600; cursor:pointer; transition:background 0.15s; white-space:nowrap; }
+    .btn-white-outline:hover { background:rgba(255,255,255,0.12); }
+    .btn-white-solid { padding:7px 14px; border-radius:8px; border:none; background:white; color:#1e2275; font-size:12.5px; font-weight:700; cursor:pointer; white-space:nowrap; }
+
+    /* Status strip */
+    .ss-row { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin-bottom:22px; }
+    .ss-card { background:white; border:1px solid #e5e7eb; border-radius:10px; padding:14px 16px; }
+    .ss-lbl  { font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; color:#9ca3af; margin-bottom:5px; }
+    .ss-val  { font-size:14px; font-weight:600; color:#111827; }
+    .ss-val--green { color:#15803d; }
+    .ss-val--amber { color:#b45309; }
+    .ss-val--red   { color:#b91c1c; }
+    .ss-val--navy  { color:#1e2275; }
+
+    /* Profile grid */
+    .profile-grid { display:grid; grid-template-columns:310px 1fr; gap:20px; align-items:start; }
+    @media (max-width:1100px) { .profile-grid { grid-template-columns:1fr; } }
+
+    /* Card helpers */
+    .kv-list { display:flex; flex-direction:column; gap:13px; }
+    .kv-label { font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; color:#9ca3af; margin-bottom:3px; }
+    .kv-value { font-size:13.5px; color:#111827; font-weight:500; }
+    .kv-divider { border:none; border-top:1px solid #f3f4f6; margin:6px 0; }
+
+    /* Support items */
+    .support-item { padding:13px 0; border-bottom:1px solid #f3f4f6; }
+    .support-item:first-child { padding-top:0; }
+    .support-item:last-child  { border-bottom:none; padding-bottom:0; }
+    .si-header { display:flex; justify-content:space-between; margin-bottom:5px; }
+    .si-cat  { font-size:13px; font-weight:600; color:#111827; }
+    .si-date { font-size:11.5px; color:#9ca3af; }
+    .si-desc { font-size:12.5px; color:#6b7280; line-height:1.5; margin-top:5px; }
+
+    /* Timeline */
+    .timeline { position:relative; padding-left:26px; }
+    .timeline::before { content:''; position:absolute; left:8px; top:6px; bottom:6px; width:2px; background:#e5e7eb; }
+    .tl-item  { position:relative; margin-bottom:18px; }
+    .tl-item:last-child { margin-bottom:0; }
+    .tl-dot   { position:absolute; left:-21px; top:2px; width:12px; height:12px; border-radius:50%; border:2px solid white; background:#9ca3af; }
+    .tl-dot--info    { background:#1e2275; }
+    .tl-dot--warning { background:#d97706; }
+    .tl-dot--success { background:#15803d; }
+    .tl-dot--critical{ background:#b91c1c; }
+    .tl-time   { font-size:11px; color:#9ca3af; margin-bottom:2px; }
+    .tl-action { font-size:13px; font-weight:600; color:#111827; margin-bottom:1px; }
+    .tl-actor  { font-size:11.5px; color:#6b7280; }
+
+    /* Notes */
+    .notes-list { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+    .note-item  { background:#fafafa; border:1px solid #f3f4f6; border-radius:8px; padding:11px 13px; }
+    .note-meta  { font-size:10.5px; color:#9ca3af; margin-bottom:3px; }
+    .note-text  { font-size:13px; color:#374151; line-height:1.5; }
+    .notes-input { width:100%; border:1px solid #e5e7eb; border-radius:8px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical; min-height:70px; outline:none; }
+    .notes-input:focus { border-color:#2b35b5; }
+  </style>
+</head>
+<body>
+
+<div class="adm-wrap">
+  <div id="adm-sidebar-mount"></div>
+  <div class="adm-body">
+    <div id="adm-topbar-mount"></div>
+    <div class="adm-content" id="content-area">
+      <div style="padding:40px;text-align:center;color:#9ca3af;font-size:13px;">Loading pensioner record…</div>
+    </div>
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/admin-shell.js"></script>
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const pensId  = params.get('id');
+  const D_RAW   = window.CRS_PDVS_DATA;
+
+  // Init shell first (needs to inject nav before auth check)
+  const pensioner = D_RAW.pensioners.find(p => p.id === pensId) || D_RAW.pensioners[0];
+  const pName     = pensioner ? pensioner.firstName + ' ' + pensioner.lastName : 'Profile';
+
+  const { user, D } = AdminShell.init('records', pName, {
+    breadcrumbs: [
+      { label:'Admin Portal',       href:'admin.html' },
+      { label:'Pensioner Records',  href:'admin-records.html' },
+      { label:pName },
+    ]
+  });
+  const { fmtDate, fmtDateTime, statusChip } = AdminShell;
+
+  const content = document.getElementById('content-area');
+  if (!pensioner) { content.innerHTML = '<div style="padding:40px;text-align:center;color:#9ca3af;">Pensioner not found.</div>'; return; }
+
+  const p = pensioner;
+  const sessions  = D.verificationSessions.filter(s => s.pensionerId === p.id).sort((a,b) => new Date(b.startedAt)-new Date(a.startedAt));
+  const support   = D.supportCases.filter(c => c.pensionerId === p.id);
+  const auditLog  = D.auditLogs.filter(l => l.target && l.target.includes(p.id)).sort((a,b) => new Date(b.timestamp)-new Date(a.timestamp));
+
+  const initials = p.firstName[0] + p.lastName[0];
+  const isOverdue = p.nextVerificationDue && new Date(p.nextVerificationDue) < new Date();
+
+  // Mock notes
+  const mockNotes = [
+    { by:`B. Nkurikiye (Verification Officer)`, date:`12 Jan 2026 · 09:45`, text:`Pensioner confirmed address change. Identity cross-checked with national ID. Proceeding with assisted verification.` },
+    { by:`E. Ita (Supervisor)`,                  date:`18 Dec 2025 · 14:12`, text:`Annual in-person review completed. Pensioner is in good health. No anomalies noted.` },
+  ];
+
+  const fallbackTimeline = [
+    { sev:'Info',    ts:'2026-01-15T09:23:00', action:'Record accessed for quarterly review',             actor:`B. Nkurikiye (Verification Officer)` },
+    { sev:'Warning', ts:'2025-12-18T11:55:00', action:'Verification session failed — low confidence',      actor:`System Auto-flag` },
+    { sev:'Info',    ts:'2025-12-01T08:30:00', action:'Enrolled in Q4 2025 verification cycle',           actor:`M. Essien (Board Administrator)` },
+  ];
+
+  const timelineItems = (auditLog.length > 0 ? auditLog : fallbackTimeline).map(l => `
+    <div class="tl-item">
+      <div class="tl-dot tl-dot--${(l.severity||l.sev||'').toLowerCase() === 'warning' ? 'warning' : (l.severity||l.sev||'').toLowerCase() === 'alert' ? 'critical' : 'info'}"></div>
+      <div class="tl-time">${fmtDateTime(l.timestamp||l.ts)}</div>
+      <div class="tl-action">${l.action}</div>
+      <div class="tl-actor">${l.actor}${l.actorRole ? ' ('+l.actorRole+')' : ''}</div>
+    </div>
+  `).join('');
+
+  const sessionsHtml = sessions.length === 0
+    ? '<tr><td colspan="7" style="text-align:center;padding:24px;color:#9ca3af;">No sessions on record.</td></tr>'
+    : sessions.map(s => `
+      <tr>
+        <td class="cell-mono">${s.sessionId}</td>
+        <td>${statusChip(s.type)}</td>
+        <td>${statusChip(s.status)}</td>
+        <td style="font-size:12.5px;">${s.livenessScore != null ? (s.livenessScore*100).toFixed(0)+'%' : '—'}</td>
+        <td style="font-size:12.5px;">${s.faceMatchScore != null ? (s.faceMatchScore*100).toFixed(0)+'%' : '—'}</td>
+        <td style="font-size:12px;color:#6b7280;">${fmtDateTime(s.startedAt)}</td>
+        <td style="font-size:12px;">${s.reviewedBy || '—'}</td>
+      </tr>
+    `).join('');
+
+  const supportHtml = support.length === 0
+    ? '<div style="padding:16px 0;color:#9ca3af;font-size:13px;text-align:center;">No support cases on record.</div>'
+    : support.map(c => `
+      <div class="support-item">
+        <div class="si-header">
+          <div class="si-cat">${c.category}</div>
+          <div class="si-date">${fmtDate(c.createdAt)}</div>
+        </div>
+        ${statusChip(c.status)}
+        <div class="si-desc">${c.summary}</div>
+      </div>
+    `).join('');
+
+  content.innerHTML = `
+    <!-- Hero -->
+    <div class="profile-hero">
+      <div class="ph-avatar">${initials}</div>
+      <div class="ph-info">
+        <div class="ph-name">${p.firstName} ${p.lastName}</div>
+        <div class="ph-meta">
+          <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${fmtDate(p.dateOfBirth)}</span>
+          <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>${p.lga}</span>
+          <span>${p.phone}</span>
+          <span style="font-family:monospace;">${p.id}</span>
+        </div>
+      </div>
+      <div class="ph-actions">
+        <button class="btn-white-outline" onclick="alert('Print — prototype only')">Print Record</button>
+        <a href="admin-review.html" class="btn-white-solid">Review Queue</a>
+      </div>
+    </div>
+
+    <!-- Status strip -->
+    <div class="ss-row">
+      <div class="ss-card"><div class="ss-lbl">Account Status</div><div class="ss-val ${p.status==='Active'?'ss-val--green':p.status==='Pending Review'?'ss-val--amber':'ss-val--red'}">${p.status}</div></div>
+      <div class="ss-card"><div class="ss-lbl">Category</div><div class="ss-val ss-val--navy">${p.category}</div></div>
+      <div class="ss-card"><div class="ss-lbl">Last Verified</div><div class="ss-val">${fmtDate(p.lastVerified) || 'Never'}</div></div>
+      <div class="ss-card"><div class="ss-lbl">Next Due</div><div class="ss-val ${isOverdue?'ss-val--red':'ss-val--navy'}">${fmtDate(p.nextVerificationDue)}</div></div>
+      <div class="ss-card"><div class="ss-lbl">Sessions (Total)</div><div class="ss-val">${sessions.length} <span style="font-size:13px;color:#9ca3af;">recorded</span></div></div>
+      <div class="ss-card"><div class="ss-lbl">Support Cases</div><div class="ss-val ${support.length>0?'ss-val--amber':''}">${support.length}</div></div>
+    </div>
+
+    <!-- Grid -->
+    <div class="profile-grid">
+      <!-- LEFT -->
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <!-- Identity -->
+        <div class="adm-card">
+          <div class="adm-card-header"><div class="adm-card-title">Identity Summary</div></div>
+          <div class="adm-card-body">
+            <div class="kv-list">
+              <div><div class="kv-label">Full Name</div><div class="kv-value">${p.firstName} ${p.lastName}</div></div>
+              <div><div class="kv-label">Pension ID</div><div class="kv-value" style="font-family:monospace;font-size:12.5px;">${p.id}</div></div>
+              <div><div class="kv-label">Gender</div><div class="kv-value">${p.gender}</div></div>
+              <div><div class="kv-label">Date of Birth</div><div class="kv-value">${fmtDate(p.dateOfBirth)}</div></div>
+              <div><div class="kv-label">Phone Number</div><div class="kv-value">${p.phone}</div></div>
+              <hr class="kv-divider">
+              <div><div class="kv-label">LGA</div><div class="kv-value">${p.lga}</div></div>
+              <div><div class="kv-label">Pension Category</div><div class="kv-value">${p.category}</div></div>
+              <div><div class="kv-label">Bank</div><div class="kv-value">${p.bankName} · ****${p.accountLast4}</div></div>
+              <div><div class="kv-label">Enrolment Date</div><div class="kv-value">${fmtDate(p.onboardedDate)}</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Support -->
+        <div class="adm-card">
+          <div class="adm-card-header"><div class="adm-card-title">Support History</div><span style="font-size:12px;color:#6b7280;">${support.length} case${support.length!==1?'s':''}</span></div>
+          <div class="adm-card-body" style="padding:16px 20px;">${supportHtml}</div>
+        </div>
+        <!-- Notes -->
+        <div class="adm-card">
+          <div class="adm-card-header"><div class="adm-card-title">Case Notes</div></div>
+          <div class="adm-card-body">
+            <div class="notes-list" id="notes-list">
+              ${mockNotes.map(n=>`<div class="note-item"><div class="note-meta">${n.by} — ${n.date}</div><div class="note-text">${n.text}</div></div>`).join('')}
+            </div>
+            <div style="border-top:1px solid #f3f4f6;padding-top:14px;">
+              <textarea class="notes-input" id="new-note" placeholder="Add a case note…"></textarea>
+              <button class="adm-btn-primary" style="margin-top:8px;width:100%;" onclick="addNote()">Save Note</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <!-- Verification history -->
+        <div class="adm-card">
+          <div class="adm-card-header"><div class="adm-card-title">Verification History</div><span style="font-size:12px;color:#6b7280;">${sessions.length} session${sessions.length!==1?'s':''}</span></div>
+          <table class="adm-table">
+            <thead><tr><th>Session ID</th><th>Type</th><th>Status</th><th>Liveness</th><th>Face</th><th>Date & Time</th><th>Officer</th></tr></thead>
+            <tbody>${sessionsHtml}</tbody>
+          </table>
+        </div>
+        <!-- Audit timeline -->
+        <div class="adm-card">
+          <div class="adm-card-header"><div class="adm-card-title">Audit Timeline</div></div>
+          <div class="adm-card-body">
+            <div class="timeline">${timelineItems}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  window.addNote = function () {
+    const val = document.getElementById('new-note').value.trim();
+    if (!val) return;
+    const now = new Date().toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) +
+                ' · ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+    document.getElementById('notes-list').insertAdjacentHTML('afterbegin', `
+      <div class="note-item">
+        <div class="note-meta">${user.firstName} ${user.lastName} (${user.role}) — ${now}</div>
+        <div class="note-text">${val}</div>
+      </div>
+    `);
+    document.getElementById('new-note').value = '';
+  };
+})();
+</script>
+
+</body>
+</html>

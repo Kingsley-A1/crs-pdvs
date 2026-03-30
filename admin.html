@@ -48,6 +48,10 @@
     .lga-bar-bg { flex: 1; height: 6px; background: #f3f4f6; border-radius: 3px; overflow: hidden; }
     .lga-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #1e2275, #4a5cc8); transition: width 0.6s ease; }
     .lga-pct { font-size: 11.5px; font-weight: 600; color: #374151; width: 36px; text-align: right; flex-shrink: 0; }
+
+    /* ---- KPI link wrapper ---- */
+    a.adm-stat-card { text-decoration: none; color: inherit; display: flex; flex-direction: column; }
+    a.adm-stat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.13); }
   </style>
 </head>
 <body>
@@ -191,17 +195,30 @@
 
   const S = D.analytics.summary;
 
-  // ---- MAIN METRIC CARDS ----
+  // ---- MAIN METRIC CARDS — clickable with count-up animation ----
   const metrics = [
-    { label: 'Total Pensioners',      val: S.totalPensioners.toLocaleString(),      accent: 'blue',   delta: null },
-    { label: 'Verified This Cycle',   val: S.verifiedThisCycle.toLocaleString(),    accent: 'green',  delta: { dir:'up',   text: D.analytics.verificationRate + '% completion' } },
-    { label: 'Pending Review',        val: S.pendingReview.toLocaleString(),         accent: 'amber',  delta: { dir:'down',  text: 'Needs officer action' } },
-    { label: 'Failed Attempts',       val: S.failedAttempts.toLocaleString(),        accent: 'red',    delta: null },
-    { label: 'Assisted Verifications',val: S.assistedVerifications.toLocaleString(), accent: 'teal',   delta: { dir:'up', text: D.analytics.assistedRate + '% of total' } },
-    { label: 'LGAs Covered',          val: S.lgasCovered + ' / 18',                  accent: 'violet', delta: null },
-    { label: 'Awaiting Verification', val: S.awaitingVerification.toLocaleString(),  accent: 'slate',  delta: null },
-    { label: 'Suspicious Flags',      val: S.suspiciousFlags.toLocaleString(),       accent: 'red',    delta: { dir:'down', text: 'Requires investigation' } },
+    { label: 'Total Pensioners',       val: S.totalPensioners,        suffix: '',       accent: 'blue',   delta: null,                                                              href: 'admin-records.html' },
+    { label: 'Verified This Cycle',    val: S.verifiedThisCycle,      suffix: '',       accent: 'green',  delta: { dir:'up',   text: D.analytics.verificationRate + '% completion' }, href: 'admin-reports.html' },
+    { label: 'Pending Review',         val: S.pendingReview,           suffix: '',       accent: 'amber',  delta: { dir:'down', text: 'Needs officer action' },                     href: 'admin-review.html' },
+    { label: 'Failed Attempts',        val: S.failedAttempts,          suffix: '',       accent: 'red',    delta: null,                                                              href: 'admin-reports.html' },
+    { label: 'Assisted Verifications', val: S.assistedVerifications,   suffix: '',       accent: 'teal',   delta: { dir:'up', text: D.analytics.assistedRate + '% of total' },      href: 'admin-reports.html' },
+    { label: 'LGAs Covered',           val: S.lgasCovered,             suffix: ' / 18', accent: 'violet', delta: null,                                                              href: 'admin-reports.html' },
+    { label: 'Awaiting Verification',  val: S.awaitingVerification,    suffix: '',       accent: 'slate',  delta: null,                                                              href: 'admin-records.html' },
+    { label: 'Suspicious Flags',       val: S.suspiciousFlags,         suffix: '',       accent: 'red',    delta: { dir:'down', text: 'Requires investigation' },                    href: 'admin-reports.html' },
   ];
+
+  // Lightweight count-up animation using requestAnimationFrame
+  function countUp(el, target, suffix, duration) {
+    const start = performance.now();
+    function tick(now) {
+      const elapsed = Math.min((now - start) / duration, 1);
+      // easeOutExpo for a snappy live-data feel
+      const ease = elapsed === 1 ? 1 : 1 - Math.pow(2, -10 * elapsed);
+      el.textContent = Math.round(ease * target) + suffix;
+      if (elapsed < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
 
   const grid = document.getElementById('metric-grid');
   metrics.forEach(m => {
@@ -209,13 +226,23 @@
       ? `<div class="adm-stat-delta ${m.delta.dir === 'up' ? 'delta-up' : 'delta-down'}">${m.delta.dir === 'up' ? '↑' : '↓'} ${m.delta.text}</div>`
       : '';
     grid.insertAdjacentHTML('beforeend', `
-      <div class="adm-stat-card accent--${m.accent}">
-        <div class="adm-stat-val">${m.val}</div>
+      <a href="${m.href}" class="adm-stat-card accent--${m.accent}">
+        <div class="adm-stat-val" data-target="${m.val}" data-suffix="${m.suffix}">0${m.suffix}</div>
         <div class="adm-stat-lbl">${m.label}</div>
         ${deltaHtml}
-      </div>
+      </a>
     `);
   });
+
+  // Trigger count-up for all KPI values 120ms after render
+  setTimeout(() => {
+    document.querySelectorAll('.adm-stat-val[data-target]').forEach(el => {
+      const target = parseInt(el.dataset.target, 10);
+      const suffix = el.dataset.suffix || '';
+      countUp(el, target, suffix, 900);
+    });
+  }, 120);
+
 
   // ---- REVIEW QUEUE STATS (Phase 08 KPIs in dashboard) ----
   const sessions = D.verificationSessions;

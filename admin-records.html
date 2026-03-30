@@ -121,7 +121,7 @@
     list.forEach(p => {
       const due = p.nextVerificationDue ? new Date(p.nextVerificationDue) < new Date() : false;
       tbody.insertAdjacentHTML('beforeend', `
-        <tr onclick="window.location.href='admin-profile.html?id=${encodeURIComponent(p.id)}'">
+        <tr onclick="window.location.href='admin-pensioners-profile.html?id=${encodeURIComponent(p.id)}'">
           <td>
             <div class="cell-primary">${p.firstName} ${p.lastName}</div>
             <div class="cell-secondary">${p.gender} · ${p.phone}</div>
@@ -132,7 +132,7 @@
           <td>${statusChip(p.status)}</td>
           <td style="font-size:12.5px;color:#374151;">${fmtDate(p.lastVerified)}</td>
           <td style="font-size:12.5px;${due ? 'color:#b91c1c;font-weight:600;' : 'color:#374151;'}">${fmtDate(p.nextVerificationDue)}</td>
-          <td><a class="adm-link" onclick="event.stopPropagation();window.location.href='admin-profile.html?id=${encodeURIComponent(p.id)}'">View →</a></td>
+          <td><a class="adm-link" onclick="event.stopPropagation();window.location.href='admin-pensioners-profile.html?id=${encodeURIComponent(p.id)}'">View →</a></td>
         </tr>
       `);
     });

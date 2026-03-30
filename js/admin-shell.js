@@ -59,8 +59,8 @@ window.AdminShell = (function () {
     {
       section: 'ADMINISTRATION',
       items: [
-        { id: 'users',    href: '#', label: 'Admin Users', icon: 'users',    roles: 'Pension Board Administrator' },
-        { id: 'settings', href: '#', label: 'Settings',    icon: 'settings', roles: 'Pension Board Administrator' },
+        { id: 'users',    href: 'admin-users.html',    label: 'Admin Users', icon: 'users',    roles: 'Pension Board Administrator' },
+        { id: 'settings', href: 'admin-settings.html', label: 'Settings',    icon: 'settings', roles: 'Pension Board Administrator' },
       ],
     },
   ];
@@ -131,7 +131,9 @@ window.AdminShell = (function () {
         </div>
         <nav class="adm-nav">${navHtml}</nav>
         <div class="adm-sidebar-user">
-          <div class="adm-user-avatar" id="adm-user-avatar">${initials}</div>
+          <a href="admin-profile.html" title="My Profile" style="line-height:0;">
+            <div class="adm-user-avatar" id="adm-user-avatar">${initials}</div>
+          </a>
           <div class="adm-user-info">
             <div class="adm-user-name">${user.firstName} ${user.lastName}</div>
             <div class="adm-user-role">${user.role}</div>

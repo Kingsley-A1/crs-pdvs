@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRS-PDVS — Admin Users</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/admin-shell.css">
+  <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
+</head>
+<body>
+
+<div class="adm-wrap">
+  <div id="adm-sidebar-mount"></div>
+  <div class="adm-body">
+    <div id="adm-topbar-mount"></div>
+    <div class="adm-content">
+
+      <div class="adm-page-header">
+        <div class="adm-page-header__left">
+          <h1>Admin Users</h1>
+          <p>Manage system administrators, officers, and their roles.</p>
+        </div>
+        <button class="adm-btn-primary" onclick="alert('Add User — prototype only')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add New User
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div class="adm-card">
+        <table class="adm-table adm-table--clickable">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>System Role</th>
+              <th>Assigned LGA</th>
+              <th>Status</th>
+              <th>Last Login</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+        <div class="adm-table-footer">
+          <span id="users-count">Loading…</span>
+          <span style="color:#9ca3af;">Click a row to view full profile</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/admin-shell.js"></script>
+<script>
+(function () {
+  const { user, D } = AdminShell.init('users', 'Admin Users');
+  const { fmtDateTime, statusChip } = AdminShell;
+  const adminUsers = D.adminUsers;
+
+  function renderTable(list) {
+    const tbody = document.getElementById('users-tbody');
+    tbody.innerHTML = '';
+    list.forEach(u => {
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr onclick="window.location.href='admin-profile.html?id=${encodeURIComponent(u.userId)}'">
+          <td>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="adm-user-avatar" style="flex-shrink:0;">${u.firstName[0]}${u.lastName[0]}</div>
+              <div>
+                <div class="cell-primary">${u.firstName} ${u.lastName}</div>
+                <div class="cell-secondary">${u.email}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-weight:600;color:#374151;">${u.role}</td>
+          <td style="font-size:13px;color:#6b7280;">${u.lga || 'System Wide'}</td>
+          <td>${statusChip(u.status)}</td>
+          <td style="font-size:12.5px;color:#6b7280;">${fmtDateTime(u.lastLogin)}</td>
+          <td><a class="adm-link" onclick="event.stopPropagation();window.location.href='admin-profile.html?id=${encodeURIComponent(u.userId)}'">Profile →</a></td>
+        </tr>
+      `);
+    });
+    document.getElementById('users-count').textContent = `Showing ${list.length} active administrators`;
+  }
+
+  renderTable(adminUsers);
+})();
+</script>
+
+</body>
+</html>
