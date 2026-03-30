@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CRS-PDVS — Sign in to your pension verification account. Official portal of the Cross River State Pension Board.">
+  <meta name="description" content="CRS-PDVS — Sign in to your pension verification account.">
   <meta name="theme-color" content="#1e2275">
   <title>CRS-PDVS — Sign In</title>
   <link rel="stylesheet" href="css/base.css">
@@ -11,272 +11,125 @@
   <link rel="stylesheet" href="css/pages.css">
   <link rel="icon" type="image/png" href="assets/images/crs_emblem.png">
   <style>
-    body {
-      background: var(--neutral-50);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    body { background: var(--neutral-50); height: 100vh; overflow: hidden; display: flex; flex-direction: column; margin: 0; }
 
-    /* ── Page wrapper ── */
     .login-page {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--space-10) var(--space-6) var(--space-16);
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: var(--space-6); min-height: 0;
     }
 
-    /* ── Main card (split panel) ── */
+    /* ── Card ── */
     .login-card {
-      display: flex;
-      width: 100%;
-      max-width: 820px;
-      background: white;
-      border-radius: var(--radius-2xl);
+      display: flex; width: 100%; max-width: 900px;
+      height: 100%; max-height: 720px;
+      background: white; border-radius: var(--radius-2xl);
       border: 1px solid var(--color-border-light);
-      box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+      box-shadow: 0 8px 48px rgba(0,0,0,0.10);
       overflow: hidden;
-      animation: cardIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
     }
-    @keyframes cardIn {
-      from { opacity: 0; transform: translateY(20px) scale(0.98); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
-    }
+    @keyframes cardIn { from{opacity:0;transform:translateY(22px) scale(0.98)} to{opacity:1;transform:none} }
 
-    /* ═══════════════════════════════════════
-       LEFT PANEL — Dark brand panel
-    ═══════════════════════════════════════ */
-    .login-brand {
-      width: 340px;
-      flex-shrink: 0;
+    /* ── Left brand panel ── */
+    .lp-brand {
+      width: 320px; flex-shrink: 0;
       background: linear-gradient(160deg, var(--crs-blue-900) 0%, var(--crs-blue-700) 55%, var(--crs-blue-600) 100%);
-      color: white;
       padding: var(--space-10) var(--space-8);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
+      display: flex; flex-direction: column;
+      position: relative; overflow: hidden;
     }
-
-    /* Radial shimmer overlays — matching index.html hero */
-    .login-brand::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse at 80% 15%, rgba(255,255,255,0.06) 0%, transparent 55%),
-        radial-gradient(ellipse at 10% 85%, rgba(255,255,255,0.04) 0%, transparent 40%);
+    .lp-brand::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 80% 15%, rgba(255,255,255,0.07) 0%, transparent 55%),
+                  radial-gradient(ellipse at 10% 85%, rgba(255,255,255,0.04) 0%, transparent 40%);
       pointer-events: none;
     }
+    .lp-brand::after {
+      content: ''; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 56px 56px; pointer-events: none;
+    }
+    .lp-inner { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; gap: var(--space-1); }
 
-    /* Subtle grid texture — identical to index.html hero */
-    .login-brand::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
-    }
+    .lp-logo-row { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-6); }
+    .lp-logo-row img { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35)); opacity: 0.95; }
+    .lp-logo-name { font-size: var(--font-size-sm); font-weight: var(--font-weight-extra); color: white; }
+    .lp-logo-sub  { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.07em; }
 
-    .login-brand__inner {
-      position: relative;
-      z-index: 1;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+    .lp-badge {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: 3px var(--space-3);
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      border-radius: var(--radius-full); font-size: 10px; font-weight: var(--font-weight-semi);
+      color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: var(--space-4); width: fit-content;
     }
+    .lp-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.85)} }
 
-    /* Brand row */
-    .login-brand__logo-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      margin-bottom: var(--space-8);
+    .lp-headline {
+      font-size: clamp(1.25rem, 2.2vw, 1.55rem);
+      font-weight: var(--font-weight-extra); color: white;
+      line-height: 1.2; letter-spacing: -0.02em; margin-bottom: var(--space-1);
     }
-    .login-brand__logo-row img {
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
-      filter: brightness(0) invert(1);
-      opacity: 0.9;
-    }
-    .login-brand__logo-name {
-      font-size: var(--font-size-base);
-      font-weight: var(--font-weight-extra);
-      color: white;
-      letter-spacing: -0.01em;
-      line-height: 1.1;
-    }
-    .login-brand__logo-sub {
-      font-size: 10px;
-      font-weight: var(--font-weight-medium);
-      color: rgba(255,255,255,0.45);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
+    .lp-season { font-size: var(--font-size-sm); color: rgba(255,255,255,0.45); font-style: italic; margin-bottom: var(--space-7); }
 
-    /* Official badge */
-    .login-brand__badge {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-2);
-      padding: var(--space-1) var(--space-3);
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: var(--radius-full);
-      font-size: 10px;
-      font-weight: var(--font-weight-semi);
-      color: rgba(255,255,255,0.65);
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      margin-bottom: var(--space-5);
-      width: fit-content;
+    /* Preview card */
+    .lp-preview {
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius-xl); padding: var(--space-5);
+      margin-bottom: var(--space-5); flex: 1; min-height: 160px;
     }
-    .login-brand__badge-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #4ade80;
-      animation: pulse 2s ease-in-out infinite;
+    .lp-preview-lbl { font-size: 10px; font-weight: var(--font-weight-semi); color: rgba(255,255,255,0.38); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--space-3); }
+    .lp-preview-name   { font-size: var(--font-size-sm); font-weight: var(--font-weight-bold); color: white; margin-bottom: 2px; }
+    .lp-preview-detail { font-size: var(--font-size-xs); color: rgba(255,255,255,0.48); margin-bottom: var(--space-3); }
+    .lp-preview-status {
+      display: flex; align-items: center; gap: var(--space-2);
+      padding: 6px var(--space-3); background: rgba(74,222,128,0.1);
+      border: 1px solid rgba(74,222,128,0.18); border-radius: var(--radius-md); margin-bottom: var(--space-3);
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.6; transform: scale(0.85); }
-    }
+    .lp-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+    .lp-status-txt { font-size: var(--font-size-xs); color: #4ade80; font-weight: var(--font-weight-semi); }
+    .lp-meta-row { display: flex; justify-content: space-between; font-size: var(--font-size-xs); margin-bottom: var(--space-1); }
+    .lp-meta-lbl { color: rgba(255,255,255,0.38); }
+    .lp-meta-val { color: rgba(255,255,255,0.78); font-weight: var(--font-weight-medium); }
 
-    /* Headline */
-    .login-brand__heading {
-      font-size: clamp(1.35rem, 2.5vw, 1.65rem);
-      font-weight: var(--font-weight-extra);
-      color: white;
-      line-height: 1.2;
-      letter-spacing: -0.02em;
-      margin-bottom: var(--space-3);
+    /* Demo panel */
+    .lp-demo { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-lg); overflow: hidden; }
+    .lp-demo-btn {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-3) var(--space-4); background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.48); font-size: 10px; font-weight: var(--font-weight-semi);
+      text-transform: uppercase; letter-spacing: 0.08em; font-family: inherit; transition: color 0.15s;
     }
-    .login-brand__season {
-      font-size: var(--font-size-sm);
-      color: rgba(255,255,255,0.55);
-      font-style: italic;
-      margin-bottom: var(--space-8);
+    .lp-demo-btn:hover { color: rgba(255,255,255,0.75); }
+    .lp-demo-btn svg { transition: transform 0.22s; }
+    .lp-demo-btn.open svg { transform: rotate(180deg); }
+    .lp-demo-body { display: none; padding: 0 var(--space-4) var(--space-4); }
+    .lp-demo-body.open { display: block; }
+    .lp-demo-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2); }
+    .lp-demo-key { font-size: var(--font-size-xs); color: rgba(255,255,255,0.4); }
+    .lp-demo-val {
+      font-family: monospace; font-size: var(--font-size-xs); color: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.09); padding: 2px 8px; border-radius: 4px;
+      cursor: pointer; transition: background 0.15s; user-select: all;
     }
+    .lp-demo-val:hover { background: rgba(255,255,255,0.16); }
+    .lp-demo-hint { font-size: 10px; color: rgba(255,255,255,0.28); margin-top: var(--space-2); }
 
-    /* Stats row */
-    .login-brand__stats {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-3);
-      margin-bottom: var(--space-8);
+    /* ── Right form panel ── */
+    .lp-form {
+      flex: 1; padding: var(--space-10) var(--space-10);
+      display: flex; flex-direction: column; justify-content: center;
+      overflow-y: auto; scrollbar-width: thin;
     }
-    .login-stat {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-    }
-    .login-stat__icon {
-      width: 32px;
-      height: 32px;
-      border-radius: var(--radius-md);
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      color: rgba(255,255,255,0.7);
-    }
-    .login-stat__label {
-      font-size: var(--font-size-xs);
-      color: rgba(255,255,255,0.5);
-    }
-    .login-stat__value {
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-semi);
-      color: rgba(255,255,255,0.85);
-    }
+    .lp-eyebrow { font-size: var(--font-size-xs); font-weight: var(--font-weight-semi); color: var(--crs-blue-400); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--space-2); }
+    .lp-title { font-size: var(--font-size-2xl); font-weight: var(--font-weight-extra); color: var(--color-text-primary); letter-spacing: var(--letter-spacing-tight); margin-bottom: var(--space-1); }
+    .lp-sub   { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--space-7); }
 
-    /* Divider */
-    .login-brand__divider {
-      height: 1px;
-      background: rgba(255,255,255,0.1);
-      margin-bottom: var(--space-5);
-    }
-
-    /* Demo credentials panel */
-    .demo-panel {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: var(--radius-lg);
-      padding: var(--space-4);
-    }
-    .demo-panel__label {
-      font-size: 10px;
-      font-weight: var(--font-weight-semi);
-      color: rgba(255,255,255,0.4);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: var(--space-3);
-    }
-    .demo-panel__row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--space-2);
-    }
-    .demo-panel__key {
-      font-size: var(--font-size-xs);
-      color: rgba(255,255,255,0.45);
-    }
-    .demo-panel__value {
-      font-family: monospace;
-      font-size: var(--font-size-xs);
-      color: rgba(255,255,255,0.8);
-      background: rgba(255,255,255,0.08);
-      padding: 2px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.15s;
-      user-select: all;
-    }
-    .demo-panel__value:hover {
-      background: rgba(255,255,255,0.14);
-    }
-    .demo-panel__hint {
-      font-size: 10px;
-      color: rgba(255,255,255,0.3);
-      margin-top: var(--space-2);
-    }
-
-    /* ═══════════════════════════════════════
-       RIGHT PANEL — Form
-    ═══════════════════════════════════════ */
-    .login-form-panel {
-      flex: 1;
-      padding: var(--space-10) var(--space-8);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .login-form-panel__title {
-      font-size: var(--font-size-2xl);
-      font-weight: var(--font-weight-extra);
-      color: var(--color-text-primary);
-      letter-spacing: var(--letter-spacing-tight);
-      margin-bottom: var(--space-1);
-    }
-    .login-form-panel__sub {
-      font-size: var(--font-size-sm);
-      color: var(--color-text-muted);
-      margin-bottom: var(--space-7);
-    }
-
-    /* Password show/hide */
-    .pw-wrap   { position: relative; }
-    .pw-input  { padding-right: 3rem !important; }
+    .pw-wrap  { position: relative; }
+    .pw-input { padding-right: 3rem !important; }
     .pw-toggle {
       position: absolute; right: var(--space-4); top: 50%; transform: translateY(-50%);
       background: none; border: none; cursor: pointer; color: var(--color-text-muted);
@@ -284,118 +137,42 @@
     }
     .pw-toggle:hover { color: var(--crs-blue-600); }
 
-    /* Error states */
-    .field-err {
-      display: none;
-      font-size: var(--font-size-xs);
-      color: var(--color-error);
-      margin-top: var(--space-1);
-    }
+    .field-err { display: none; font-size: var(--font-size-xs); color: var(--color-error); margin-top: var(--space-1); }
     .has-error .form-input { border-color: var(--color-error) !important; box-shadow: 0 0 0 3px rgba(220,38,38,0.08); }
     .has-error .field-err  { display: block; }
 
-    /* Attempts warning */
-    .attempts-bar {
-      display: none;
-      margin-bottom: var(--space-4);
-      padding: var(--space-3) var(--space-4);
-      background: var(--amber-50);
-      border: 1px solid var(--amber-100);
-      border-radius: var(--radius-md);
-      font-size: var(--font-size-sm);
-      color: var(--amber-700);
-      display: none;
-    }
-
-    /* Lockout state */
-    .lockout-bar {
-      display: none;
-      padding: var(--space-4) var(--space-5);
-      background: var(--red-50);
-      border: 1px solid var(--red-100);
-      border-radius: var(--radius-md);
-      margin-bottom: var(--space-5);
-    }
+    .lockout-bar { display: none; padding: var(--space-4); background: var(--red-50); border: 1px solid var(--red-100); border-radius: var(--radius-md); margin-bottom: var(--space-5); }
     .lockout-bar.visible { display: block; }
-    .lockout-bar p { font-size: var(--font-size-sm); color: var(--red-600); margin: 0; line-height: var(--line-height-relaxed); }
+    .lockout-bar p { font-size: var(--font-size-sm); color: var(--red-600); margin: 0; }
 
-    /* Forgot panel */
-    .forgot-panel {
-      display: none;
-      padding: var(--space-4);
-      background: var(--amber-50);
-      border: 1px solid var(--amber-100);
-      border-radius: var(--radius-md);
-      margin-bottom: var(--space-5);
-    }
+    .forgot-panel { display: none; padding: var(--space-4); background: var(--amber-50); border: 1px solid var(--amber-100); border-radius: var(--radius-md); margin-bottom: var(--space-5); }
     .forgot-panel.open { display: block; }
-    .forgot-panel p { font-size: var(--font-size-sm); color: var(--amber-700); margin: 0; line-height: var(--line-height-relaxed); }
+    .forgot-panel p { font-size: var(--font-size-sm); color: var(--amber-700); margin: 0; }
 
-    /* Sign-in button loading state */
-    .btn--loading {
-      pointer-events: none;
-      opacity: 0.75;
-    }
-
-    /* Spinner inside button */
     @keyframes spin { to { transform: rotate(360deg); } }
-    .btn-spinner {
-      display: none;
-      width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,0.35);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      flex-shrink: 0;
-    }
+    .btn-spinner { display: none; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.35); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
 
-    /* Divider */
-    .form-divider {
-      display: flex; align-items: center; gap: var(--space-3);
-      margin: var(--space-5) 0;
-    }
-    .form-divider::before, .form-divider::after {
-      content: ''; flex: 1; height: 1px; background: var(--color-border-light);
-    }
-    .form-divider__text {
-      font-size: var(--font-size-xs); color: var(--color-text-muted); white-space: nowrap;
-    }
+    .form-divider { display: flex; align-items: center; gap: var(--space-3); margin: var(--space-5) 0; }
+    .form-divider::before, .form-divider::after { content: ''; flex: 1; height: 1px; background: var(--color-border-light); }
+    .form-divider span { font-size: var(--font-size-xs); color: var(--color-text-muted); white-space: nowrap; }
 
-    /* Register link */
-    .reg-row {
-      text-align: center;
-      margin-top: var(--space-5);
-      font-size: var(--font-size-sm);
-      color: var(--color-text-muted);
-    }
-    .reg-row a { color: var(--crs-blue-500); font-weight: var(--font-weight-semi); text-decoration: none; }
-    .reg-row a:hover { text-decoration: underline; }
-
-    /* Animations */
-    @keyframes fadeInUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-
-    /* ── Mobile: stack ── */
+    /* Mobile */
     @media (max-width: 700px) {
-      .login-card { flex-direction: column; max-width: 480px; }
-      .login-brand {
-        width: auto;
-        padding: var(--space-7) var(--space-6);
-        flex-direction: column;
-      }
-      .login-brand__stats { display: none; }
-      .demo-panel { display: none; }
-      .login-brand__divider { display: none; }
-      .login-form-panel { padding: var(--space-7) var(--space-6); }
+      body { height: auto; overflow: visible; min-height: 100vh; }
+      .login-page { padding: var(--space-6) var(--space-4); height: auto; min-height: auto; }
+      .login-card { flex-direction: column; max-width: 480px; height: auto; max-height: none; }
+      .lp-brand { width: auto; padding: var(--space-6); }
+      .lp-inner { flex-direction: row; align-items: center; gap: var(--space-4); }
+      .lp-logo-row { margin-bottom: 0; }
+      .lp-badge, .lp-season, .lp-preview, .lp-demo { display: none; }
+      .lp-headline { font-size: var(--font-size-base); margin-bottom: 0; }
+      .lp-form { padding: var(--space-8) var(--space-6); overflow-y: visible; }
     }
-
-    @media (max-width: 400px) {
-      .login-form-panel { padding: var(--space-6); }
-    }
+    @media (max-width: 400px) { .lp-form { padding: var(--space-6); } }
   </style>
 </head>
 <body>
 
-  <!-- SITE HEADER -->
   <header class="site-header" id="site-header">
     <div class="site-header__inner">
       <a href="index.html" class="site-header__brand" aria-label="CRS-PDVS Home">
@@ -419,114 +196,70 @@
     </div>
   </header>
 
-
   <main class="login-page" role="main">
     <div class="login-card">
 
-      <!-- ══════════════════════════════════════
-           LEFT — Brand panel
-      ══════════════════════════════════════ -->
-      <div class="login-brand" aria-hidden="true">
-        <div class="login-brand__inner">
-
-          <!-- Logo -->
-          <div class="login-brand__logo-row">
-            <img src="assets/images/crs_emblem.png" alt="CRS Emblem">
+      <!-- ══ LEFT — Brand ══ -->
+      <div class="lp-brand" aria-hidden="true">
+        <div class="lp-inner">
+          <div class="lp-logo-row">
+            <img src="assets/images/crs_emblem.png" alt="">
             <div>
-              <div class="login-brand__logo-name">CRS-PDVS</div>
-              <div class="login-brand__logo-sub">Pension Verification</div>
+              <div class="lp-logo-name">CRS-PDVS</div>
+              <div class="lp-logo-sub">Pension Verification</div>
             </div>
           </div>
+          <div class="lp-badge"><span class="lp-badge-dot"></span> Official Portal</div>
+          <h2 class="lp-headline">Welcome back<br>to CRS-PDVS.</h2>
+          <p class="lp-season">Season of Sweetness is here.</p>
 
-          <!-- Official badge -->
-          <div class="login-brand__badge">
-            <span class="login-brand__badge-dot"></span>
-            Official Portal
+          <div class="lp-preview">
+            <div class="lp-preview-lbl">Sample Verification</div>
+            <div class="lp-preview-name">Margaret N. Effiom</div>
+            <div class="lp-preview-detail">CRS-PEN-2024-0001 · Civil Service Retiree</div>
+            <div class="lp-preview-status">
+              <div class="lp-status-dot"></div>
+              <div class="lp-status-txt">Verified · 15 Dec 2025</div>
+            </div>
+            <div class="lp-meta-row"><span class="lp-meta-lbl">LGA</span><span class="lp-meta-val">Calabar Municipality</span></div>
+            <div class="lp-meta-row"><span class="lp-meta-lbl">Next cycle</span><span class="lp-meta-val">June 2026</span></div>
+            <div class="lp-meta-row"><span class="lp-meta-lbl">Reference</span><span class="lp-meta-val">VS-2026-0001</span></div>
           </div>
 
-          <!-- Headline -->
-          <h2 class="login-brand__heading">
-            Welcome back to<br>CRS-PDVS.
-          </h2>
-          <p class="login-brand__season">Season of Sweetness is here.</p>
-
-          <!-- Stats -->
-          <div class="login-brand__stats">
-            <div class="login-stat">
-              <div class="login-stat__icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div class="lp-demo">
+            <button class="lp-demo-btn" id="demo-toggle" type="button">
+              🔐 Prototype Access
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="lp-demo-body" id="demo-body">
+              <div class="lp-demo-row">
+                <span class="lp-demo-key">Pension ID</span>
+                <span class="lp-demo-val" onclick="copyDemo('CRS-PEN-2024-0001')">CRS-PEN-2024-0001</span>
               </div>
-              <div>
-                <div class="login-stat__value">14,832</div>
-                <div class="login-stat__label">Registered Pensioners</div>
+              <div class="lp-demo-row">
+                <span class="lp-demo-key">Password</span>
+                <span class="lp-demo-val" onclick="copyDemo('crs2026')">crs2026</span>
               </div>
-            </div>
-            <div class="login-stat">
-              <div class="login-stat__icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-              <div>
-                <div class="login-stat__value">9,641</div>
-                <div class="login-stat__label">Verified This Cycle</div>
-              </div>
-            </div>
-            <div class="login-stat">
-              <div class="login-stat__icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="m16 8 4-4 4 4"/><path d="M20 4v13"/></svg>
-              </div>
-              <div>
-                <div class="login-stat__value">18 LGAs</div>
-                <div class="login-stat__label">Across Cross River State</div>
-              </div>
+              <p class="lp-demo-hint">Click a value to fill the form →</p>
             </div>
           </div>
-
-          <div class="login-brand__divider"></div>
-
-          <!-- Demo credentials -->
-          <div class="demo-panel">
-            <div class="demo-panel__label">🔐 Prototype Access</div>
-            <div class="demo-panel__row">
-              <span class="demo-panel__key">Pension ID</span>
-              <span class="demo-panel__value" title="Click to copy" onclick="copyDemo('CRS-PEN-2024-0001')">CRS-PEN-2024-0001</span>
-            </div>
-            <div class="demo-panel__row">
-              <span class="demo-panel__key">Password</span>
-              <span class="demo-panel__value" title="Click to copy" onclick="copyDemo('crs2026')">crs2026</span>
-            </div>
-            <p class="demo-panel__hint">Click a value to pre-fill the form →</p>
-          </div>
-
         </div>
       </div>
 
+      <!-- ══ RIGHT — Form ══ -->
+      <div class="lp-form">
+        <p class="lp-eyebrow">Pensioner Portal</p>
+        <h1 class="lp-title" id="form-heading">Sign In</h1>
+        <p class="lp-sub" id="form-sub">Enter your Pension ID and password to continue.</p>
 
-      <!-- ══════════════════════════════════════
-           RIGHT — Login form
-      ══════════════════════════════════════ -->
-      <div class="login-form-panel">
-
-        <h1 class="login-form-panel__title" id="form-heading">Sign In</h1>
-        <p class="login-form-panel__sub" id="form-sub">Enter your Pension ID and password to continue.</p>
-
-        <!-- Lockout -->
         <div class="lockout-bar" id="lockout-bar">
-          <p>
-            <strong>Account temporarily locked.</strong> Too many failed attempts.
-            Please visit your LGA Pension Board office or call <strong>08033000000</strong>.
-          </p>
+          <p><strong>Account temporarily locked.</strong> Too many failed attempts. Please visit your LGA Pension Board or call <strong>08033000000</strong>.</p>
         </div>
 
-        <!-- Forgot panel -->
         <div class="forgot-panel" id="forgot-panel">
-          <p>
-            <strong>Forgot your Pension ID or password?</strong><br>
-            Visit your nearest LGA Pension Board office with a valid ID, or call
-            <strong>08033000000</strong> (Mon–Fri, 8am–4pm).
-          </p>
+          <p><strong>Forgot your Pension ID or password?</strong><br>Visit your nearest LGA Pension Board office with a valid ID, or call <strong>08033000000</strong> (Mon–Fri, 8am–4pm).</p>
         </div>
 
-        <!-- Error banner -->
         <div id="login-error" style="display:none; margin-bottom:var(--space-5);">
           <div class="banner banner--error" role="alert">
             <span class="banner__icon">
@@ -536,7 +269,6 @@
           </div>
         </div>
 
-        <!-- Attempts bar -->
         <div id="attempts-bar" style="display:none; margin-bottom:var(--space-4);">
           <div style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-3) var(--space-4);background:var(--amber-50);border:1px solid var(--amber-100);border-radius:var(--radius-md);">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -544,31 +276,17 @@
           </div>
         </div>
 
-        <form class="login-form" id="login-form" novalidate>
-
-          <!-- Pension ID -->
+        <form id="login-form" novalidate>
           <div class="form-group" id="fg-id">
-            <label class="form-label" for="login-id">
-              Pension ID
-              <span style="color:var(--color-error);" aria-hidden="true">*</span>
-            </label>
-            <input class="form-input" id="login-id" type="text"
-              placeholder="e.g. CRS-PEN-2024-0001"
-              autocomplete="username" spellcheck="false"
-              autofocus required>
+            <label class="form-label" for="login-id">Pension ID <span style="color:var(--color-error);" aria-hidden="true">*</span></label>
+            <input class="form-input" id="login-id" type="text" placeholder="e.g. CRS-PEN-2024-0001" autocomplete="username" spellcheck="false" autofocus required>
             <span class="form-hint">The ID printed on your pension documentation.</span>
             <span class="field-err" id="err-id">Please enter your Pension ID.</span>
           </div>
-
-          <!-- Password -->
           <div class="form-group" id="fg-pw">
-            <label class="form-label" for="login-pw">
-              Password
-              <span style="color:var(--color-error);" aria-hidden="true">*</span>
-            </label>
+            <label class="form-label" for="login-pw">Password <span style="color:var(--color-error);" aria-hidden="true">*</span></label>
             <div class="pw-wrap">
-              <input class="form-input pw-input" id="login-pw" type="password"
-                placeholder="Your account password" autocomplete="current-password" required>
+              <input class="form-input pw-input" id="login-pw" type="password" placeholder="Your account password" autocomplete="current-password" required>
               <button type="button" class="pw-toggle" id="pw-btn" aria-label="Show password">
                 <svg id="eye-show" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 <svg id="eye-hide" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -576,216 +294,119 @@
             </div>
             <span class="field-err" id="err-pw">Please enter your password.</span>
           </div>
-
-          <!-- Submit button -->
-          <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:var(--space-2);" id="btn-login">
+          <button type="submit" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:var(--space-2);margin-top:var(--space-2);" id="btn-login">
             <span class="btn-spinner" id="btn-spinner"></span>
             <span id="btn-label">Sign In</span>
           </button>
-
         </form>
 
-        <!-- Forgot link -->
         <div style="text-align:center; margin-top:var(--space-4);">
-          <button type="button" id="forgot-btn"
-            style="background:none;border:none;cursor:pointer;font-size:var(--font-size-sm);color:var(--crs-blue-500);font-family:inherit;">
-            Forgot your Pension ID or password?
-          </button>
+          <button type="button" id="forgot-btn" style="background:none;border:none;cursor:pointer;font-size:var(--font-size-sm);color:var(--crs-blue-500);font-family:inherit;">Forgot your Pension ID or password?</button>
         </div>
 
-        <div class="form-divider"><span class="form-divider__text">Not yet registered?</span></div>
+        <div class="form-divider"><span>New to CRS-PDVS?</span></div>
+        <a href="register.html" class="btn btn-secondary" style="width:100%;text-align:center;">Create an Account</a>
+        <p style="text-align:center;margin-top:var(--space-5);font-size:var(--font-size-sm);color:var(--color-text-muted);">Need help? Call <a href="tel:08033000000" style="color:var(--crs-blue-500);font-weight:600;">08033000000</a> (Mon–Fri, 8am–4pm)</p>
+      </div>
 
-        <a href="register.html" class="btn btn-secondary" style="width:100%;text-align:center;" id="btn-register">
-          Create an Account
-        </a>
-
-        <p class="reg-row" style="margin-top:var(--space-4);">
-          Need help? Call <a href="tel:08033000000">08033000000</a> (Mon–Fri, 8am–4pm)
-        </p>
-
-      </div><!-- /.login-form-panel -->
-
-    </div><!-- /.login-card -->
+    </div>
   </main>
-
 
   <script src="js/mock-data.js"></script>
   <script src="js/pensioner-auth.js"></script>
   <script>
   (function () {
-
-    // If already logged in → redirect
     if (PensionerAuth.getSession()) {
-      const params   = new URLSearchParams(window.location.search);
-      const returnTo = params.get('return') || 'dashboard.html';
-      window.location.replace(returnTo);
+      const p = new URLSearchParams(window.location.search);
+      window.location.replace(p.get('return') || 'dashboard.html');
       return;
     }
 
-    // Personalise welcome heading if name is known
     const knownName = PensionerAuth.getKnownName();
-    if (knownName) {
-      document.getElementById('form-heading').textContent = 'Welcome back, ' + knownName + '.';
-      document.getElementById('form-sub').textContent = 'Enter your Pension ID and password to continue.';
-    }
+    if (knownName) document.getElementById('form-heading').textContent = 'Welcome back, ' + knownName + '.';
 
     let attempts = 0;
-    const MAX_ATTEMPTS = 3;
+    const MAX = 3;
 
-    /* ------ Form submit ------ */
     document.getElementById('login-form').addEventListener('submit', function (e) {
       e.preventDefault();
-      if (attempts >= MAX_ATTEMPTS) return;
-
+      if (attempts >= MAX) return;
       clearErrors();
 
       const pensionId = document.getElementById('login-id').value.trim().toUpperCase();
       const password  = document.getElementById('login-pw').value;
+      let err = false;
+      if (!pensionId) { setFErr('fg-id','err-id','Please enter your Pension ID.'); err = true; }
+      if (!password)  { setFErr('fg-pw','err-pw','Please enter your password.'); err = true; }
+      if (err) return;
 
-      let hasError = false;
-
-      if (!pensionId) {
-        setFieldError('fg-id', 'err-id', 'Please enter your Pension ID.');
-        hasError = true;
-      }
-      if (!password) {
-        setFieldError('fg-pw', 'err-pw', 'Please enter your password.');
-        hasError = true;
-      }
-      if (hasError) return;
-
-      // Show loading state
       setLoading(true);
-
-      // Simulate brief network check (300ms)
       setTimeout(function () {
-        const valid = PensionerAuth.validateCredentials(pensionId, password);
-
-        if (!valid) {
-          setLoading(false);
-          attempts++;
-
-          if (attempts >= MAX_ATTEMPTS) {
+        if (!PensionerAuth.validateCredentials(pensionId, password)) {
+          setLoading(false); attempts++;
+          if (attempts >= MAX) {
             document.getElementById('lockout-bar').classList.add('visible');
             document.getElementById('login-form').style.opacity = '0.45';
             document.getElementById('btn-login').disabled = true;
             document.getElementById('attempts-bar').style.display = 'none';
-            hideError();
+            hideErr();
           } else {
-            const remaining = MAX_ATTEMPTS - attempts;
-            showError('Incorrect Pension ID or password. Please try again.');
+            const rem = MAX - attempts;
+            showErr('Incorrect Pension ID or password. Please try again.');
             document.getElementById('attempts-bar').style.display = 'block';
-            document.getElementById('attempts-text').textContent =
-              remaining + ' attempt' + (remaining !== 1 ? 's' : '') + ' remaining before this account is locked.';
+            document.getElementById('attempts-text').textContent = rem + ' attempt' + (rem !== 1 ? 's' : '') + ' remaining before this account is locked.';
           }
           return;
         }
-
-        // Build session
         const record = window.CRS_PDVS_DATA.pensioners.find(p => p.id === pensionId);
-        PensionerAuth.setSession({
-          pensionId:           record.id,
-          firstName:           record.firstName,
-          lastName:            record.lastName,
-          phone:               record.phone,
-          lga:                 record.lga,
-          category:            record.category,
-          status:              record.status,
-          lastVerified:        record.lastVerified,
-          nextVerificationDue: record.nextVerificationDue,
-          bankName:            record.bankName,
-          accountLast4:        record.accountLast4,
-          photoUrl:            null,
-        });
-
-        const params   = new URLSearchParams(window.location.search);
-        const returnTo = params.get('return') || 'dashboard.html';
-        window.location.href = returnTo;
-
+        PensionerAuth.setSession({ pensionId: record.id, firstName: record.firstName, lastName: record.lastName, phone: record.phone, lga: record.lga, category: record.category, status: record.status, lastVerified: record.lastVerified, nextVerificationDue: record.nextVerificationDue, bankName: record.bankName, accountLast4: record.accountLast4, photoUrl: null });
+        const p = new URLSearchParams(window.location.search);
+        window.location.href = p.get('return') || 'dashboard.html';
       }, 320);
     });
 
-    /* ------ Demo click-to-fill ------ */
     window.copyDemo = function (val) {
-      if (val.startsWith('CRS')) {
-        document.getElementById('login-id').value = val;
-      } else {
-        document.getElementById('login-pw').value = val;
-      }
-      // Subtle pulse on the target input
-      const inp = val.startsWith('CRS')
-        ? document.getElementById('login-id')
-        : document.getElementById('login-pw');
-      inp.style.transition = 'box-shadow 0.2s';
-      inp.style.boxShadow  = '0 0 0 3px rgba(30,34,117,0.25)';
-      setTimeout(() => { inp.style.boxShadow = ''; }, 600);
+      if (val.startsWith('CRS')) document.getElementById('login-id').value = val;
+      else document.getElementById('login-pw').value = val;
+      const inp = val.startsWith('CRS') ? document.getElementById('login-id') : document.getElementById('login-pw');
+      inp.style.boxShadow = '0 0 0 3px rgba(30,34,117,0.22)';
+      setTimeout(() => inp.style.boxShadow = '', 600);
     };
 
-    /* ------ Password toggle ------ */
     document.getElementById('pw-btn').addEventListener('click', function () {
-      const inp  = document.getElementById('login-pw');
-      const show = document.getElementById('eye-show');
-      const hide = document.getElementById('eye-hide');
-      if (inp.type === 'password') {
-        inp.type = 'text';
-        show.style.display = 'none';
-        hide.style.display = 'block';
-      } else {
-        inp.type = 'password';
-        show.style.display = 'block';
-        hide.style.display = 'none';
-      }
+      const inp = document.getElementById('login-pw');
+      const on  = inp.type === 'password';
+      inp.type = on ? 'text' : 'password';
+      document.getElementById('eye-show').style.display = on ? 'none' : 'block';
+      document.getElementById('eye-hide').style.display = on ? 'block' : 'none';
     });
 
-    /* ------ Forgot toggle ------ */
     document.getElementById('forgot-btn').addEventListener('click', function () {
       document.getElementById('forgot-panel').classList.toggle('open');
     });
 
-    /* ------ Helpers ------ */
+    document.getElementById('demo-toggle').addEventListener('click', function () {
+      this.classList.toggle('open');
+      document.getElementById('demo-body').classList.toggle('open');
+    });
+
     function setLoading(on) {
-      const btn    = document.getElementById('btn-login');
-      const lbl    = document.getElementById('btn-label');
-      const sp     = document.getElementById('btn-spinner');
-      btn.classList.toggle('btn--loading', on);
-      lbl.textContent = on ? 'Signing in…' : 'Sign In';
-      sp.style.display = on ? 'block' : 'none';
+      document.getElementById('btn-login').style.opacity = on ? '0.8' : '';
+      document.getElementById('btn-login').style.pointerEvents = on ? 'none' : '';
+      document.getElementById('btn-label').textContent = on ? 'Signing in…' : 'Sign In';
+      document.getElementById('btn-spinner').style.display = on ? 'block' : 'none';
     }
-
-    function showError(msg) {
-      const el  = document.getElementById('login-error');
-      const txt = document.getElementById('login-error-text');
-      el.style.display = 'block';
-      txt.textContent  = msg;
-    }
-    function hideError() {
-      document.getElementById('login-error').style.display = 'none';
-    }
-
-    function setFieldError(groupId, errId, msg) {
-      document.getElementById(groupId).classList.add('has-error');
-      document.getElementById(errId).textContent = msg;
-    }
-
+    function showErr(msg) { document.getElementById('login-error').style.display='block'; document.getElementById('login-error-text').textContent=msg; }
+    function hideErr()    { document.getElementById('login-error').style.display='none'; }
+    function setFErr(g, e, m) { document.getElementById(g).classList.add('has-error'); document.getElementById(e).textContent=m; }
     function clearErrors() {
-      ['fg-id', 'fg-pw'].forEach(id => {
-        document.getElementById(id).classList.remove('has-error');
-      });
-      hideError();
+      ['fg-id','fg-pw'].forEach(id => document.getElementById(id).classList.remove('has-error'));
+      hideErr();
     }
-
-    // Mobile menu
     const menuBtn = document.getElementById('header-menu-btn');
     const nav     = document.getElementById('header-nav');
-    if (menuBtn && nav) {
-      menuBtn.addEventListener('click', () => {
-        const open = nav.classList.toggle('open');
-        menuBtn.setAttribute('aria-expanded', open);
-      });
-    }
-
+    if (menuBtn && nav) menuBtn.addEventListener('click', () => { const o = nav.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', o); });
   })();
   </script>
-
 </body>
 </html>
