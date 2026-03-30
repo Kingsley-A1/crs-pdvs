@@ -8,7 +8,7 @@
    - External resources (Google Fonts): Cache-first with expiry check
    ================================================================ */
 
-const CACHE_VERSION  = 'v2';
+const CACHE_VERSION  = 'v3';
 const STATIC_CACHE   = 'crs-pdvs-static-' + CACHE_VERSION;
 const PAGES_CACHE    = 'crs-pdvs-pages-'  + CACHE_VERSION;
 const FONTS_CACHE    = 'crs-pdvs-fonts-'  + CACHE_VERSION;
@@ -24,6 +24,8 @@ const STATIC_ASSETS = [
   'js/admin-shell.js',
   'js/pwa-install.js',
   'assets/images/crs_emblem.png',
+  'assets/images/icon-192.png',
+  'assets/images/icon-512.png',
   'assets/images/think_cross_river.jpg',
   'manifest.json',
 ];

@@ -68,15 +68,14 @@
     .pwa-sheet__logo {
       width: 52px; height: 52px;
       border-radius: 14px;
-      background: linear-gradient(135deg, #1e2275 0%, #2b35b5 100%);
+      background: white;
+      border: 1px solid #e5e7eb;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; box-shadow: 0 4px 16px rgba(30,34,117,0.3);
+      flex-shrink: 0; box-shadow: 0 2px 12px rgba(30,34,117,0.12);
     }
     .pwa-sheet__logo img {
-      width: 30px; height: 30px;
+      width: 36px; height: 36px;
       object-fit: contain;
-      filter: brightness(0) invert(1);
-      opacity: 0.9;
     }
 
     .pwa-sheet__text { flex: 1; min-width: 0; }

@@ -54,10 +54,11 @@
     }
 
     .vr-header__logo {
-      width: 28px; height: 28px;
+      width: 32px; height: 32px;
       object-fit: contain;
-      filter: brightness(0) invert(1);
-      opacity: 0.85;
+      background: rgba(255,255,255,0.14);
+      border-radius: 8px;
+      padding: 3px;
     }
 
     .vr-header__title {
@@ -377,8 +378,9 @@
         <defs>
           <!-- Clip everything outside the oval to darken the scene edges -->
           <mask id="face-mask">
-            <rect width="340" height="450" fill="rgba(0,0,0,0.75)"/>
-            <ellipse cx="170" cy="210" rx="105" ry="140" fill="white"/>
+            <!-- white = show dark overlay, black = hide it (reveal video) -->
+            <rect width="340" height="450" fill="white"/>
+            <ellipse cx="170" cy="210" rx="105" ry="140" fill="black"/>
           </mask>
         </defs>
 

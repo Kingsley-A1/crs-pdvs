@@ -1,10 +1,10 @@
 {
-  "name": "CRS-PDVS — Pension Verification Portal",
+  "name": "Cross River State Pensioners Digital Verification System",
   "short_name": "CRS-PDVS",
   "description": "Cross River State Pensioners Digital Verification System — Complete your pension verification securely from anywhere.",
   "lang": "en-NG",
-  "start_url": "/index.html",
-  "scope": "/",
+  "start_url": "./index.html",
+  "scope": ".",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#1e2275",
@@ -14,43 +14,13 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "assets/images/crs_emblem.png",
-      "sizes": "48x48",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/images/crs_emblem.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/images/crs_emblem.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/images/crs_emblem.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/images/crs_emblem.png",
+      "src": "assets/images/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "assets/images/crs_emblem.png",
-      "sizes": "256x256",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/images/crs_emblem.png",
+      "src": "assets/images/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -58,7 +28,7 @@
   ],
   "screenshots": [
     {
-      "src": "assets/images/crs_emblem.png",
+      "src": "assets/images/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "label": "CRS-PDVS Pension Verification Portal"
@@ -69,15 +39,15 @@
       "name": "Start Verification",
       "short_name": "Verify",
       "description": "Begin your pension verification",
-      "url": "/pensioner-login.html?return=verify.html",
-      "icons": [{ "src": "assets/images/crs_emblem.png", "sizes": "192x192" }]
+      "url": "./pensioner-login.html?return=verify.html",
+      "icons": [{ "src": "assets/images/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "My Dashboard",
       "short_name": "Dashboard",
       "description": "View your verification dashboard",
-      "url": "/dashboard.html",
-      "icons": [{ "src": "assets/images/crs_emblem.png", "sizes": "192x192" }]
+      "url": "./dashboard.html",
+      "icons": [{ "src": "assets/images/icon-192.png", "sizes": "192x192" }]
     }
   ],
   "related_applications": [],
