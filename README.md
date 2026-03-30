@@ -2,14 +2,14 @@
 ## Prototype Documentation & Project Structure
 
 > **Status:** Prototype — Front-end only. All data is mocked in JavaScript.  
-> **Version:** Phase 09 (Assisted Console + Analytics)  
+> **Version:** Phase 10 (PWA + Pensioner Auth + Assisted Console + Analytics)  
 > **Authority:** Cross River State Pension Board
 
 ---
 
 ## Overview
 
-CRS-PDVS (Cross River State Pension Digital Verification System) is a biometric-assisted identity verification platform for retired civil servants across all 18 LGAs of Cross River State. This repository contains the full interactive HTML prototype, covering the public-facing pensioner flows and the complete administrative command centre.
+CRS-PDVS (Cross River State Pension Digital Verification System) is a biometric-assisted identity verification platform for retired civil servants across all 18 LGAs of Cross River State. This repository contains the full interactive HTML prototype covering the public-facing pensioner flows, a complete administrative command centre, and a Progressive Web App (PWA) layer for offline-capable deployment.
 
 ---
 
@@ -18,50 +18,74 @@ CRS-PDVS (Cross River State Pension Digital Verification System) is a biometric-
 ```
 CRS PDVS/
 │
-├── 📄 index.html              — Public landing page (pensioner entry point)
-├── 📄 onboard.html            — Pensioner onboarding & Pension ID lookup
-├── 📄 verify.html             — Identity lookup & sign-in flow
-├── 📄 face.html               — Biometric liveness verification flow
-├── 📄 dashboard.html          — Post-verification pensioner dashboard
-├── 📄 design.html             — CRS-PDVS design system reference
+│   ── PUBLIC / PENSIONER PAGES ─────────────────────────────────
 │
-│   ── ADMIN PORTAL ─────────────────────────────────────────────
+├── 📄 index.html                  — Public landing page (pensioner entry point)
+├── 📄 pensioner-login.html        — Dedicated pensioner sign-in page
+├── 📄 register.html               — Pensioner registration & Pension ID creation
+├── 📄 onboard.html                — Pensioner onboarding & Pension ID lookup
+├── 📄 verify.html                 — Identity lookup & sign-in flow
+├── 📄 face.html                   — Biometric liveness verification (camera + mocked)
+├── 📄 dashboard.html              — Post-verification pensioner dashboard
+├── 📄 pensioner-profile.html      — Pensioner self-service profile view
+├── 📄 notification.html           — Pensioner notifications centre
+├── 📄 design.html                 — CRS-PDVS design system reference & token catalogue
 │
-├── 📄 admin-login.html        — Secure admin sign-in with role selection
-├── 📄 admin.html              — Admin dashboard & command centre
-├── 📄 admin-review.html       — Verification review queue
-├── 📄 admin-records.html      — Searchable pensioner records registry
-├── 📄 admin-profile.html      — Individual pensioner profile detail
-├── 📄 admin-reports.html      — Analytics & reporting (charts, KPIs)
-├── 📄 admin-assisted.html     — Assisted verification agent console
+│   ── ADMIN PORTAL ──────────────────────────────────────────────
 │
-│   ── STYLES ───────────────────────────────────────────────────
+├── 📄 admin-login.html            — Secure admin sign-in with role selection
+├── 📄 admin.html                  — Admin dashboard & command centre (KPI charts)
+├── 📄 admin-review.html           — Verification review queue
+├── 📄 admin-records.html          — Searchable pensioner records registry
+├── 📄 admin-pensioners-profile.html — Full pensioner detail view (admin-side)
+├── 📄 admin-profile.html          — Admin user's own profile page
+├── 📄 admin-users.html            — Admin users management (Board Admin only)
+├── 📄 admin-settings.html         — Admin portal system settings (Board Admin only)
+├── 📄 admin-reports.html          — Analytics & reporting (charts, KPI export)
+├── 📄 admin-assisted.html         — Assisted verification agent console
+│
+│   ── PWA LAYER ─────────────────────────────────────────────────
+│
+├── 📄 manifest.json               — PWA web app manifest (icons, theme, display)
+├── 📄 sw.js                       — Service Worker — caching & offline support
+├── 📄 offline.html                — PWA offline fallback page
+│
+│   ── STYLES ─────────────────────────────────────────────────────
 │
 ├── css/
-│   ├── base.css               — Design tokens, typography, global resets
-│   ├── components.css         — Reusable UI components (public-facing)
-│   └── admin-shell.css        — Shared admin shell: sidebar, topbar, layout
+│   ├── base.css                   — Design tokens, typography, global resets
+│   ├── components.css             — Reusable UI components (public-facing)
+│   ├── pages.css                  — Page-specific layout rules (public flows)
+│   └── admin-shell.css            — Shared admin shell: sidebar, topbar, layout
 │
-│   ── JAVASCRIPT ────────────────────────────────────────────────
+│   ── JAVASCRIPT ──────────────────────────────────────────────────
 │
 ├── js/
-│   ├── mock-data.js           — Single source of truth for all mock data
-│   └── admin-shell.js         — Shared admin sidebar, topbar, auth, nav
+│   ├── mock-data.js               — Single source of truth for ALL mock data
+│   ├── app.js                     — Public-side pensioner flow controller
+│   ├── pensioner-auth.js          — Session-based pensioner authentication guard
+│   ├── pensioner.js               — Pensioner profile page logic
+│   ├── pwa-install.js             — PWA install prompt controller
+│   ├── admin-shell.js             — Shared admin sidebar, topbar, auth, nav
+│   └── admin.js                   — Admin dashboard page-specific logic
 │
-│   ── ASSETS ───────────────────────────────────────────────────
+│   ── ASSETS ──────────────────────────────────────────────────────
 │
 ├── assets/
 │   └── images/
-│       ├── crs_emblem.png     — Official Cross River State coat of arms
-│       └── think_cross_river.jpg — "Think Cross River" state branding
+│       ├── crs_emblem.png         — Official Cross River State coat of arms
+│       └── think_cross_river.jpg  — "Think Cross River" state branding image
 │
-│   ── DOCUMENTATION ─────────────────────────────────────────────
+│   ── DOCUMENTATION ──────────────────────────────────────────────
 │
-├── README.md                  — This file
-├── CRS-PDVS_Prototype_Prompt_Library.md  — Build prompt history
-├── crs_pdvs_prototype_blueprint.md       — Technical blueprint
-├── crs_pdvs_executive_brief_master_plan.md
-└── crs_pdvs_idea_and_features.md
+├── docs/
+│   ├── blueprint.md               — Technical prototype blueprint
+│   ├── executive-brief.md         — Executive brief & master plan
+│   ├── idea-and-features.md       — Feature ideation & system capabilities
+│   └── prompt-library.md          — Full AI build prompt history (all phases)
+│
+├── README.md                      — This file
+└── .gitignore                     — Git ignore rules (binary docs, OS files)
 ```
 
 ---
@@ -99,32 +123,65 @@ CRS PDVS/
 
 ---
 
-## Admin Navigation
+## Pensioner Flows (Public Side)
 
-All admin pages share the unified sidebar and topbar injected by `js/admin-shell.js`.
-
-| Page | Nav ID | Role Access |
+| Step | File | Description |
 |---|---|---|
-| `admin.html` | `dashboard` | All roles |
-| `admin-review.html` | `review` | All roles |
-| `admin-records.html` | `records` | All roles |
-| `admin-assisted.html` | `assisted` | All roles |
-| `admin-reports.html` | `reports` | Board Admin, Auditor, Supervisor, Officer |
-| Audit Log | `audit` | Board Admin, Auditor, Supervisor |
-| Admin Users | `users` | Board Admin only |
-| Settings | `settings` | Board Admin only |
+| 0 | `index.html` | Landing page — purpose, trust indicators, CTA |
+| 1a | `pensioner-login.html` | Returning pensioner sign-in (Pension ID + Phone) |
+| 1b | `register.html` | New pensioner registration & ID creation |
+| 2 | `onboard.html` | Onboarding — Pension ID lookup, personal details |
+| 3 | `verify.html` | Identity sign-in — Pension ID + phone lookup |
+| 4 | `face.html` | Biometric liveness simulation (camera + mocked outcomes) |
+| 5 | `dashboard.html` | Post-verification dashboard, history, result states |
+| 6 | `pensioner-profile.html` | Self-service profile — view & edit personal details |
+| 7 | `notification.html` | Notifications — verification results, system alerts |
 
 ---
 
-## Admin Roles
+## Admin Portal
+
+All admin pages share a unified sidebar and topbar injected by `js/admin-shell.js`.
+
+### Admin Navigation
+
+| Page | File | Nav ID | Role Access |
+|---|---|---|---|
+| Dashboard | `admin.html` | `dashboard` | All roles |
+| Review Queue | `admin-review.html` | `review` | All roles |
+| Records Registry | `admin-records.html` | `records` | All roles |
+| Assisted Console | `admin-assisted.html` | `assisted` | All roles |
+| Reports & Analytics | `admin-reports.html` | `reports` | Board Admin, Auditor, Supervisor, Officer |
+| Audit Log | *(inline in shell)* | `audit` | Board Admin, Auditor, Supervisor |
+| Admin Users | `admin-users.html` | `users` | Board Admin only |
+| Settings | `admin-settings.html` | `settings` | Board Admin only |
+| Pensioner Detail | `admin-pensioners-profile.html` | *(linked from Records)* | All roles |
+| My Profile | `admin-profile.html` | `profile` | All roles |
+
+### Admin Roles
 
 | Role | Level | Key Permissions |
 |---|---|---|
-| Pension Board Administrator | Super | Full access |
-| Verification Officer | Standard | Review, approve, flag, notes |
-| Supervisor | Senior | Escalate, manage officers, analytics |
+| Pension Board Administrator | Super | Full access — all pages, users, settings |
+| Verification Officer | Standard | Review, approve, flag, add notes |
+| Supervisor | Senior | Escalate, manage officers, view analytics |
 | Auditor | Audit | Read-only, export reports, audit log |
 | Assisted Verification Agent | Field | Search pensioner, record assisted sessions |
+
+### Mock Login Credentials (`admin-login.html`)
+
+All passwords are accepted for any pre-set user in the demo.  
+Select a user card, enter any password, click **Sign In**.
+
+| Name | Role |
+|---|---|
+| Michael Essien | Pension Board Administrator |
+| Blessing Nku | Verification Officer |
+| Esther Ita | Supervisor |
+| Cornelius Obasi | Auditor |
+| Mary Ogar | Assisted Verification Agent |
+
+> **Demo Mode:** If an admin page is opened directly without login, the shell auto-creates a Board Administrator demo session so all pages remain navigable.
 
 ---
 
@@ -142,41 +199,53 @@ All data is mocked — no backend calls are made. The `CRS_PDVS_DATA` global exp
 | `supportCases` | 5 support cases with case notes |
 | `auditLogs` | 10 audit log entries spanning all actor types |
 
-### Mock Login Credentials (admin-login.html)
+---
 
-All passwords are accepted for any pre-set user in the demo.  
-Select a user card, enter any password, click Sign In.
+## PWA Layer
 
-| Name | Role |
+CRS-PDVS is installable as a Progressive Web App on desktop and mobile.
+
+| File | Purpose |
 |---|---|
-| Michael Essien | Pension Board Administrator |
-| Blessing Nku | Verification Officer |
-| Esther Ita | Supervisor |
-| Cornelius Obasi | Auditor |
-| Mary Ogar | Assisted Verification Agent |
-
-> **Demo Mode:** If an admin page is opened directly without going through login, the shell auto-creates a Board Administrator demo session so all pages remain navigable.
+| `manifest.json` | App name, icons, theme colour, display mode |
+| `sw.js` | Service Worker — caches core assets for offline use |
+| `offline.html` | Fallback page shown when offline and page is not cached |
+| `js/pwa-install.js` | Custom install banner logic (deferred `beforeinstallprompt`) |
 
 ---
 
-## Pensioner Flows (Public Side)
+## CSS Architecture (`css/`)
 
-| Step | File | Description |
-|---|---|---|
-| 1 | `index.html` | Landing page — purpose, trust indicators, CTA |
-| 2 | `onboard.html` | Onboarding — Pension ID lookup, personal details |
-| 3 | `verify.html` | Identity sign-in — Pension ID + phone lookup |
-| 4 | `face.html` | Biometric liveness simulation (camera + mocked outcomes) |
-| 5 | `dashboard.html` | Post-verification dashboard, history, result states |
+| File | Scope |
+|---|---|
+| `base.css` | CSS custom properties (design tokens), typography scale, global resets |
+| `components.css` | Reusable UI components used across public-facing pages |
+| `pages.css` | Page-specific layout rules for public pensioner flows |
+| `admin-shell.css` | Shared admin layout — sidebar, topbar, responsive shell |
+
+---
+
+## JavaScript Architecture (`js/`)
+
+| File | Scope |
+|---|---|
+| `mock-data.js` | Single source of truth — all pensioner, admin, analytics data |
+| `app.js` | Orchestrates public-side flow: landing → verify → face → dashboard |
+| `pensioner-auth.js` | Auth guard — validates `sessionStorage` on protected pensioner pages |
+| `pensioner.js` | Pensioner profile page: reads session, populates profile fields |
+| `pwa-install.js` | Intercepts PWA install prompt and renders a branded install CTA |
+| `admin-shell.js` | Injects sidebar + topbar, handles admin session, active nav, logout |
+| `admin.js` | Admin dashboard: KPI cards, Chart.js visualisations, recent activity |
 
 ---
 
 ## Prototype Rules
 
-- No real authentication or biometric matching. All outcomes are mocked in JavaScript.
-- Session state is held in `sessionStorage` for the current browser tab.
-- Navigation uses standard HTML `<a href>` links. No routing library.
+- No real authentication or biometric matching — all outcomes are mocked in JavaScript.
+- Session state is held in `sessionStorage` for the current browser tab only.
+- Navigation uses standard HTML `<a href>` links — no routing library.
 - All pages are static HTML — serve with any local HTTP server or open directly in a browser.
+- Admin shell (`admin-shell.js`) auto-creates a demo session if no login session is present.
 
 ---
 
@@ -185,15 +254,18 @@ Select a user card, enter any password, click Sign In.
 | Phase | Description |
 |---|---|
 | 01 | Public landing page (`index.html`) |
-| 02 | Design system foundation (`css/`) |
+| 02 | Design system foundation (`css/base.css`, `css/components.css`) |
 | 03 | Pensioner identity lookup (`verify.html`) |
 | 04 | Onboarding flow (`onboard.html`) |
 | 05 | Biometric liveness simulation (`face.html`) |
-| 06 | Post-verification dashboard (`dashboard.html`) |
+| 06 | Post-verification pensioner dashboard (`dashboard.html`) |
 | 07 | Admin login + dashboard shell (`admin-login.html`, `admin.html`) |
-| 08 | Records, review queue, profile (`admin-records.html`, `admin-review.html`, `admin-profile.html`) |
+| 08 | Records, review queue, profile pages (`admin-records.html`, `admin-review.html`, `admin-pensioners-profile.html`) |
 | 09 | Reports + assisted console (`admin-reports.html`, `admin-assisted.html`) |
+| 10 | PWA layer + pensioner auth + registration + profile + notifications |
 | ✅ | Shared shell refactor — unified sidebar + topbar across all admin pages |
+| ✅ | Admin sub-pages — `admin-profile.html`, `admin-users.html`, `admin-settings.html` |
+| ✅ | Project reorganisation — `docs/` folder, `.gitignore`, clean root |
 
 ---
 
