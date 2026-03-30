@@ -13,7 +13,7 @@
    LGAs, pensioner names, pension categories, timestamps.
    ============================================================ */
 
-const CRS_PDVS_DATA = (() => {
+window.CRS_PDVS_DATA = (() => {
 
   // ===========================================================
   // Cross River State Local Government Areas
@@ -533,66 +533,6 @@ const CRS_PDVS_DATA = (() => {
   ];
 
 
-  // ===========================================================
-  // Admin Users
-  // ===========================================================
-  const adminUsers = [
-    {
-      userId: 'ADM-001',
-      firstName: 'Blessing',
-      lastName: 'Nku',
-      email: 'b.nku@crspb.gov.ng',
-      role: 'Verification Officer',
-      roleId: 'ROLE-002',
-      lga: 'Calabar Municipality',
-      lastLogin: '2026-03-26T08:30:00',
-      status: 'Active'
-    },
-    {
-      userId: 'ADM-002',
-      firstName: 'Michael',
-      lastName: 'Essien',
-      email: 'm.essien@crspb.gov.ng',
-      role: 'Pension Board Administrator',
-      roleId: 'ROLE-001',
-      lga: null,
-      lastLogin: '2026-03-26T07:45:00',
-      status: 'Active'
-    },
-    {
-      userId: 'ADM-003',
-      firstName: 'Esther',
-      lastName: 'Ita',
-      email: 'e.ita@crspb.gov.ng',
-      role: 'Supervisor',
-      roleId: 'ROLE-003',
-      lga: 'Calabar Municipality',
-      lastLogin: '2026-03-25T16:20:00',
-      status: 'Active'
-    },
-    {
-      userId: 'ADM-004',
-      firstName: 'Cornelius',
-      lastName: 'Obasi',
-      email: 'c.obasi@crspb.gov.ng',
-      role: 'Auditor',
-      roleId: 'ROLE-004',
-      lga: null,
-      lastLogin: '2026-03-24T10:10:00',
-      status: 'Active'
-    },
-    {
-      userId: 'ADM-005',
-      firstName: 'Mary',
-      lastName: 'Ogar',
-      email: 'm.ogar@crspb.gov.ng',
-      role: 'Assisted Verification Agent',
-      roleId: 'ROLE-005',
-      lga: 'Boki',
-      lastLogin: '2026-03-26T09:00:00',
-      status: 'Active'
-    }
-  ];
 
 
   // ===========================================================
@@ -851,6 +791,67 @@ const CRS_PDVS_DATA = (() => {
       detail: 'Approved phone number update for pensioner. Documentation verified.',
       ipAddress: '102.89.xxx.xxx',
       severity: 'Info'
+    }
+  ];
+
+  // ===========================================================
+  // Admin Users
+  // ===========================================================
+  const adminUsers = [
+    {
+      userId: 'ADM-001',
+      firstName: 'Margaret',
+      lastName: 'Uke',
+      email: 'm.uke@crspb.gov.ng',
+      role: 'Pension Board Administrator',
+      status: 'Active',
+      lastLogin: '2026-03-29T10:15:00',
+      lga: null,
+      actions: 312
+    },
+    {
+      userId: 'ADM-002',
+      firstName: 'Michael',
+      lastName: 'Essien',
+      email: 'm.essien@crspb.gov.ng',
+      role: 'Pension Board Administrator',
+      status: 'Active',
+      lastLogin: '2026-03-29T07:45:00',
+      lga: null,
+      actions: 419
+    },
+    {
+      userId: 'ADM-003',
+      firstName: 'Esther',
+      lastName: 'Ita',
+      email: 'e.ita@crspb.gov.ng',
+      role: 'Supervisor',
+      status: 'Active',
+      lastLogin: '2026-03-28T14:30:00',
+      lga: 'Calabar Municipality',
+      actions: 142
+    },
+    {
+      userId: 'ADM-004',
+      firstName: 'Blessing',
+      lastName: 'Nku',
+      email: 'b.nku@crspb.gov.ng',
+      role: 'Verification Officer',
+      status: 'Active',
+      lastLogin: '2026-03-29T08:10:00',
+      lga: 'Odukpani',
+      actions: 512
+    },
+    {
+      userId: 'ADM-005',
+      firstName: 'Joseph',
+      lastName: 'Agba',
+      email: 'j.agba@crspb.gov.ng',
+      role: 'Auditor',
+      status: 'Inactive',
+      lastLogin: '2025-12-10T09:00:00',
+      lga: null,
+      actions: 89
     }
   ];
 
